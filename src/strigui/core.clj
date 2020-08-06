@@ -130,7 +130,8 @@
 
 (defmulti button-clicked :name)
 
-(defmethod button-clicked "" [])
+(defmethod button-clicked "" []
+  )
 
 (defmethod c2d/mouse-event ["main-window" :mouse-pressed] [event state]
   (let [btn (first (filter #(within? (:coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @buttons))]
