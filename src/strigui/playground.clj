@@ -10,5 +10,4 @@
   (gui/button "d" "Bye" {:x 50 :y 200 :color [:yellow :green] :min-width 100}))
 
 (defmethod e/button-clicked "a" [btn]
-  (println "Now!")
   (gui/info "Button A pressed"))

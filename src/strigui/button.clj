@@ -109,9 +109,7 @@
 
 (defmethod c2d/mouse-event ["main-window" :mouse-pressed] [event state]
   (let [btn (first (filter #(within? (:coord %) (c2d/mouse-x @wnd/window) (c2d/mouse-y @wnd/window)) @buttons))]
-    (println "pressed")
     (when (not-empty btn)
-      (println (:name btn))
       (draw-clicked wnd/canvas btn)
       (e/button-clicked btn)))
   state)
