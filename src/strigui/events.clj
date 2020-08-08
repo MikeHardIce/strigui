@@ -2,4 +2,4 @@
 
 (defmulti button-clicked :name)
 
-(defmethod button-clicked "" [])
+(defmethod button-clicked :default [btn])

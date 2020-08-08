@@ -5,4 +5,5 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [clojure2d "1.3.1"]]
-  :repl-options {:init-ns strigui.core})
+  :repl-options {:init-ns strigui.playground}
+  :main strigui.playground/main)

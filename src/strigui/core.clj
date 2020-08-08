@@ -8,12 +8,13 @@
 (defn button
   "canvas - clojure2d canvas
    text - text displayed inside the button
-   x - x coordinate of top left corner
-   y - y coordinate of top left corner
-   color - vector consisting of [background-color font-color]
-   min-width - the minimum width"
-  [name text {:keys [x y color min-width]}]
-  (btn/button wnd/canvas name text {:keys [x y color min-width]}))
+   args - list of:
+     x - x coordinate of top left corner
+     y - y coordinate of top left corner
+     color - vector consisting of [background-color font-color]
+     min-width - the minimum width"
+  [name text args]
+  (btn/button wnd/canvas name text args))
 
 (defn info [text]
   (wnd/display-info wnd/canvas text))

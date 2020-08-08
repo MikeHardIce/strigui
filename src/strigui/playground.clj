@@ -9,5 +9,6 @@
   (gui/button "c" "Blah" {:x 50 :y 150 :color [:blue :yellow] :min-width 100})
   (gui/button "d" "Bye" {:x 50 :y 200 :color [:yellow :green] :min-width 100}))
 
-(defmethod e/button-clicked "a" []
+(defmethod e/button-clicked "a" [btn]
+  (println "Now!")
   (gui/info "Button A pressed"))
