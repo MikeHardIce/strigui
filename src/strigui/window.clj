@@ -19,3 +19,14 @@
       (c2d/set-font-attributes 15)
       (c2d/set-color :black)
       (c2d/text (str text) 0 height))))
+
+(defn within?
+  "Checks wheter the point (x y) is within the given coord
+   coord - vector [x-coord y-coord width height]
+   x - x-coord of point to check
+   y - y-coord of point to check"
+  [coord x y]
+  (and (>= x (first coord))
+       (>= y (nth coord 1))
+       (<= x (+ (first coord) (nth coord 2)))
+       (<= y (+ (nth coord 1) (nth coord 3)))))

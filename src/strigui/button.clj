@@ -64,17 +64,6 @@
     (apply button-border (conj [canvas :black 1] coord))
     (swap! buttons conj {:coord coord :func func :args args :name name})))
 
-(defn within?
-  "Checks wheter the point (x y) is within the given coord
-   coord - vector [x-coord y-coord width height]
-   x - x-coord of point to check
-   y - y-coord of point to check"
-  [coord x y]
-  (and (>= x (first coord))
-       (>= y (nth coord 1))
-       (<= x (+ (first coord) (nth coord 2)))
-       (<= y (+ (nth coord 1) (nth coord 3)))))
-
 (defn- draw-hover
   "Draws the hover effect of the given button on the given canvas"
   [canvas btn]
@@ -99,7 +88,7 @@
       btn)))
 
 (defmethod c2d/mouse-event ["main-window" :mouse-moved] [event state]
-  (let [btn-hits (first (filter #(within? (:coord %) (c2d/mouse-x @wnd/window) (c2d/mouse-y @wnd/window)) @buttons))
+  (let [btn-hits (first (filter #(wnd/within? (:coord %) (c2d/mouse-x @wnd/window) (c2d/mouse-y @wnd/window)) @buttons))
         btns @buttons-to-redraw]
     (wnd/display-info wnd/canvas (str (c2d/mouse-pos @wnd/window) " " @buttons-to-redraw))
     (if (empty? btn-hits)
@@ -111,7 +100,7 @@
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-pressed] [event state]
-  (let [btn (first (filter #(within? (:coord %) (c2d/mouse-x @wnd/window) (c2d/mouse-y @wnd/window)) @buttons))]
+  (let [btn (first (filter #(wnd/within? (:coord %) (c2d/mouse-x @wnd/window) (c2d/mouse-y @wnd/window)) @buttons))]
     (when (not-empty btn)
       (draw-clicked wnd/canvas btn)
       (swap! buttons-clicked #(conj %1 %2) btn)
