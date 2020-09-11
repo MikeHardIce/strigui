@@ -11,8 +11,8 @@
 (when (> strength 0)
     (c2d/with-canvas-> canvas
     ;(c2d/set-stroke strength :butt 0 0)
-    (c2d/set-color color)
-    (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) true))
+      (c2d/set-color color)
+      (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) true))
     (box-border canvas color (- strength 1) [x y w h])))
   
 (defn create-box
