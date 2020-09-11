@@ -8,7 +8,7 @@
 
 (defn button
   "text - text displayed inside the button
-   args - list of:
+   args - map of:
      x - x coordinate of top left corner
      y - y coordinate of top left corner
      color - vector consisting of [background-color font-color]
@@ -18,7 +18,7 @@
 
 (defn label
    "text - text displayed inside the button
-   args - list of:
+   args - map of:
      x - x coordinate of top left corner
      y - y coordinate of top left corner
      color - vector consisting of [font-color]
@@ -26,5 +26,6 @@
   [name text args]
   (lbl/label @wnd/context name text args))
 
-(defn info [text]
+(defn info 
+  [text]
   (wnd/display-info @wnd/context text))

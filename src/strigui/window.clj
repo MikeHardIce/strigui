@@ -33,6 +33,3 @@
        (>= y (nth coord 1))
        (<= x (+ (first coord) (nth coord 2)))
        (<= y (+ (nth coord 1) (nth coord 3)))))
-
-(defmethod c2d/mouse-event ["main-window" :default] [event state]
-  state)

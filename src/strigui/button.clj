@@ -16,8 +16,8 @@
    y - y coordinate of top left corner
    color - vector consisting of [background-color font-color]
    min-width - the minimum width"
-  [context name text {:keys [x y color min-width]}]
-  (b/box (:canvas context) name test {x y color min-width}))
+  [context name text args]
+  (b/box (:canvas context) name text args))
 
 (defn- draw-hover
   "Draws the hover effect of the given button on the given canvas"
@@ -49,12 +49,12 @@
         window (:window context)
         btn-hits (first (filter #(wnd/within? (:coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @b/boxes))
         btns @buttons-to-redraw]
-    (wnd/display-info canvas (str (c2d/mouse-pos window) " " @buttons-to-redraw))
+    (wnd/display-info context (str (c2d/mouse-pos window) " " @buttons-to-redraw))
     (if (empty? btn-hits)
       (let [redrawn-buttons (map #(redraw-button canvas %) btns)]
         (swap! buttons-to-redraw #(s/difference %1 (set %2))  redrawn-buttons))
       (do 
-        (draw-hover wnd/canvas btn-hits)
+        (draw-hover canvas btn-hits)
         (swap! buttons-to-redraw  #(conj %1 %2) btn-hits))))
   state)
 
@@ -67,10 +67,11 @@
     (when (not-empty btn)
       (draw-clicked canvas btn)
       (swap! buttons-clicked #(conj %1 %2) btn)
+      (println btn)
       (e/button-clicked btn)))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
-  (map #(draw-hover (:canvas wnd/context) %1) @buttons-clicked)
+  (map #(draw-hover (:canvas @wnd/context) %1) @buttons-clicked)
   (reset! buttons-clicked  #{})
   state)

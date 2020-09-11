@@ -5,7 +5,7 @@
 (set! *unchecked-math* :warn-on-boxed)
 
 ;;{:coord [] :func :args [] :name ""}
-(def boxes (atom {}))
+(def boxes (atom ()))
 
 (defn box-border [canvas color strength [x y w h]]
 (when (> strength 0)
