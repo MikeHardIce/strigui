@@ -1,13 +1,29 @@
 (ns strigui.box
-  (:require [clojure2d.core :as c2d]))
+  (:require [clojure2d.core :as c2d]
+            [clojure.set :as s]
+            [strigui.window :as wnd]))
 
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* :warn-on-boxed)
 
+(defprotocol render 
+  "collection of functions around redrawing boxes, managing the border etc. ..."
+  (draw-hover [this canvas] this)
+  (draw-clicked [this canvas] this)
+  (redraw [this canvas] this))
+
+(defprotocol events
+  "collection of functions to hook into events"
+  (clicked [this] this))
+
 ;;{:coord [] :func :args [] :name ""}
 (def boxes (atom ()))
 
-(defn box-border [canvas color strength [x y w h]]
+(def boxes-to-redraw (atom #{}))
+
+(def boxes-clicked (atom #{}))
+
+(defn box-border [canvas color ^long strength [^long x ^long y ^long w ^long h]]
 (when (> strength 0)
     (c2d/with-canvas-> canvas
     ;(c2d/set-stroke strength :butt 0 0)
@@ -22,11 +38,11 @@
    y - y coordinate of top left corner
    color - vector consisting of [background-color font-color]
    min-width - the minimum width"
-  [canvas text {:keys [x y color min-width]}]
+  [canvas text {:keys [^long x ^long y color ^long min-width]}]
   (let [text-box (c2d/with-canvas-> canvas
                    (c2d/text-bounding-box text))
         text-width (nth text-box 2)
-        text-heigth (nth text-box 3)
+        text-heigth  (nth text-box 3)
         text-y (nth text-box 1)
         btn-w (* text-width 1.8)
         border-width (if (and (number? min-width) (< btn-w min-width)) min-width btn-w)
@@ -50,10 +66,46 @@
    x - x coordinate of top left corner
    y - y coordinate of top left corner
    color - vector consisting of [background-color font-color]
-   min-width - the minimum width"
-  [canvas name text {:keys [x y color min-width]}]
+   min-width - the minimum width
+   create-func - function that creates a specific record of a component"
+  [canvas name text {:keys [x y color min-width]} create-func]
   (let [args [canvas text {:x x :y y :color color :min-width min-width}]
         func create-box
         coord (apply func args)]
     (apply box-border (conj [canvas :black 1] coord))
-    (swap! boxes conj {:coord coord :func func :args args :name name})))
+    (swap! boxes conj (create-func name coord func args))))
+
+  ;; TODO: maybe its not necessary to go to @wnd/context directly
+(defmethod c2d/mouse-event ["main-window" :mouse-moved] [event state]
+  (let [context @wnd/context
+        canvas (:canvas context)
+        window (:window context)
+        btn-hits (first (filter #(wnd/within? (:coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))
+        btns @boxes-to-redraw]
+    (wnd/display-info context (str (c2d/mouse-pos window) " " @boxes-to-redraw))
+    (if (empty? btn-hits)
+      (let [redrawn-buttons (map #(redraw % canvas) btns)]
+        (swap! boxes-to-redraw #(s/difference %1 (set %2))  redrawn-buttons))
+      (do 
+        (draw-hover btn-hits canvas)
+        (swap! boxes-to-redraw  #(conj %1 %2) btn-hits))))
+  state)
+
+;; TODO: maybe its not necessary to go to @wnd/context directly
+(defmethod c2d/mouse-event ["main-window" :mouse-pressed] [event state]
+  (let [context @wnd/context
+        canvas (:canvas context)
+        window (:window context)
+        btn (first (filter #(wnd/within? (:coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))]
+    (when (not-empty btn)
+      (draw-clicked btn canvas)
+      (swap! boxes-clicked #(conj %1 %2) btn)
+      (println btn)
+      ;;(e/button-clicked btn)
+      (clicked btn)))
+  state)
+
+(defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
+  (map #(draw-hover %1 (:canvas @wnd/context)) @boxes-clicked)
+  (reset! boxes-clicked  #{})
+  state)
