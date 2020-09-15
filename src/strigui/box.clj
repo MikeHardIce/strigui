@@ -8,13 +8,39 @@
 
 (defprotocol render 
   "collection of functions around redrawing boxes, managing the border etc. ..."
-  (draw-hover [this canvas] this)
-  (draw-clicked [this canvas] this)
-  (redraw [this canvas] this))
+  (draw-hover [this canvas] "")
+  (draw-clicked [this canvas] "")
+  (redraw [this canvas] ""))
 
-(defprotocol events
-  "collection of functions to hook into events"
-  (clicked [this] this))
+(defn box-border [canvas color ^long strength [^long x ^long y ^long w ^long h]]
+  (when (> strength 0)
+      (c2d/with-canvas-> canvas
+      ;(c2d/set-stroke strength :butt 0 0)
+        (c2d/set-color color)
+        (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) true))
+      (box-border canvas color (- strength 1) [x y w h])))
+
+(defn box-draw-hover 
+  [box canvas] (apply box-border (conj [canvas :black 2] (:coord box)))
+  box)
+
+(defn box-redraw 
+  [box canvas] 
+  (let [coord (:coord box)]
+    (when (not-empty coord)
+      (apply box-border (conj [canvas :white 2] coord))
+      (apply box-border (conj [canvas :black 1] coord))
+      box)))
+
+(defrecord Box [name coord create-func args]
+  render
+  (draw-hover [this canvas] (box-draw-hover this canvas))
+   (draw-clicked [this canvas] this)
+   (redraw [this canvas] (box-redraw this canvas)))
+
+ (defprotocol events
+   "collection of functions to hook into events"
+   (clicked [this] ""))
 
 ;;{:coord [] :func :args [] :name ""}
 (def boxes (atom ()))
@@ -22,14 +48,6 @@
 (def boxes-to-redraw (atom #{}))
 
 (def boxes-clicked (atom #{}))
-
-(defn box-border [canvas color ^long strength [^long x ^long y ^long w ^long h]]
-(when (> strength 0)
-    (c2d/with-canvas-> canvas
-    ;(c2d/set-stroke strength :butt 0 0)
-      (c2d/set-color color)
-      (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) true))
-    (box-border canvas color (- strength 1) [x y w h])))
   
 (defn create-box
   "canvas - clojure2d canvas
