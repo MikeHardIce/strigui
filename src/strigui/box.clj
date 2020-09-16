@@ -6,41 +6,17 @@
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* :warn-on-boxed)
 
-(defprotocol render 
+;; not sure if thats the right way
+(defprotocol Box 
   "collection of functions around redrawing boxes, managing the border etc. ..."
+  (box-coord [this] "gets the coordinates of the box")
   (draw-hover [this canvas] "")
   (draw-clicked [this canvas] "")
   (redraw [this canvas] ""))
 
-(defn box-border [canvas color ^long strength [^long x ^long y ^long w ^long h]]
-  (when (> strength 0)
-      (c2d/with-canvas-> canvas
-      ;(c2d/set-stroke strength :butt 0 0)
-        (c2d/set-color color)
-        (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) true))
-      (box-border canvas color (- strength 1) [x y w h])))
-
-(defn box-draw-hover 
-  [box canvas] (apply box-border (conj [canvas :black 2] (:coord box)))
-  box)
-
-(defn box-redraw 
-  [box canvas] 
-  (let [coord (:coord box)]
-    (when (not-empty coord)
-      (apply box-border (conj [canvas :white 2] coord))
-      (apply box-border (conj [canvas :black 1] coord))
-      box)))
-
-(defrecord Box [name coord create-func args]
-  render
-  (draw-hover [this canvas] (box-draw-hover this canvas))
-   (draw-clicked [this canvas] this)
-   (redraw [this canvas] (box-redraw this canvas)))
-
- (defprotocol events
-   "collection of functions to hook into events"
-   (clicked [this] ""))
+(defprotocol Actions
+  "collection of functions to hook into events"
+  (clicked [this] ""))
 
 ;;{:coord [] :func :args [] :name ""}
 (def boxes (atom ()))
@@ -78,6 +54,14 @@
       (c2d/text text (+ x x-offset) (- y (* text-y 1.5))))
     [x y border-width border-heigth]))
 
+(defn box-border [canvas color ^long strength [^long x ^long y ^long w ^long h]]
+  (when (> strength 0)
+      (c2d/with-canvas-> canvas
+      ;(c2d/set-stroke strength :butt 0 0)
+        (c2d/set-color color)
+        (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) true))
+      (box-border canvas color (- strength 1) [x y w h])))
+          
 (defn box
   "canvas - clojure2d canvas
    text - text displayed inside the button
@@ -93,12 +77,24 @@
     (apply box-border (conj [canvas :black 1] coord))
     (swap! boxes conj (create-func name coord func args))))
 
+(defn box-draw-hover 
+  [^strigui.box.Box box canvas] (apply box-border (conj [canvas :black 2] (box-coord box)))
+  box)
+
+(defn box-redraw 
+  [^strigui.box.Box box canvas] 
+  (let [coord (box-coord box)]
+    (when (not-empty coord)
+      (apply box-border (conj [canvas :white 2] coord))
+      (apply box-border (conj [canvas :black 1] coord))
+      box)))
+
   ;; TODO: maybe its not necessary to go to @wnd/context directly
 (defmethod c2d/mouse-event ["main-window" :mouse-moved] [event state]
   (let [context @wnd/context
         canvas (:canvas context)
         window (:window context)
-        btn-hits (first (filter #(wnd/within? (:coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))
+        btn-hits (first (filter #(wnd/within? (box-coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))
         btns @boxes-to-redraw]
     (wnd/display-info context (str (c2d/mouse-pos window) " " @boxes-to-redraw))
     (if (empty? btn-hits)
@@ -114,7 +110,7 @@
   (let [context @wnd/context
         canvas (:canvas context)
         window (:window context)
-        btn (first (filter #(wnd/within? (:coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))]
+        btn (first (filter #(wnd/within? (box-coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))]
     (when (not-empty btn)
       (draw-clicked btn canvas)
       (swap! boxes-clicked #(conj %1 %2) btn)

@@ -1,20 +1,18 @@
 (ns strigui.button
   (:require [clojure2d.core :as c2d]
             [strigui.box :as b]
-            [strigui.events :as e])
-    (:import [strigui.box Box])
-  )
+            [strigui.events :as e]))
+  ;(:import strigui.box Box))
 
-(defrecord Button [name coord create-func args])
-
- (extend-protocol b/render
-  Button
+(defrecord Button [name coord create-func args]
+  b/Box
+  (box-coord [this] (:coord this)) ;; could be a mapping if the record would look different
   (draw-hover [this canvas] (b/box-draw-hover this canvas))
   (draw-clicked [this canvas] (apply b/box-border (conj [canvas :green 2] (:coord this)))
                                  this)
-  (redraw [this canvas] (box-redraw this canvas)))
+  (redraw [this canvas] (b/box-redraw this canvas)))
 
- (extend-protocol b/events
+ (extend-protocol b/Actions
   Button
    (clicked [this] (e/button-clicked this)))
 
