@@ -9,10 +9,11 @@
 ;; not sure if thats the right way
 (defprotocol Box 
   "collection of functions around redrawing boxes, managing the border etc. ..."
-  (box-coord [this] "gets the coordinates of the box")
+  (coord [this] "gets the coordinates of the box")
   (draw-hover [this canvas] "")
   (draw-clicked [this canvas] "")
-  (redraw [this canvas] ""))
+  (redraw [this canvas] "")
+  (draw [this canvas] ""))
 
 (defprotocol Actions
   "collection of functions to hook into events"
@@ -25,14 +26,28 @@
 
 (def boxes-clicked (atom #{}))
   
-(defn create-box
-  "canvas - clojure2d canvas
-   text - text displayed inside the input
-   x - x coordinate of top left corner
-   y - y coordinate of top left corner
-   color - vector consisting of [background-color font-color]
-   min-width - the minimum width"
+(defn box-coord 
+  "Computes the full box coordinates.
+  Returns the vector [x y border-width border-heigth]"
   [canvas text {:keys [^long x ^long y color ^long min-width]}]
+  (let [text-box (c2d/with-canvas-> canvas
+                  (c2d/text-bounding-box text))
+      text-width (nth text-box 2)
+      text-heigth  (nth text-box 3)
+      btn-w (* text-width 1.8)
+      border-width (if (and (number? min-width) (< btn-w min-width)) min-width btn-w)
+      border-heigth (* text-heigth 1.8)]
+      [x y border-width border-heigth]))
+
+(defn box-draw
+  "canvas - clojure2d canvas
+  text - text displayed inside the input
+  x - x coordinate of top left corner
+  y - y coordinate of top left corner
+  color - vector consisting of [background-color font-color]
+  min-width - the minimum width"
+  ([args] (apply box-draw args))
+  ([canvas text {:keys [^long x ^long y color ^long min-width]}]
   (let [text-box (c2d/with-canvas-> canvas
                    (c2d/text-bounding-box text))
         text-width (nth text-box 2)
@@ -52,7 +67,7 @@
       (c2d/set-font-attributes 15 :bold)
       (c2d/set-color foreground-color)
       (c2d/text text (+ x x-offset) (- y (* text-y 1.5))))
-    [x y border-width border-heigth]))
+    [x y border-width border-heigth])))
 
 (defn box-border [canvas color ^long strength [^long x ^long y ^long w ^long h]]
   (when (> strength 0)
@@ -62,28 +77,23 @@
         (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) true))
       (box-border canvas color (- strength 1) [x y w h])))
           
-(defn box
-  "canvas - clojure2d canvas
-   text - text displayed inside the button
-   x - x coordinate of top left corner
-   y - y coordinate of top left corner
-   color - vector consisting of [background-color font-color]
-   min-width - the minimum width
-   create-func - function that creates a specific record of a component"
-  [canvas name text {:keys [x y color min-width]} create-func]
-  (let [args [canvas text {:x x :y y :color color :min-width min-width}]
-        func create-box
-        coord (apply func args)]
-    (apply box-border (conj [canvas :black 1] coord))
-    (swap! boxes conj (create-func name coord func args))))
+(defn register-box
+  "Registers a box component"
+  [canvas ^strigui.box.Box box]
+    (swap! boxes conj box))
+
+(defn box-draw-border 
+  [^strigui.box.Box box canvas]
+  (apply box-border (conj [canvas :black 1] (coord box))))
 
 (defn box-draw-hover 
-  [^strigui.box.Box box canvas] (apply box-border (conj [canvas :black 2] (box-coord box)))
+  [^strigui.box.Box box canvas] 
+  (apply box-border (conj [canvas :black 2] (coord box)))
   box)
 
 (defn box-redraw 
   [^strigui.box.Box box canvas] 
-  (let [coord (box-coord box)]
+  (let [coord (coord box)]
     (when (not-empty coord)
       (apply box-border (conj [canvas :white 2] coord))
       (apply box-border (conj [canvas :black 1] coord))
@@ -94,7 +104,7 @@
   (let [context @wnd/context
         canvas (:canvas context)
         window (:window context)
-        btn-hits (first (filter #(wnd/within? (box-coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))
+        btn-hits (first (filter #(wnd/within? (coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))
         btns @boxes-to-redraw]
     (wnd/display-info context (str (c2d/mouse-pos window) " " @boxes-to-redraw))
     (if (empty? btn-hits)
@@ -110,7 +120,7 @@
   (let [context @wnd/context
         canvas (:canvas context)
         window (:window context)
-        btn (first (filter #(wnd/within? (box-coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))]
+        btn (first (filter #(wnd/within? (coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))]
     (when (not-empty btn)
       (draw-clicked btn canvas)
       (swap! boxes-clicked #(conj %1 %2) btn)

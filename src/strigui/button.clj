@@ -4,28 +4,34 @@
             [strigui.events :as e]))
   ;(:import strigui.box Box))
 
-(defrecord Button [name coord create-func args]
+(defrecord Button [name coordinates args]
   b/Box
-  (box-coord [this] (:coord this)) ;; could be a mapping if the record would look different
+  (coord [this] (:coordinates this)) ;; could be a mapping if the record would look different
   (draw-hover [this canvas] (b/box-draw-hover this canvas))
-  (draw-clicked [this canvas] (apply b/box-border (conj [canvas :green 2] (:coord this)))
+  (draw-clicked [this canvas] (apply b/box-border (conj [canvas :green 2] (:coordinates this)))
                                  this)
-  (redraw [this canvas] (b/box-redraw this canvas)))
+  (redraw [this canvas] (b/box-redraw this canvas))
+  (draw [this canvas]
+    (b/box-draw-border this canvas) 
+    (b/box-draw (:args this))))
 
  (extend-protocol b/Actions
   Button
    (clicked [this] (e/button-clicked this)))
 
-(defn create-button
-  [name coord create-func args]
-  (Button. name coord create-func args))
-
 (defn button
   "context - map consiting of clojure2d canvas and clojure2d window
+   name - name of the button
    text - text displayed inside the button
-   x - x coordinate of top left corner
-   y - y coordinate of top left corner
-   color - vector consisting of [background-color font-color]
-   min-width - the minimum width"
+   args - map of properties:
+      x - x coordinate of top left corner
+      y - y coordinate of top left corner
+      color - vector consisting of [background-color font-color]
+      min-width - the minimum width"
   [context name text args]
-  (b/box (:canvas context) name text args create-button))
+  (let [canvas (:canvas context)
+        arg [canvas text args]
+        coord (apply b/box-coord arg)
+        btn (Button. name coord arg)]
+    (b/draw btn canvas)
+    (b/register-box canvas btn)))
