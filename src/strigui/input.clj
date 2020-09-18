@@ -27,8 +27,10 @@
   Input
     (clicked [this] (let [focus @has-focus
                           new (if (contains? focus this)
-                                (s/difference focus (set this))
-                                (s/union focus (set this))] 
+                                (s/difference focus #{this})
+                                (s/union focus #{this}))] 
+                      (println focus)
+                      (println new)
                       (reset! has-focus new))))
 
 (defn input
