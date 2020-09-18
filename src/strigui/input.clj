@@ -25,9 +25,10 @@
 
   (extend-protocol b/Actions
   Input
-    (clicked [this] (let [new (if (contains? @has-focus this)
-                                (s/difference @has-focus (set this))
-                                (s/union @has-focus (set this))] 
+    (clicked [this] (let [focus @has-focus
+                          new (if (contains? focus this)
+                                (s/difference focus (set this))
+                                (s/union focus (set this))] 
                       (reset! has-focus new))))
 
 (defn input
