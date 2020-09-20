@@ -29,7 +29,7 @@
 (defn box-coord 
   "Computes the full box coordinates.
   Returns the vector [x y border-width border-heigth]"
-  [canvas text {:keys [^long x ^long y color ^long min-width]}]
+  [canvas text {:keys [^long x ^long y ^long min-width]}]
   (let [text-box (c2d/with-canvas-> canvas
                   (c2d/text-bounding-box text))
       text-width (nth text-box 2)
@@ -39,6 +39,24 @@
       border-heigth (* text-heigth 1.8)]
       [x y border-width border-heigth]))
 
+(defn box-draw-text 
+  "Draws the text of the box"
+  [canvas text {:keys [^long x ^long y color ^long min-width]}]
+  (let [[_ _ border-width border-heigth] (box-coord canvas text {:x x :y y :min-width min-width})
+        [_ text-y text-width _] (c2d/with-canvas-> canvas
+                          (c2d/text-bounding-box text))
+        background-color (if (> (count color) 0) (first color) :grey)
+        foreground-color (if (> (count color) 1) (nth color 1) :black)
+        x-offset (if (and (number? min-width) (= min-width border-width))
+                   (/ (- border-width text-width) 2.0)
+                   (* border-width 0.12))]
+      (c2d/with-canvas-> canvas
+        (c2d/set-color background-color)
+        (c2d/rect x y border-width border-heigth)
+        (c2d/set-font-attributes 15 :bold)
+        (c2d/set-color foreground-color)
+        (c2d/text text (+ x x-offset) (- y (* text-y 1.5))))))
+
 (defn box-draw
   "canvas - clojure2d canvas
   text - text displayed inside the input
@@ -47,26 +65,14 @@
   color - vector consisting of [background-color font-color]
   min-width - the minimum width"
   ([args] (apply box-draw args))
-  ([canvas text {:keys [^long x ^long y color ^long min-width]}]
-  (let [text-box (c2d/with-canvas-> canvas
-                   (c2d/text-bounding-box text))
-        text-width (nth text-box 2)
-        text-heigth  (nth text-box 3)
-        text-y (nth text-box 1)
-        btn-w (* text-width 1.8)
-        border-width (if (and (number? min-width) (< btn-w min-width)) min-width btn-w)
-        border-heigth (* text-heigth 1.8)
-        background-color (if (> (count color) 0) (first color) :grey)
-        foreground-color (if (> (count color) 1) (nth color 1) :black)
-        x-offset (if (and (number? min-width) (= min-width border-width))
-                   (/ (- border-width text-width) 2.0)
-                   (* border-width 0.12))]
+  ([canvas text args]
+  (let [{:keys [^long x ^long y color ^long min-width]} args
+        [_ _ border-width border-heigth] (box-coord canvas text {:x x :y y :min-width min-width})
+        background-color (if (> (count color) 0) (first color) :grey)]
     (c2d/with-canvas-> canvas
       (c2d/set-color background-color)
-      (c2d/rect x y border-width border-heigth)
-      (c2d/set-font-attributes 15 :bold)
-      (c2d/set-color foreground-color)
-      (c2d/text text (+ x x-offset) (- y (* text-y 1.5))))
+      (c2d/rect x y border-width border-heigth))
+    (box-draw-text canvas text args)
     [x y border-width border-heigth])))
 
 (defn box-border [canvas color ^long strength [^long x ^long y ^long w ^long h]]
@@ -76,11 +82,16 @@
         (c2d/set-color color)
         (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) true))
       (box-border canvas color (- strength 1) [x y w h])))
-          
+
 (defn register-box
   "Registers a box component"
-  [canvas ^strigui.box.Box box]
-    (swap! boxes conj box))
+  [^strigui.box.Box box]
+  (swap! boxes conj box))
+
+(defn unregister-box 
+  "Unregisters a box component"
+  [^strigui.box.Box box]
+    (swap! boxes #(filter (fn [el] (not= %2 el)) %1) box))
 
 (defn box-draw-border 
   [^strigui.box.Box box canvas]

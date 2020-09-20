@@ -29,8 +29,6 @@
                           new (if (contains? focus this)
                                 (s/difference focus #{this})
                                 (s/union focus #{this}))] 
-                      (println focus)
-                      (println new)
                       (reset! has-focus new))))
 
 (defn input
@@ -48,4 +46,13 @@
         coord (apply b/box-coord arg)
         inp (Input. name coord arg)]
     (b/draw inp canvas)
-    (b/register-box canvas inp)))
+    (b/register-box inp)))
+
+(defmethod c2d/key-event ["main-window" :key-pressed] [event state]
+  (let [char-added (c2d/key-char event)
+        new-focused-inputs (doall (map #(assoc-in %1 [:args 1] (str (nth (:args %1) 1) (c2d/key-char event))) @has-focus))]
+    (doall (map #(b/unregister-box %1) @has-focus))
+    (doall (map #(b/register-box %1) new-focused-inputs))
+    (doall (map #(apply b/box-draw-text (:args %1)) new-focused-inputs))
+    (reset! has-focus (set new-focused-inputs)))
+  state)
