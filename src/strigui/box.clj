@@ -147,10 +147,12 @@
         canvas (:canvas context)
         window (:window context)
         btn (first (filter #(wnd/within? (coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))]
-    (when (not-empty btn)
-      (clicked btn)
-      (draw-clicked btn canvas)
-      (swap! boxes-clicked #(conj %1 %2) btn)))
+    (if (not-empty btn)
+      (do 
+        (clicked btn)
+        (draw-clicked btn canvas)
+        (swap! boxes-clicked #(conj %1 %2) btn))
+      (reset! boxes-focused #{})))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
