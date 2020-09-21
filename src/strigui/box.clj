@@ -91,7 +91,8 @@
 (defn unregister-box 
   "Unregisters a box component"
   [^strigui.box.Box box]
-    (swap! boxes #(filter (fn [el] (not= %2 el)) %1) box))
+    (swap! boxes #(filter (fn [el] (not= %2 el)) %1) box)
+    (swap! boxes-to-redraw #(s/difference %1 #{box})))
 
 (defn box-draw-border 
   [^strigui.box.Box box canvas]

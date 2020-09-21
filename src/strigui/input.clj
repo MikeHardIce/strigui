@@ -48,12 +48,13 @@
     (b/draw inp canvas)
     (b/register-box inp)))
   
-;; (= code "back_space")
 (defn adjust-text [text char code]
   (if (and (= code :back_space) (> (count text) 0)) 
     (subs text 0 (- (count text) 1))
     (str text char)))
 
+;TODO: probably should move the entire hover thing to box and
+;extend the actions protocol
 (defmethod c2d/key-event ["main-window" :key-pressed] [event state]
   (let [char-added (c2d/key-char event)
         char-code (c2d/key-code event)
