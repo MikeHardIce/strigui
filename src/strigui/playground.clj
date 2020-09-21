@@ -15,3 +15,7 @@
 
 (defmethod e/button-clicked "a" [btn]
   (gui/info "Button A pressed"))
+
+(defmethod e/input-modified "inp1" [inp]
+  ;;TODO: just make text a simple key (:text inp)
+  (gui/info (nth (:args inp) 1)))

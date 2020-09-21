@@ -32,7 +32,7 @@
                       (reset! has-focus new))))
 
 (defn input
-  "context - map consiting of clojure2d canvas and clojure2d window
+  "context - map consisting of clojure2d canvas and clojure2d window
     name - name of the input element
     text - text displayed inside the input element
     args - map of properties:
@@ -47,12 +47,21 @@
         inp (Input. name coord arg)]
     (b/draw inp canvas)
     (b/register-box inp)))
+  
+;; (= code "back_space")
+(defn adjust-text [text char code]
+  (if (and (= code :back_space) (> (count text) 0)) 
+    (subs text 0 (- (count text) 1))
+    (str text char)))
 
 (defmethod c2d/key-event ["main-window" :key-pressed] [event state]
   (let [char-added (c2d/key-char event)
-        new-focused-inputs (doall (map #(assoc-in %1 [:args 1] (str (nth (:args %1) 1) (c2d/key-char event))) @has-focus))]
+        char-code (c2d/key-code event)
+        new-focused-inputs (doall (map #(assoc-in %1 [:args 1] (adjust-text (nth (:args %1) 1) char-added char-code)) @has-focus))]
+    (println (str char-added ":" char-code))
     (doall (map #(b/unregister-box %1) @has-focus))
     (doall (map #(b/register-box %1) new-focused-inputs))
     (doall (map #(apply b/box-draw-text (:args %1)) new-focused-inputs))
-    (reset! has-focus (set new-focused-inputs)))
+    (reset! has-focus (set new-focused-inputs))
+    (doall (map #(e/input-modified %1) new-focused-inputs)))
   state)
