@@ -17,15 +17,17 @@
 
 (defprotocol Actions
   "collection of functions to hook into events"
-  (clicked [this] ""))
+  (clicked [this] "")
+  (key-pressed [this char code] ""))
 
-;;{:coord [] :func :args [] :name ""}
 (def boxes (atom ()))
 
 (def boxes-to-redraw (atom #{}))
 
 (def boxes-clicked (atom #{}))
-  
+
+(def boxes-focused (atom #{}))
+
 (defn box-coord 
   "Computes the full box coordinates.
   Returns the vector [x y border-width border-heigth]"
@@ -83,12 +85,12 @@
         (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) true))
       (box-border canvas color (- strength 1) [x y w h])))
 
-(defn register-box
+(defn register-box!
   "Registers a box component"
   [^strigui.box.Box box]
   (swap! boxes conj box))
 
-(defn unregister-box 
+(defn unregister-box! 
   "Unregisters a box component"
   [^strigui.box.Box box]
     (swap! boxes #(filter (fn [el] (not= %2 el)) %1) box)
@@ -110,6 +112,18 @@
       (apply box-border (conj [canvas :white 2] coord))
       (apply box-border (conj [canvas :black 1] coord))
       box)))
+
+(defn swap-focused!
+  [box]
+  (let [focus @boxes-focused
+        new (if (contains? focus box)
+                (s/difference focus #{box})
+                (s/union focus #{box}))] 
+    (reset! boxes-focused new)))
+
+(defn focused? 
+  [box]
+  (contains? @boxes-focused box))
 
   ;; TODO: maybe its not necessary to go to @wnd/context directly
 (defmethod c2d/mouse-event ["main-window" :mouse-moved] [event state]
@@ -142,4 +156,15 @@
 (defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
   (map #(draw-hover %1 (:canvas @wnd/context)) @boxes-clicked)
   (reset! boxes-clicked  #{})
+  state)
+
+(defmethod c2d/key-event ["main-window" :key-pressed] [event state]
+  (let [char (c2d/key-char event)
+        code (c2d/key-code event)
+        new-focused-inputs (doall (map #(key-pressed %1 char code) @boxes-focused))]
+    (when (not-empty new-focused-inputs)
+      (doall (map #(unregister-box %1) @boxes-focused))
+      (doall (map #(register-box %1) new-focused-inputs))
+      (doall (map #(apply box-draw-text (:args %1)) new-focused-inputs))
+      (reset! boxes-focused (set new-focused-inputs))))
   state)

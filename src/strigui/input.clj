@@ -5,31 +5,32 @@
             [strigui.box :as b]
             [strigui.events :as e]))
 
-;;
-(def has-focus (atom #{}))
-
 (defrecord Input [name coordinates args]
   b/Box
   (coord [this] (:coordinates this)) ;; could be a mapping if the record would look different
   (draw-hover [this canvas] 
-    (when (not (contains? @has-focus this))
+    (when (not (b/focused? this))
       (b/box-draw-hover this canvas)))
   (draw-clicked [this canvas] (apply b/box-border (conj [canvas :blue 2] (:coordinates this)))
                                   this)
   (redraw [this canvas] 
-    (when (not (contains? @has-focus this))
+    (when (not (b/focused? this))
       (b/box-redraw this canvas)))
   (draw [this canvas]
     (b/box-draw-border this canvas) 
     (b/box-draw (:args this))))
 
-  (extend-protocol b/Actions
+(defn adjust-text [text char code]
+  (if (and (= code :back_space) (> (count text) 0)) 
+    (subs text 0 (- (count text) 1))
+    (str text char)))
+
+(extend-protocol b/Actions
   Input
-    (clicked [this] (let [focus @has-focus
-                          new (if (contains? focus this)
-                                (s/difference focus #{this})
-                                (s/union focus #{this}))] 
-                      (reset! has-focus new))))
+  (clicked [this] 
+    (b/swap-focused! this))
+  (key-pressed [this char code]
+    (assoc-in this [:args 1] (adjust-text (nth (:args this) 1) char code))))
 
 (defn input
   "context - map consisting of clojure2d canvas and clojure2d window
@@ -47,22 +48,3 @@
         inp (Input. name coord arg)]
     (b/draw inp canvas)
     (b/register-box inp)))
-  
-(defn adjust-text [text char code]
-  (if (and (= code :back_space) (> (count text) 0)) 
-    (subs text 0 (- (count text) 1))
-    (str text char)))
-
-;TODO: probably should move the entire hover thing to box and
-;extend the actions protocol
-(defmethod c2d/key-event ["main-window" :key-pressed] [event state]
-  (let [char-added (c2d/key-char event)
-        char-code (c2d/key-code event)
-        new-focused-inputs (doall (map #(assoc-in %1 [:args 1] (adjust-text (nth (:args %1) 1) char-added char-code)) @has-focus))]
-    (println (str char-added ":" char-code))
-    (doall (map #(b/unregister-box %1) @has-focus))
-    (doall (map #(b/register-box %1) new-focused-inputs))
-    (doall (map #(apply b/box-draw-text (:args %1)) new-focused-inputs))
-    (reset! has-focus (set new-focused-inputs))
-    (doall (map #(e/input-modified %1) new-focused-inputs)))
-  state)
