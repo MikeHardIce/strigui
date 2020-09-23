@@ -165,8 +165,8 @@
         code (c2d/key-code event)
         new-focused-inputs (doall (map #(key-pressed %1 char code) @boxes-focused))]
     (when (not-empty new-focused-inputs)
-      (doall (map #(unregister-box %1) @boxes-focused))
-      (doall (map #(register-box %1) new-focused-inputs))
+      (doall (map #(unregister-box! %1) @boxes-focused))
+      (doall (map #(register-box! %1) new-focused-inputs))
       (doall (map #(apply box-draw-text (:args %1)) new-focused-inputs))
       (reset! boxes-focused (set new-focused-inputs))))
   state)

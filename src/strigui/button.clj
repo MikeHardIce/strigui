@@ -34,4 +34,4 @@
         coord (apply b/box-coord arg)
         btn (Button. name coord arg)]
     (b/draw btn canvas)
-    (b/register-box btn)))
+    (b/register-box! btn)))

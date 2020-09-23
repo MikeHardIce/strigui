@@ -2,6 +2,7 @@
   (:require [strigui.button :as btn]
             [strigui.label :as lbl]
             [strigui.input :as inp]
+            [strigui.stacks :as st]
             [strigui.window :as wnd]))
 
 (defn window [width height]
@@ -39,6 +40,10 @@
     min-width - the minimum width"
   [name text args]
   (inp/input @wnd/context name text args))
+
+(defn stacks 
+  [name args]
+  (st/stacks @wnd/context name args))
 
 (defn info 
   [text]

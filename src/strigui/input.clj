@@ -47,4 +47,4 @@
         coord (apply b/box-coord arg)
         inp (Input. name coord arg)]
     (b/draw inp canvas)
-    (b/register-box inp)))
+    (b/register-box! inp)))

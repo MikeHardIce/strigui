@@ -11,7 +11,8 @@
   (gui/button "d" "Bye" {:x 50 :y 200 :color [:yellow :green] :min-width 100})
   (gui/input "inp1" "" {:x 250 :y 50 :color [:white :red] :min-width 100})
   (gui/input "inp2" "" {:x 250 :y 100 :color [:white :red] :min-width 100})
-  (gui/input "inp3" "last" {:x 250 :y 150 :color [:white :red] :min-width 100}))
+  (gui/input "inp3" "last" {:x 250 :y 150 :color [:white :red] :min-width 100})
+  (gui/stacks "stacks" {:x 250 :y 300}))
 
 (defmethod e/button-clicked "a" [btn]
   (gui/info "Button A pressed"))
