@@ -12,7 +12,7 @@
         (c2d/set-color :green)
         (c2d/set-stroke 3)
         (c2d/line x y-offset (+ x 30) y-offset))
-      (recur (- y-offset 6) (- curr-val 1)))))
+       (recur (- y-offset 6) (- curr-val 1)))))
 
 (defn draw-stack
   [canvas val x y h]
@@ -25,7 +25,6 @@
         (c2d/line x-offset y x-offset (+ y height)))
     (draw-item-lines canvas val (+ x 3) (+ y height))))
 
-
 (defn draw-stacks
   [canvas stack-vals x y]
   (let [items (apply + stack-vals)
@@ -33,11 +32,13 @@
     (loop [x-offset x
             cur-index 0]
             (when (< cur-index (count stack-vals))
-            (draw-stack canvas (nth stack-vals cur-index) x-offset y height)
-            (recur (+ x-offset 45) (inc cur-index))))))
+              (draw-stack canvas (nth stack-vals cur-index) x-offset y height)
+              (recur (+ x-offset 45) (inc cur-index))))))
 
 (defn stacks
   [context name args]
   (let [canvas (:canvas context)
         {:keys [x y]} args]
+        ;; TODO: maybe the list can simply be passed, instead of using an
+        ;; atom later
         (draw-stacks canvas '(5 4 1 6 3 0) x y)))
