@@ -41,9 +41,17 @@
   [name text args]
   (inp/input @wnd/context name text args))
 
-(defn stacks 
-  [name args]
-  (st/stacks @wnd/context name args))
+(defn stacks
+  "name - name of the elemnt
+  item-list - list consisting of the number of
+              items on each stack for example:
+              (5 4 5) for 3 stacks with 5 on the 1st,
+                4 on the 2nd and 5 and the last stack
+  args - map of:
+    x - x coordinate of top left corner
+    y - y coordinate of top left corner"
+  [name item-list args]
+  (st/stacks @wnd/context name item-list args))
 
 (defn info 
   [text]

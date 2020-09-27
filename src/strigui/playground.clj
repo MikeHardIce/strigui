@@ -12,7 +12,7 @@
   (gui/input "inp1" "" {:x 250 :y 50 :color [:white :red] :min-width 100})
   (gui/input "inp2" "" {:x 250 :y 100 :color [:white :red] :min-width 100})
   (gui/input "inp3" "last" {:x 250 :y 150 :color [:white :red] :min-width 100})
-  (gui/stacks "stacks" {:x 250 :y 300}))
+  (gui/stacks "stacks" '(5 1 8 2 0 0 0 5 7) {:x 150 :y 400}))
 
 (defmethod e/button-clicked "a" [btn]
   (gui/info "Button A pressed"))

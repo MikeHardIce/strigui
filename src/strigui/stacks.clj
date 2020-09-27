@@ -1,8 +1,6 @@
 (ns strigui.stacks
     (:require [clojure2d.core :as c2d]))
 
-(def stack-data (atom ()))
-
 (defn draw-item-lines 
   [canvas val x y]
   (loop [y-offset (- y 5)
@@ -36,9 +34,7 @@
               (recur (+ x-offset 45) (inc cur-index))))))
 
 (defn stacks
-  [context name args]
+  [context name item-list args]
   (let [canvas (:canvas context)
         {:keys [x y]} args]
-        ;; TODO: maybe the list can simply be passed, instead of using an
-        ;; atom later
-        (draw-stacks canvas '(5 4 1 6 3 0) x y)))
+        (draw-stacks canvas item-list x y)))
