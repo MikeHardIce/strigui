@@ -30,7 +30,8 @@
   (clicked [this] 
     (b/swap-focused! this))
   (key-pressed [this char code]
-    (assoc-in this [:args 1] (adjust-text (nth (:args this) 1) char code))))
+    (assoc-in this [:args 1] (adjust-text (nth (:args this) 1) char code))
+    (e/input-modified this)))
 
 (defn input
   "context - map consisting of clojure2d canvas and clojure2d window
