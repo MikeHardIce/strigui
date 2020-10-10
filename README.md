@@ -1,5 +1,7 @@
 # strigui
 
+[![Clojars Project](https://img.shields.io/clojars/v/strigui.svg)](https://clojars.org/strigui)
+
 A simple straightforward GUI library for Clojure beginners like me. Currently contains Buttons, TextFields, Labels, the window component itself, and a weird component called stacks. I am planning to just create a few functions that allow components to be modified based on their name. 
 Click events and "text modified" events are accessible via multi-methods.
 
