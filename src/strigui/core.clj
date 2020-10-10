@@ -3,6 +3,7 @@
             [strigui.label :as lbl]
             [strigui.input :as inp]
             [strigui.stacks :as st]
+            [strigui.box :as box]
             [strigui.window :as wnd]))
 
 (defn window [width height]
@@ -26,7 +27,9 @@
      x - x coordinate of top left corner
      y - y coordinate of top left corner
      color - vector consisting of [font-color]
-     align - either :right :center :left"
+     align - vector consisting of either :right :center :left
+     font-style - vector consisting of either :bold :italic :italic-bold
+     font-size - number"
   [name text args]
   (lbl/label @wnd/context name text args))
 
@@ -56,3 +59,12 @@
 (defn info 
   [text]
   (wnd/display-info @wnd/context text))
+
+(defn update! 
+  [name func value])
+
+(defn remove! 
+  [name]
+  (when-let [box-to-remove (box/find-by-name name)]
+    (box/unregister-box! box-to-remove)
+    (box/box-remove-drawn box-to-remove (:canvas @wnd/context))))

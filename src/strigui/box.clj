@@ -20,13 +20,13 @@
   (clicked [this] "")
   (key-pressed [this char code] ""))
 
-(def boxes (atom ()))
+(def ^:private boxes (atom ()))
 
-(def boxes-to-redraw (atom #{}))
+(def ^:private boxes-to-redraw (atom #{}))
 
-(def boxes-clicked (atom #{}))
+(def ^:private boxes-clicked (atom #{}))
 
-(def boxes-focused (atom #{}))
+(def ^:private boxes-focused (atom #{}))
 
 (defn box-coord 
   "Computes the full box coordinates.
@@ -43,9 +43,12 @@
 
 (defn box-draw-text 
   "Draws the text of the box"
-  [canvas text {:keys [^long x ^long y color ^long min-width]}]
-  (let [[_ _ border-width border-heigth] (box-coord canvas text {:x x :y y :min-width min-width})
+  [canvas text {:keys [^long x ^long y color ^long min-width align font-style font-size]}]
+  (let [style (if (empty? font-style) :bold (first font-style))
+        size (if (number? font-size) font-size 15)
+        [_ _ border-width border-heigth] (box-coord canvas text {:x x :y y :min-width min-width})
         [_ text-y text-width _] (c2d/with-canvas-> canvas
+                          (c2d/set-font-attributes size style)
                           (c2d/text-bounding-box text))
         background-color (if (> (count color) 0) (first color) :grey)
         foreground-color (if (> (count color) 1) (nth color 1) :black)
@@ -55,7 +58,7 @@
       (c2d/with-canvas-> canvas
         (c2d/set-color background-color)
         (c2d/rect x y border-width border-heigth)
-        (c2d/set-font-attributes 15 :bold)
+        (c2d/set-font-attributes size style)
         (c2d/set-color foreground-color)
         (c2d/text text (+ x x-offset) (- y (* text-y 1.5))))))
 
@@ -85,6 +88,10 @@
         (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) true))
       (box-border canvas color (- strength 1) [x y w h])))
 
+(defn find-by-name 
+  [name]
+  (first (filter #(= (:name %) name) @boxes)))
+
 (defn register-box!
   "Registers a box component"
   [^strigui.box.Box box]
@@ -97,8 +104,9 @@
     (swap! boxes-to-redraw #(s/difference %1 #{box})))
 
 (defn box-draw-border 
-  [^strigui.box.Box box canvas]
-  (apply box-border (conj [canvas :black 1] (coord box))))
+  ([^strigui.box.Box box canvas] (box-draw-border box canvas :black))
+  ([^strigui.box.Box box canvas color]
+  (apply box-border (conj [canvas color 1] (coord box)))))
 
 (defn box-draw-hover 
   [^strigui.box.Box box canvas] 
@@ -112,6 +120,18 @@
       (apply box-border (conj [canvas :white 2] coord))
       (apply box-border (conj [canvas :black 1] coord))
       box)))
+
+(defn box-remove-drawn 
+  [^strigui.box.Box box canvas]
+  (let [empty-box (-> box
+                    (assoc-in [:args :color] [:white :white])
+                    (assoc-in [:args :text] ""))]
+    (draw empty-box canvas)
+    (box-draw-border empty-box canvas :white)))
+
+(defn redraw-all 
+  [canvas]
+  (doall (map box-redraw @boxes)))
 
 (defn swap-focused!
   [box]

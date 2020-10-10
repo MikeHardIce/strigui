@@ -4,7 +4,7 @@
             [strigui.events :as e]))
   ;(:import strigui.box Box))
 
-(defrecord Button [name coordinates args]
+(defrecord Button [name value coordinates args]
   b/Box
   (coord [this] (:coordinates this)) ;; could be a mapping if the record would look different
   (draw-hover [this canvas] (b/box-draw-hover this canvas))
@@ -32,6 +32,6 @@
   (let [canvas (:canvas context)
         arg [canvas text args]
         coord (apply b/box-coord arg)
-        btn (Button. name coord arg)]
+        btn (Button. name text coord arg)]
     (b/draw btn canvas)
     (b/register-box! btn)))
