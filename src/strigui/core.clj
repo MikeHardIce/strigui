@@ -27,10 +27,11 @@
     (unregister box-to-remove (:canvas @wnd/context))))
 
 (defn update! 
-  [name func value]
+  [name key value]
   (when-let [w (find-by-name name)
-             widget (assoc widget (apply )]
-    ()))
+             widget (assoc widget key value)]
+            (unregister w (:canvas @wnd/context)
+            (register widget (:canvas @wnd/context)))))
 
 (defn window [width height]
   (wnd/create-window width height))

@@ -22,7 +22,7 @@
     (let [[x y w h] (:coordinates this)] 
       (b/box-draw-border canvas :blue 2 x y w h)
                                   this)))
-(extend-protocol b/Actions
+(extend-protocol e/Actions
   Button
   (clicked [this] (e/button-clicked this)))
 
@@ -38,8 +38,5 @@
   [context name text args]
   (let [canvas (:canvas context)
         arg [canvas text args]
-        coord (apply b/box-coord arg)
-        btn (Button. name text coord args)]
-    (b/draw btn canvas)
-    (b/register-box! btn))
-    btn)
+        coord (apply b/box-coord arg)]
+    (Button. name text coord args)))

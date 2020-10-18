@@ -10,12 +10,7 @@
 (defprotocol Box 
   "collection of functions around redrawing boxes, managing the border etc. ..."
   (draw-hover [this canvas] "draws the hover effect")
-  (draw-clicked [this canvas] "draws the cliced effect"))
-
-(defprotocol Actions
-  "collection of functions to hook into events"
-  (clicked [this] "")
-  (key-pressed [this char code] ""))
+  (draw-clicked [this canvas] "draws the clicked effect"))
 
 (def ^:private default-font-size 15)
 
@@ -86,17 +81,6 @@
         (c2d/set-color color)
         (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) no-fill))
       (box-border canvas color (- strength 1) x y w h no-fill))))
-
-(defn register-box!
-  "Registers a box component"
-  [^strigui.box.Box box]
-  (swap! boxes conj box))
-
-(defn unregister-box! 
-  "Unregisters a box component"
-  [^strigui.box.Box box]
-    (swap! boxes #(filter (fn [el] (not= %2 el)) %1) box)
-    (swap! boxes-to-redraw #(s/difference %1 #{box})))
 
 (defn box-draw-border 
   ([^strigui.box.Box box canvas] (box-draw-border box canvas :black 1))

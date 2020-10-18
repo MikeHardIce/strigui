@@ -34,7 +34,7 @@
     (subs text 0 (- (count text) 1))
     (str text char)))
 
-(extend-protocol b/Actions
+(extend-protocol e/Actions
   Input
   (clicked [this] 
     (b/swap-focused! this))
@@ -54,8 +54,5 @@
   [context name text args]
   (let [canvas (:canvas context)
         arg [canvas text args]
-        coord (apply b/box-coord arg)
-        inp (Input. name text coord args)]
-    (b/draw inp canvas)
-    (b/register-box! inp))
-    inp)
+        coord (apply b/box-coord arg)]
+    (Input. name text coord args)))
