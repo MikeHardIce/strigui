@@ -3,8 +3,34 @@
             [strigui.label :as lbl]
             [strigui.input :as inp]
             [strigui.stacks :as st]
-            [strigui.box :as box]
             [strigui.window :as wnd]))
+
+(def ^:private widgets (atom ()))
+
+(defn- register 
+  [^strigui.widget.Widget widget canvas]
+  (when (draw widget canvas)
+      (swap! widgets conj widget)))
+
+(defn- unregister
+  [^strigui.widget.Widget widget canvas]
+  (when (hide widget canvas)
+      (swap! widgets #(filter (fn [item] (not= item %2))) widget)))
+
+(defn find-by-name 
+  [name]
+  (first (filter #(= (widget-name %) name) @widgets)))
+
+(defn remove! 
+  [name]
+  (when-let [box-to-remove (find-by-name name)]
+    (unregister box-to-remove (:canvas @wnd/context))))
+
+(defn update! 
+  [name func value]
+  (when-let [w (find-by-name name)
+             widget (assoc widget (apply )]
+    ()))
 
 (defn window [width height]
   (wnd/create-window width height))
@@ -18,7 +44,7 @@
      color - vector consisting of [background-color font-color]
      min-width - the minimum width"
   [name text args]
-  (btn/button @wnd/context name text args))
+  (register (btn/button name text args)))
 
 (defn label
    "name - name of the element
@@ -31,7 +57,7 @@
      font-style - vector consisting of either :bold :italic :italic-bold
      font-size - number"
   [name text args]
-  (lbl/label @wnd/context name text args))
+  (register (lbl/create name text args)))
 
 (defn input
   "name - name of the element
@@ -42,7 +68,7 @@
     color - vector consisting of [background-color font-color]
     min-width - the minimum width"
   [name text args]
-  (inp/input @wnd/context name text args))
+  (register (inp/input name text args)))
 
 (defn stacks
   "name - name of the elemnt
@@ -54,17 +80,8 @@
     x - x coordinate of top left corner
     y - y coordinate of top left corner"
   [name item-list args]
-  (st/stacks @wnd/context name item-list args))
+  (register (st/create name item-list args)))
 
 (defn info 
   [text]
   (wnd/display-info @wnd/context text))
-
-(defn update! 
-  [name func value])
-
-(defn remove! 
-  [name]
-  (when-let [box-to-remove (box/find-by-name name)]
-    (box/unregister-box! box-to-remove)
-    (box/box-remove-drawn box-to-remove (:canvas @wnd/context))))

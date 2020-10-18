@@ -1,7 +1,20 @@
 (ns strigui.label
-  (:require [clojure2d.core :as c2d]))
+  (:require [clojure2d.core :as c2d]
+            [strigui.widget :as wdg]))
 
-(def labels (atom []))
+(defrecord Label [name value coordinates args]
+  wdg/Widget
+    (coord [this] (:coordinates this))
+    (value [this] (:value this))
+    (args [this] (:args this))
+    (widget-name [this] (:name this))
+    (draw [this canvas] 
+      (let [[x y] (coord this)]
+        (create-label canvas (value this) args)
+        this))
+    (redraw 
+      [this canvas]
+      (draw this canvas)))
 
 (defn- create-label [canvas text {:keys [x y color align font-style font-size]}]
   (let [font-color (if (empty? color) :black (first color))
@@ -13,8 +26,6 @@
       (c2d/set-color font-color)
       (c2d/text text x y alignment))))
 
-(defn label [context name text {:keys [x y color align font-style font-size] :as arg}]
-  (let [args [(:canvas context) text arg]
-        func create-label
-        coord (apply func args)]
-     (swap! labels conj {:coord coord :func func :args args :name name})))
+(defn create 
+  [context name text {:keys [x y color align font-style font-size] :as arg}]
+  (Label. name test [x y] arg))

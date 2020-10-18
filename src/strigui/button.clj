@@ -1,23 +1,30 @@
 (ns strigui.button
   (:require [clojure2d.core :as c2d]
             [strigui.box :as b]
-            [strigui.events :as e]))
-  ;(:import strigui.box Box))
+            [strigui.events :as e]
+            [strigui.widget :as wdg]))
 
 (defrecord Button [name value coordinates args]
-  b/Box
+  wdg/Widget
   (coord [this] (:coordinates this)) ;; could be a mapping if the record would look different
-  (draw-hover [this canvas] (b/box-draw-hover this canvas))
-  (draw-clicked [this canvas] (apply b/box-border (conj [canvas :green 2] (:coordinates this)))
-                                 this)
+  (text [this] (:value this))
+  (args [this] (:args this))
+  (box-name [this] (:name this))
   (redraw [this canvas] (b/box-redraw this canvas))
   (draw [this canvas]
     (b/box-draw-border this canvas) 
-    (b/box-draw (:args this))))
+    (b/box-draw canvas (:value this) (:args this))))
 
- (extend-protocol b/Actions
+(extend-protocol b/Box
   Button
-   (clicked [this] (e/button-clicked this)))
+  (draw-hover [this canvas] (b/box-draw-hover this canvas))
+  (draw-clicked [this canvas] 
+    (let [[x y w h] (:coordinates this)] 
+      (b/box-draw-border canvas :blue 2 x y w h)
+                                  this)))
+(extend-protocol b/Actions
+  Button
+  (clicked [this] (e/button-clicked this)))
 
 (defn button
   "context - map consiting of clojure2d canvas and clojure2d window
@@ -32,6 +39,7 @@
   (let [canvas (:canvas context)
         arg [canvas text args]
         coord (apply b/box-coord arg)
-        btn (Button. name text coord arg)]
+        btn (Button. name text coord args)]
     (b/draw btn canvas)
-    (b/register-box! btn)))
+    (b/register-box! btn))
+    btn)

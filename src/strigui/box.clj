@@ -1,26 +1,23 @@
 (ns strigui.box
   (:require [clojure2d.core :as c2d]
             [clojure.set :as s]
-            [strigui.window :as wnd]))
+            [strigui.window :as wnd]
+            [strigui.widget :as wdg]))
 
 (set! *warn-on-reflection* true)
-(set! *unchecked-math* :warn-on-boxed)
+;;(set! *unchecked-math* :warn-on-boxed)
 
-;; not sure if thats the right way
 (defprotocol Box 
   "collection of functions around redrawing boxes, managing the border etc. ..."
-  (coord [this] "gets the coordinates of the box")
-  (draw-hover [this canvas] "")
-  (draw-clicked [this canvas] "")
-  (redraw [this canvas] "")
-  (draw [this canvas] ""))
+  (draw-hover [this canvas] "draws the hover effect")
+  (draw-clicked [this canvas] "draws the cliced effect"))
 
 (defprotocol Actions
   "collection of functions to hook into events"
   (clicked [this] "")
   (key-pressed [this char code] ""))
 
-(def ^:private boxes (atom ()))
+(def ^:private default-font-size 15)
 
 (def ^:private boxes-to-redraw (atom #{}))
 
@@ -45,7 +42,7 @@
   "Draws the text of the box"
   [canvas text {:keys [^long x ^long y color ^long min-width align font-style font-size]}]
   (let [style (if (empty? font-style) :bold (first font-style))
-        size (if (number? font-size) font-size 15)
+        size (if (number? font-size) font-size default-font-size)
         [_ _ border-width border-heigth] (box-coord canvas text {:x x :y y :min-width min-width})
         [_ text-y text-width _] (c2d/with-canvas-> canvas
                           (c2d/set-font-attributes size style)
@@ -80,17 +77,15 @@
     (box-draw-text canvas text args)
     [x y border-width border-heigth])))
 
-(defn box-border [canvas color ^long strength [^long x ^long y ^long w ^long h]]
+(defn box-border 
+  ([canvas color strength x y w h] 
+    (box-border canvas color strength x y w h true))
+  ([canvas color strength x y w h no-fill]
   (when (> strength 0)
       (c2d/with-canvas-> canvas
-      ;(c2d/set-stroke strength :butt 0 0)
         (c2d/set-color color)
-        (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) true))
-      (box-border canvas color (- strength 1) [x y w h])))
-
-(defn find-by-name 
-  [name]
-  (first (filter #(= (:name %) name) @boxes)))
+        (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) no-fill))
+      (box-border canvas color (- strength 1) x y w h no-fill))))
 
 (defn register-box!
   "Registers a box component"
@@ -104,30 +99,30 @@
     (swap! boxes-to-redraw #(s/difference %1 #{box})))
 
 (defn box-draw-border 
-  ([^strigui.box.Box box canvas] (box-draw-border box canvas :black))
-  ([^strigui.box.Box box canvas color]
-  (apply box-border (conj [canvas color 1] (coord box)))))
+  ([^strigui.box.Box box canvas] (box-draw-border box canvas :black 1))
+  ([^strigui.box.Box box canvas color] (box-draw-border box canvas color 1))
+  ([^strigui.box.Box box canvas color strength] (box-draw-border box canvas color strength false))
+  ([^strigui.box.Box box canvas color strength fill]
+  (let [[x y w h] (wdg/coord box)]
+    (box-border canvas color strength x y w h (not fill)))))
 
 (defn box-draw-hover 
   [^strigui.box.Box box canvas] 
-  (apply box-border (conj [canvas :black 2] (coord box)))
+  (box-draw-border box canvas :black 2)
   box)
 
 (defn box-redraw 
   [^strigui.box.Box box canvas] 
   (let [coord (coord box)]
     (when (not-empty coord)
-      (apply box-border (conj [canvas :white 2] coord))
-      (apply box-border (conj [canvas :black 1] coord))
+    (box-draw-border box canvas :white 2)
+      (box-draw-border box canvas :black 1)
+      (draw box canvas)
       box)))
 
 (defn box-remove-drawn 
   [^strigui.box.Box box canvas]
-  (let [empty-box (-> box
-                    (assoc-in [:args :color] [:white :white])
-                    (assoc-in [:args :text] ""))]
-    (draw empty-box canvas)
-    (box-draw-border empty-box canvas :white)))
+  (box-draw-border box canvas :white 1 true))
 
 (defn redraw-all 
   [canvas]
@@ -187,6 +182,6 @@
     (when (not-empty new-focused-inputs)
       (doall (map #(unregister-box! %1) @boxes-focused))
       (doall (map #(register-box! %1) new-focused-inputs))
-      (doall (map #(apply box-draw-text (:args %1)) new-focused-inputs))
+      (doall (map #(box-draw-text (:canvas @wnd/context) (text %1) (args %1)) new-focused-inputs))
       (reset! boxes-focused (set new-focused-inputs))))
   state)

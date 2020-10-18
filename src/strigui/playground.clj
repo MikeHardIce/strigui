@@ -22,8 +22,8 @@
 
 (defmethod e/input-modified "inp1" [inp]
   ;;TODO: just make text a simple key (:text inp)
-  (gui/info (nth (:args inp) 1)))
+  (gui/info (:value inp)))
 
 (defmethod e/input-modified "inp2" [inp]
     ;;TODO: just make text a simple key (:text inp)
-  (gui/info (nth (:args inp) 1)))
+  (gui/info (:value inp)))
