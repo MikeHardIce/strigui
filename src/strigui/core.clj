@@ -3,23 +3,24 @@
             [strigui.label :as lbl]
             [strigui.input :as inp]
             [strigui.stacks :as st]
-            [strigui.window :as wnd]))
+            [strigui.window :as wnd]
+            [strigui.widget :as wdg]))
 
-(def ^:private widgets (atom ()))
+
 
 (defn- register 
   [^strigui.widget.Widget widget canvas]
-  (when (draw widget canvas)
-      (swap! widgets conj widget)))
+  (when (wdg/draw widget canvas)
+      (swap! wdg/widgets conj widget)))
 
 (defn- unregister
   [^strigui.widget.Widget widget canvas]
-  (when (hide widget canvas)
-      (swap! widgets #(filter (fn [item] (not= item %2))) widget)))
+  (when (wdg/hide widget canvas)
+      (swap! wdg/widgets #(filter (fn [item] (not= item %2))) widget)))
 
 (defn find-by-name 
   [name]
-  (first (filter #(= (widget-name %) name) @widgets)))
+  (first (filter #(= (widget-name %) name) @wdg/widgets)))
 
 (defn remove! 
   [name]

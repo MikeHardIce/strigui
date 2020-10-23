@@ -40,3 +40,12 @@
         arg [canvas text args]
         coord (apply b/box-coord arg)]
     (Button. name text coord args)))
+
+(defmethod widget-event [strigui.button.Button :mouse-moved] 
+  [widget _ canvas]
+  (draw-hover widget canvas))
+
+(defmethod widget-event [strigui.button.Button :mouse-clicked]
+  [widget _ canvas]
+  (clicked widget)
+  (draw-clicked widget canvas))

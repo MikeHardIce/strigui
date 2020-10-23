@@ -1,6 +1,7 @@
 (ns strigui.box
   (:require [clojure2d.core :as c2d]
             [clojure.set :as s]
+            [strigui.events :as e]
             [strigui.window :as wnd]
             [strigui.widget :as wdg]))
 
@@ -13,8 +14,6 @@
   (draw-clicked [this canvas] "draws the clicked effect"))
 
 (def ^:private default-font-size 15)
-
-(def ^:private boxes-to-redraw (atom #{}))
 
 (def ^:private boxes-clicked (atom #{}))
 
@@ -97,20 +96,16 @@
 
 (defn box-redraw 
   [^strigui.box.Box box canvas] 
-  (let [coord (coord box)]
+  (let [coord (wdg/coord box)]
     (when (not-empty coord)
     (box-draw-border box canvas :white 2)
       (box-draw-border box canvas :black 1)
-      (draw box canvas)
+      (wdg/draw box canvas)
       box)))
 
 (defn box-remove-drawn 
   [^strigui.box.Box box canvas]
   (box-draw-border box canvas :white 1 true))
-
-(defn redraw-all 
-  [canvas]
-  (doall (map box-redraw @boxes)))
 
 (defn swap-focused!
   [box]
@@ -125,47 +120,18 @@
   (contains? @boxes-focused box))
 
   ;; TODO: maybe its not necessary to go to @wnd/context directly
-(defmethod c2d/mouse-event ["main-window" :mouse-moved] [event state]
-  (let [context @wnd/context
-        canvas (:canvas context)
-        window (:window context)
-        btn-hits (first (filter #(wnd/within? (coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))
-        btns @boxes-to-redraw]
-    (wnd/display-info context (str (c2d/mouse-pos window) " " @boxes-to-redraw))
-    (if (empty? btn-hits)
-      (let [redrawn-buttons (map #(redraw % canvas) btns)]
-        (swap! boxes-to-redraw #(s/difference %1 (set %2))  redrawn-buttons))
-      (do 
-        (draw-hover btn-hits canvas)
-        (swap! boxes-to-redraw  #(conj %1 %2) btn-hits))))
-  state)
+(defmethod wdg/widget-global-event :mouse-released 
+  [_ canvas & args]
+  (map #(draw-hover %1 canvas) @boxes-clicked)
+  (reset! boxes-clicked  #{}))
 
-;; TODO: maybe its not necessary to go to @wnd/context directly
-(defmethod c2d/mouse-event ["main-window" :mouse-pressed] [event state]
-  (let [context @wnd/context
-        canvas (:canvas context)
-        window (:window context)
-        btn (first (filter #(wnd/within? (coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @boxes))]
-    (if (not-empty btn)
-      (do 
-        (clicked btn)
-        (draw-clicked btn canvas)
-        (swap! boxes-clicked #(conj %1 %2) btn))
-      (reset! boxes-focused #{})))
-  state)
-
-(defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
-  (map #(draw-hover %1 (:canvas @wnd/context)) @boxes-clicked)
-  (reset! boxes-clicked  #{})
-  state)
-
-(defmethod c2d/key-event ["main-window" :key-pressed] [event state]
-  (let [char (c2d/key-char event)
-        code (c2d/key-code event)
-        new-focused-inputs (doall (map #(key-pressed %1 char code) @boxes-focused))]
+(defmethod wdg/widget-global-event :key-pressed
+  [_ canvas & args]
+  (let [char (first args)
+        code (nth args 1)
+        new-focused-inputs (doall (map #(e/key-pressed %1 char code) @boxes-focused))]
     (when (not-empty new-focused-inputs)
-      (doall (map #(unregister-box! %1) @boxes-focused))
-      (doall (map #(register-box! %1) new-focused-inputs))
-      (doall (map #(box-draw-text (:canvas @wnd/context) (text %1) (args %1)) new-focused-inputs))
-      (reset! boxes-focused (set new-focused-inputs))))
-  state)
+    (doall (map #(unregister-box! %1) @boxes-focused))
+    (doall (map #(register-box! %1) new-focused-inputs))
+    (doall (map #(box-draw-text canvas (wdg/value %1) (wdg/args %1)) new-focused-inputs))
+    (reset! boxes-focused (set new-focused-inputs)))))
