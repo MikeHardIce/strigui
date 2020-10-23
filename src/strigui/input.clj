@@ -63,5 +63,6 @@
 
 (defmethod wdg/widget-event [strigui.button.Input :mouse-clicked]
   [widget _ canvas]
-  (clicked widget)
-  (draw-clicked widget canvas))
+  (e/clicked widget)
+  (b/draw-clicked widget canvas)
+  (swap! b/boxes-clicked #(conj %1 %2) btn))

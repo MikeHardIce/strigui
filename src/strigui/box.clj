@@ -15,9 +15,9 @@
 
 (def ^:private default-font-size 15)
 
-(def ^:private boxes-clicked (atom #{}))
+(def boxes-clicked (atom #{}))
 
-(def ^:private boxes-focused (atom #{}))
+(def boxes-focused (atom #{}))
 
 (defn box-coord 
   "Computes the full box coordinates.
@@ -119,11 +119,14 @@
   [box]
   (contains? @boxes-focused box))
 
-  ;; TODO: maybe its not necessary to go to @wnd/context directly
 (defmethod wdg/widget-global-event :mouse-released 
   [_ canvas & args]
   (map #(draw-hover %1 canvas) @boxes-clicked)
   (reset! boxes-clicked  #{}))
+
+(defmethod wdg/widget-global-event :mouse-pressed-on-empty-space
+  [_ canvas & args]
+  (reset! boxes-focused #{}))
 
 (defmethod wdg/widget-global-event :key-pressed
   [_ canvas & args]
@@ -131,7 +134,7 @@
         code (nth args 1)
         new-focused-inputs (doall (map #(e/key-pressed %1 char code) @boxes-focused))]
     (when (not-empty new-focused-inputs)
-    (doall (map #(unregister-box! %1) @boxes-focused))
-    (doall (map #(register-box! %1) new-focused-inputs))
-    (doall (map #(box-draw-text canvas (wdg/value %1) (wdg/args %1)) new-focused-inputs))
-    (reset! boxes-focused (set new-focused-inputs)))))
+      (doall (map #(wdg/unregister %1) @boxes-focused))
+      (doall (map #(wdg/register %1) new-focused-inputs))
+      (doall (map #(box-draw-text canvas (wdg/value %1) (wdg/args %1)) new-focused-inputs))
+      (reset! boxes-focused (set new-focused-inputs)))))

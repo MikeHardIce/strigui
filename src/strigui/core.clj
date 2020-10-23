@@ -8,16 +8,6 @@
 
 
 
-(defn- register 
-  [^strigui.widget.Widget widget canvas]
-  (when (wdg/draw widget canvas)
-      (swap! wdg/widgets conj widget)))
-
-(defn- unregister
-  [^strigui.widget.Widget widget canvas]
-  (when (wdg/hide widget canvas)
-      (swap! wdg/widgets #(filter (fn [item] (not= item %2))) widget)))
-
 (defn find-by-name 
   [name]
   (first (filter #(= (widget-name %) name) @wdg/widgets)))

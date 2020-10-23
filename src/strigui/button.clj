@@ -7,7 +7,7 @@
 (defrecord Button [name value coordinates args]
   wdg/Widget
   (coord [this] (:coordinates this)) ;; could be a mapping if the record would look different
-  (text [this] (:value this))
+  (value [this] (:value this))
   (args [this] (:args this))
   (box-name [this] (:name this))
   (redraw [this canvas] (b/box-redraw this canvas))
@@ -43,9 +43,10 @@
 
 (defmethod widget-event [strigui.button.Button :mouse-moved] 
   [widget _ canvas]
-  (draw-hover widget canvas))
+  (b/draw-hover widget canvas))
 
 (defmethod widget-event [strigui.button.Button :mouse-clicked]
   [widget _ canvas]
-  (clicked widget)
-  (draw-clicked widget canvas))
+  (e/clicked widget)
+  (b/draw-clicked widget canvas)
+  (swap! b/boxes-clicked #(conj %1 %2) btn))
