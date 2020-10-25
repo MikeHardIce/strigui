@@ -29,6 +29,7 @@
    x - x-coord of point to check
    y - y-coord of point to check"
   [coord x y]
+  (println coord)
   (and (>= x (first coord))
        (>= y (nth coord 1))
        (<= x (+ (first coord) (nth coord 2)))

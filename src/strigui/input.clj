@@ -57,11 +57,13 @@
     (Input. name text coord args)))
 
 (defmethod wdg/widget-event [strigui.input.Input :mouse-moved] 
-  [widget _ canvas]
+  [_ canvas widget]
+  (println "mouse moved Input")
   (b/draw-hover widget canvas))
 
 (defmethod wdg/widget-event [strigui.input.Input :mouse-clicked]
-  [widget _ canvas]
+  [_ canvas widget]
+  (println "mouse clicked Input")
   (e/clicked widget)
   (b/draw-clicked widget canvas)
   (swap! b/boxes-clicked #(conj %1 %2) widget))

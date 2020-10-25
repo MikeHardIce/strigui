@@ -41,11 +41,11 @@
     (Button. name text coord args)))
 
 (defmethod wdg/widget-event [strigui.button.Button :mouse-moved] 
-  [widget _ canvas]
+  [_ canvas widget]
   (b/draw-hover widget canvas))
 
 (defmethod wdg/widget-event [strigui.button.Button :mouse-clicked]
-  [widget _ canvas]
+  [_ canvas widget]
   (e/clicked widget)
   (b/draw-clicked widget canvas)
   (swap! b/boxes-clicked #(conj %1 %2) widget))

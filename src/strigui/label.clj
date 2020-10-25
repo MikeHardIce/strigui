@@ -28,4 +28,6 @@
 
 (defn create 
   [canvas name text {:keys [x y color align font-style font-size] :as arg}]
-  (Label. name test [x y] arg))
+(let [[_ _ width height] (c2d/with-canvas-> canvas
+                            (c2d/text-bounding-box text))]
+  (Label. name test [x y width height] arg)))
