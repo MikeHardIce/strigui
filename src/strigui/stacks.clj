@@ -1,20 +1,6 @@
 (ns strigui.stacks
-    (:require [clojure2d.core :as c2d
+    (:require [clojure2d.core :as c2d]
               [strigui.widget :as wdg]))
-
-(defrecord Stack [name value coordinates args]
-  wdg/Widget
-    (coord [this] (:coordinates this))
-    (value [this] (:value this))
-    (args [this] (:args this))
-    (widget-name [this] (:name this))
-    (draw [this canvas] 
-      (let [[x y] (coord this)]
-        (draw-stacks canvas (value this) x y)
-        this))
-    (redraw 
-      [this canvas]
-      (draw this canvas)))
 
 (defn draw-item-lines 
   [canvas val x y]
@@ -25,7 +11,7 @@
         (c2d/set-color :green)
         (c2d/set-stroke 3)
         (c2d/line x y-offset (+ x 30) y-offset))
-       (recur (- y-offset 6) (- curr-val 1)))))
+        (recur (- y-offset 6) (- curr-val 1)))))
 
 (defn draw-stack
   [canvas val x y h]
@@ -48,8 +34,22 @@
               (draw-stack canvas (nth stack-vals cur-index) x-offset y height)
               (recur (+ x-offset 45) (inc cur-index))))))
 
+(defrecord Stack [name value coordinates args]
+  wdg/Widget
+    (coord [this] (:coordinates this))
+    (value [this] (:value this))
+    (args [this] (:args this))
+    (widget-name [this] (:name this))
+    (draw [this canvas] 
+      (let [[x y] (wdg/coord this)]
+        (draw-stacks canvas (wdg/value this) x y)
+        this))
+    (redraw 
+      [this canvas]
+      (wdg/draw this canvas)))
+
 (defn create
-  [context name item-list args]
+  [canvas name item-list args]
   (let [coord [(:x args) (:y args)]
         stack (Stack. name item-list coord args)]
       stack))

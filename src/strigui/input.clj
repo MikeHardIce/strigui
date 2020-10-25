@@ -9,7 +9,7 @@
 (defrecord Input [name value coordinates args]
   wdg/Widget
   (coord [this] (:coordinates this)) ;; could be a mapping if the record would look different
-  (text [this] (:value this))
+  (value [this] (:value this))
   (args [this] (:args this))
   (widget-name [this] (:name this))
   (redraw [this canvas] 
@@ -43,7 +43,7 @@
     (assoc this :value (adjust-text (:value this) char code))))
 
 (defn input
-  "context - map consisting of clojure2d canvas and clojure2d window
+  "canvas - clojure2d canvas
     name - name of the input element
     text - text displayed inside the input element
     args - map of properties:
@@ -51,18 +51,17 @@
       y - y coordinate of top left corner
       color - vector consisting of [background-color font-color]
       min-width - the minimum width"
-  [context name text args]
-  (let [canvas (:canvas context)
-        arg [canvas text args]
+  [canvas name text args]
+  (let [arg [canvas text args]
         coord (apply b/box-coord arg)]
     (Input. name text coord args)))
 
-(defmethod wdg/widget-event [strigui.button.Input :mouse-moved] 
+(defmethod wdg/widget-event [strigui.input.Input :mouse-moved] 
   [widget _ canvas]
-  (draw-hover widget canvas))
+  (b/draw-hover widget canvas))
 
-(defmethod wdg/widget-event [strigui.button.Input :mouse-clicked]
+(defmethod wdg/widget-event [strigui.input.Input :mouse-clicked]
   [widget _ canvas]
   (e/clicked widget)
   (b/draw-clicked widget canvas)
-  (swap! b/boxes-clicked #(conj %1 %2) btn))
+  (swap! b/boxes-clicked #(conj %1 %2) widget))

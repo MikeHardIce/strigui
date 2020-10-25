@@ -18,12 +18,12 @@
 (def ^:private widgets-to-redraw (atom #{}))
 
 (defn register 
-  [^strigui.widget.Widget widget canvas]
+  [canvas ^strigui.widget.Widget widget]
   (when (draw widget canvas)
     (swap! widgets conj widget)))
 
 (defn unregister
-  [^strigui.widget.Widget widget canvas]
+  [canvas ^strigui.widget.Widget widget]
   (when (hide widget canvas)
     (swap! widgets #(filter (fn [item] (not= item %2))) widget)
     (swap! widgets-to-redraw #(s/difference %1 #{widget}))))

@@ -6,23 +6,20 @@
             [strigui.window :as wnd]
             [strigui.widget :as wdg]))
 
-
-
 (defn find-by-name 
   [name]
-  (first (filter #(= (widget-name %) name) @wdg/widgets)))
+  (first (filter #(= (wdg/widget-name %) name) @wdg/widgets)))
 
 (defn remove! 
   [name]
   (when-let [box-to-remove (find-by-name name)]
-    (unregister box-to-remove (:canvas @wnd/context))))
+    (wdg/unregister box-to-remove (:canvas @wnd/context))))
 
 (defn update! 
   [name key value]
-  (when-let [w (find-by-name name)
-             widget (assoc widget key value)]
-            (unregister w (:canvas @wnd/context)
-            (register widget (:canvas @wnd/context)))))
+  (when-let [w (find-by-name name)]
+    (wdg/unregister w (:canvas @wnd/context)
+    (wdg/register (assoc w key value) (:canvas @wnd/context)))))
 
 (defn window [width height]
   (wnd/create-window width height))
@@ -36,7 +33,7 @@
      color - vector consisting of [background-color font-color]
      min-width - the minimum width"
   [name text args]
-  (register (btn/button name text args)))
+  (wdg/register (:canvas @wnd/context) (btn/button (:canvas @wnd/context) name text args)))
 
 (defn label
    "name - name of the element
@@ -49,7 +46,7 @@
      font-style - vector consisting of either :bold :italic :italic-bold
      font-size - number"
   [name text args]
-  (register (lbl/create name text args)))
+  (wdg/register (:canvas @wnd/context) (lbl/create (:canvas @wnd/context) name text args)))
 
 (defn input
   "name - name of the element
@@ -60,7 +57,7 @@
     color - vector consisting of [background-color font-color]
     min-width - the minimum width"
   [name text args]
-  (register (inp/input name text args)))
+  (wdg/register (:canvas @wnd/context) (inp/input (:canvas @wnd/context) name text args)))
 
 (defn stacks
   "name - name of the elemnt
@@ -72,7 +69,7 @@
     x - x coordinate of top left corner
     y - y coordinate of top left corner"
   [name item-list args]
-  (register (st/create name item-list args)))
+  (wdg/register (:canvas @wnd/context) (st/create (:canvas @wnd/context) name item-list args)))
 
 (defn info 
   [text]

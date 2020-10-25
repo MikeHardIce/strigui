@@ -134,7 +134,7 @@
         code (nth args 1)
         new-focused-inputs (doall (map #(e/key-pressed %1 char code) @boxes-focused))]
     (when (not-empty new-focused-inputs)
-      (doall (map #(wdg/unregister %1) @boxes-focused))
-      (doall (map #(wdg/register %1) new-focused-inputs))
+      (doall (map #(wdg/unregister canvas %1) @boxes-focused))
+      (doall (map #(wdg/register canvas %1) new-focused-inputs))
       (doall (map #(box-draw-text canvas (wdg/value %1) (wdg/args %1)) new-focused-inputs))
       (reset! boxes-focused (set new-focused-inputs)))))
