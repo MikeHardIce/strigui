@@ -13,13 +13,13 @@
 (defn remove! 
   [name]
   (when-let [box-to-remove (find-by-name name)]
-    (wdg/unregister box-to-remove (:canvas @wnd/context))))
+    (wdg/unregister (:canvas @wnd/context) box-to-remove)))
 
 (defn update! 
   [name key value]
   (when-let [w (find-by-name name)]
-    (wdg/unregister w (:canvas @wnd/context)
-    (wdg/register (assoc w key value) (:canvas @wnd/context)))))
+    (wdg/unregister (:canvas @wnd/context) w )
+    (wdg/register (:canvas @wnd/context) (assoc w key value))))
 
 (defn window [width height]
   (wnd/create-window width height))

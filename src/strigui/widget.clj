@@ -21,7 +21,7 @@
   (let [[x y w h] (coord widget)]
     (c2d/with-canvas-> canvas
       (c2d/set-color :white)
-      (c2d/rect x y w h))))
+      (c2d/rect (- x 1) (- y 1) (+ w 4) (+ h 4)))))
 
 (defn register 
   [canvas ^strigui.widget.Widget widget]
