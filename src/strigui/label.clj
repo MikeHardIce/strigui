@@ -20,7 +20,7 @@
     (widget-name [this] (:name this))
     (draw [this canvas] 
       (let [[x y] (wdg/coord this)]
-        (create-label canvas (value this) args)
+        (create-label canvas (:value this) args)
         this))
     (redraw 
       [this canvas]
@@ -30,4 +30,4 @@
   [canvas name text {:keys [x y color align font-style font-size] :as arg}]
 (let [[_ _ width height] (c2d/with-canvas-> canvas
                             (c2d/text-bounding-box text))]
-  (Label. name test [x y width height] arg)))
+  (Label. name text [x y width height] arg)))
