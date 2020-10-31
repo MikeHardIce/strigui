@@ -126,6 +126,7 @@
 
 (defmethod wdg/widget-global-event :mouse-pressed-on-empty-space
   [_ canvas & args]
+  (println "mouse pressed on empty space")
   (reset! boxes-focused #{}))
 
 (defmethod wdg/widget-global-event :key-pressed
@@ -134,7 +135,9 @@
         code (nth args 1)
         new-focused-inputs (doall (map #(e/key-pressed %1 char code) @boxes-focused))]
     (when (not-empty new-focused-inputs)
+      (println (str "key pressed: " char))
       (doall (map #(wdg/unregister canvas %1) @boxes-focused))
+      (println new-focused-inputs)
       (doall (map #(wdg/register canvas %1) new-focused-inputs))
       (doall (map #(box-draw-text canvas (wdg/value %1) (wdg/args %1)) new-focused-inputs))
       (reset! boxes-focused (set new-focused-inputs)))))

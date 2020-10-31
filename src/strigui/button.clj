@@ -19,9 +19,9 @@
   Button
   (draw-hover [this canvas] (b/box-draw-hover this canvas))
   (draw-clicked [this canvas] 
-    (let [[x y w h] (:coordinates this)] 
-      (b/box-draw-border canvas :blue 2 x y w h)
-                                  this)))
+    (b/box-draw-border this canvas :blue 2)
+    this))
+  
 (extend-protocol e/Actions
   Button
   (clicked [this] (e/button-clicked this)))

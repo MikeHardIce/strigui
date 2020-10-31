@@ -24,10 +24,9 @@
   (draw-hover [this canvas] 
     (when (not (b/focused? this))
       (b/box-draw-hover this canvas)))
-  (draw-clicked [this canvas] 
-    (let [[x y w h] (:coordinates this)] 
-      (b/box-draw-border canvas :blue 2 x y w h)
-                                  this)))
+  (draw-clicked [this canvas]  
+    (b/box-draw-border this canvas :blue 2)
+    this))
 
 (defn adjust-text [text char code]
   (if (and (= code :back_space) (> (count text) 0)) 

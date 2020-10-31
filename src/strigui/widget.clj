@@ -10,12 +10,18 @@
     (args [this] "the current args of the widget")
     (widget-name [this] "name of the widget")
     (draw [this canvas] "draw the widget, returns the widget on success")
-    (redraw [this canvas] "redraw the widget")
-    (hide [this canvas] "removes the widget from the canvas"))
+    (redraw [this canvas] "redraw the widget"))
 
 (def widgets (atom ()))
 
 (def ^:private widgets-to-redraw (atom #{}))
+
+(defn hide 
+  [^strigui.widget.Widget widget canvas]
+  (let [[x y w h] (coord widget)]
+    (c2d/with-canvas-> canvas
+      (c2d/set-color :white)
+      (c2d/rect x y w h))))
 
 (defn register 
   [canvas ^strigui.widget.Widget widget]
@@ -25,7 +31,7 @@
 (defn unregister
   [canvas ^strigui.widget.Widget widget]
   (when (hide widget canvas)
-    (swap! widgets #(filter (fn [item] (not= item %2))) widget)
+    (swap! widgets #(filter (fn [item] (not= item %2)) %1) widget)
     (swap! widgets-to-redraw #(s/difference %1 #{widget}))))
 
 (defmulti widget-event 
@@ -50,8 +56,7 @@
     (if (empty? btn-hits)
       (let [redrawn-buttons (map #(redraw % canvas) btns)]
         (swap! widgets-to-redraw #(s/difference %1 (set %2))  redrawn-buttons))
-      (do 
-        (println "bla")
+      (do
         (widget-event :mouse-moved canvas btn-hits)
         (swap! widgets-to-redraw  #(conj %1 %2) btn-hits))))
   state)
