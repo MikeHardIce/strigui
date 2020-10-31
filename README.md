@@ -8,7 +8,7 @@ Click events and "text modified" events are accessible via multi-methods.
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha"]]
+:dependencies [[strigui "0.0.1-alpha1"]]
 ```
 
 ```

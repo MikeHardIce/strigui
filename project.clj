@@ -1,4 +1,4 @@
-(defproject strigui "0.0.1-alpha"
+(defproject strigui "0.0.1-alpha1"
   :description "A simple GUI library."
   :url "https://github.com/OgreBelly/strigui"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
