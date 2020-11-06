@@ -39,4 +39,4 @@ In project.clj:
   (gui/info "Button A pressed"))
 ```
 
-![](resources/strigui-alpha.png)
+![](resources/strigui-alpha1.png)
