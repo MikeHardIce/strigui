@@ -8,7 +8,7 @@
 ;; TODO: check out alternatives to records
 (defrecord Input [name value coordinates args]
   wdg/Widget
-  (coord [this] (:coordinates this)) ;; could be a mapping if the record would look different
+  (coord [this] (:coordinates this))
   (value [this] (:value this))
   (args [this] (:args this))
   (widget-name [this] (:name this))
