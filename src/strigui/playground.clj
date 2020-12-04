@@ -1,6 +1,5 @@
 (ns strigui.playground
-  (:require [strigui.core :as gui]
-            [strigui.events :as e]))
+  (:require [strigui.core :as gui]))
 
 (defn main []
   (gui/window 600 600)
