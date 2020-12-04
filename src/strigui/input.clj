@@ -2,8 +2,7 @@
   (:require [clojure2d.core :as c2d]
             [clojure.set :as s]
             [strigui.widget :as wdg]
-            [strigui.box :as b]
-            [strigui.events :as e]))
+            [strigui.box :as b]))
 
 ;; TODO: check out alternatives to records
 (defrecord Input [name value coordinates args]
@@ -33,12 +32,12 @@
     (subs text 0 (- (count text) 1))
     (str text char)))
 
-(extend-protocol e/Actions
+(defn clicked [^strigui.input.Input inp] 
+  (b/swap-focused! inp))
+
+(extend-protocol b/Event
   Input
-  (clicked [this] 
-    (b/swap-focused! this))
   (key-pressed [this char code]
-    (e/input-modified this)
     (assoc this :value (adjust-text (:value this) char code))))
 
 (defn input
@@ -63,6 +62,6 @@
 (defmethod wdg/widget-event [strigui.input.Input :mouse-clicked]
   [_ canvas widget]
   (println "mouse clicked Input")
-  (e/clicked widget)
+  (clicked widget)
   (b/draw-clicked widget canvas)
   (swap! b/boxes-clicked #(conj %1 %2) widget))

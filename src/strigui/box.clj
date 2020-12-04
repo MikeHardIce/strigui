@@ -1,7 +1,6 @@
 (ns strigui.box
   (:require [clojure2d.core :as c2d]
             [clojure.set :as s]
-            [strigui.events :as e]
             [strigui.window :as wnd]
             [strigui.widget :as wdg]))
 
@@ -12,6 +11,10 @@
   "collection of functions around redrawing boxes, managing the border etc. ..."
   (draw-hover [this canvas] "draws the hover effect")
   (draw-clicked [this canvas] "draws the clicked effect"))
+
+(defprotocol Event
+  "collection of functions to hook into events"
+  (key-pressed [this char code] ""))
 
 (def ^:private default-font-size 15)
 
@@ -132,7 +135,7 @@
   [_ canvas & args]
   (let [char (first args)
         code (nth args 1)
-        new-focused-inputs (doall (map #(e/key-pressed %1 char code) @boxes-focused))]
+        new-focused-inputs (doall (map #(key-pressed %1 char code) @boxes-focused))]
     (when (not-empty new-focused-inputs)
       (doall (map #(wdg/unregister canvas %1) @boxes-focused))
       (doall (map #(wdg/register canvas %1) new-focused-inputs))

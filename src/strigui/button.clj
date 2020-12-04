@@ -1,10 +1,9 @@
 (ns strigui.button
   (:require [clojure2d.core :as c2d]
             [strigui.box :as b]
-            [strigui.events :as e]
             [strigui.widget :as wdg]))
 
-(defrecord Button [name value coordinates args]
+(defrecord Button [name value coordinates args events]
   wdg/Widget
   (coord [this] (:coordinates this)) ;; could be a mapping if the record would look different
   (value [this] (:value this))
@@ -21,10 +20,6 @@
   (draw-clicked [this canvas] 
     (b/box-draw-border this canvas :blue 2)
     this))
-  
-(extend-protocol e/Actions
-  Button
-  (clicked [this] (e/button-clicked this)))
 
 (defn button
   "canvas - clojure2d canvas
@@ -34,11 +29,14 @@
       x - x coordinate of top left corner
       y - y coordinate of top left corner
       color - vector consisting of [background-color font-color]
-      min-width - the minimum width"
-  [canvas name text args]
+      min-width - the minimum width
+    events - map of event functions
+      supported event atm :clicked"
+  ([canvas name text args] (button canvas name text args {}))
+  ([canvas name text args events]
   (let [arg [canvas text args]
         coord (apply b/box-coord arg)]
-    (Button. name text coord args)))
+    (Button. name text coord args events))))
 
 (defmethod wdg/widget-event [strigui.button.Button :mouse-moved] 
   [_ canvas widget]
@@ -46,6 +44,5 @@
 
 (defmethod wdg/widget-event [strigui.button.Button :mouse-clicked]
   [_ canvas widget]
-  (e/clicked widget)
   (b/draw-clicked widget canvas)
   (swap! b/boxes-clicked #(conj %1 %2) widget))

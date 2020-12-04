@@ -18,15 +18,6 @@
   (gui/stacks "stacks" '(5 1 8 2 0 3 0 5 7) {:x 150 :y 400})
   (gui/find-by-name "inp2")
   (gui/remove! "inp1")
-  (gui/update! "inp3" :value "Hello"))
-
-(defmethod e/button-clicked "a" [btn]
-  (gui/info "Button A pressed"))
-
-(defmethod e/input-modified "inp1" [inp]
-  ;;TODO: just make text a simple key (:text inp)
-  (gui/info (:value inp)))
-
-(defmethod e/input-modified "inp2" [inp]
-    ;;TODO: just make text a simple key (:text inp)
-  (gui/info (:value inp)))
+  (gui/update! "inp3" :value "Hello")
+  (gui/update! "a" :events {:mouse-clicked (fn [wdg]
+                                                (gui/info "Button A pressed"))}))

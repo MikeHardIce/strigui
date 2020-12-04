@@ -34,6 +34,11 @@
     (swap! widgets #(filter (fn [item] (not= item %2)) %1) widget)
     (swap! widgets-to-redraw #(s/difference %1 #{widget}))))
 
+(defn trigger-custom-event 
+  [action ^strigui.widget.Widget widget]
+  (when-let [event-fn (-> widget :events action)]
+    (event-fn widget)))
+
 (defmulti widget-event 
   (fn [action canvas widget] 
     (println (str "dispatch: " [(class widget) action]))
@@ -50,15 +55,16 @@
   (let [context @wnd/context
         canvas (:canvas context)
         window (:window context)
-        btn-hits (first (filter #(wnd/within? (coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))
+        btn (first (filter #(wnd/within? (coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))
         btns @widgets-to-redraw]
     (wnd/display-info context (str (c2d/mouse-pos window) " " @widgets-to-redraw))
-    (if (empty? btn-hits)
+    (if (empty? btn)
       (let [redrawn-buttons (map #(redraw % canvas) btns)]
         (swap! widgets-to-redraw #(s/difference %1 (set %2))  redrawn-buttons))
       (do
-        (widget-event :mouse-moved canvas btn-hits)
-        (swap! widgets-to-redraw  #(conj %1 %2) btn-hits))))
+        (widget-event :mouse-moved canvas btn)
+        (swap! widgets-to-redraw  #(conj %1 %2) btn)
+        (trigger-custom-event :mouse-moved btn))))
   state)
   
 ;; TODO: maybe its not necessary to go to @wnd/context directly
@@ -68,7 +74,9 @@
         window (:window context)
         btn (first (filter #(wnd/within? (coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))]
     (if (not-empty btn)
-      (widget-event :mouse-clicked canvas btn)
+      (do 
+        (widget-event :mouse-clicked canvas btn)
+        (trigger-custom-event :mouse-clicked btn))
       (widget-global-event :mouse-pressed-on-empty-space canvas)))
   state)
 
@@ -78,6 +86,9 @@
 
 (defmethod c2d/key-event ["main-window" :key-pressed] [event state]
   (let [char (c2d/key-char event)
-        code (c2d/key-code event)]
-    (widget-global-event :key-pressed (:canvas @wnd/context) char code))
+        code (c2d/key-code event)
+        window (:window @wnd/context)]
+    (widget-global-event :key-pressed (:canvas @wnd/context) char code)
+    (when-let [wdg (first (filter #(wnd/within? (coord %) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))]
+      (trigger-custom-event :key-pressed wdg)))
   state)
