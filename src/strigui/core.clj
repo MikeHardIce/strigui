@@ -16,10 +16,14 @@
     (wdg/unregister (:canvas @wnd/context) box-to-remove)))
 
 (defn update! 
+"name - name of the widget
+ key - either single key or vector of keys
+ value - the new property value"
   [name key value]
   (when-let [w (find-by-name name)]
     (wdg/unregister (:canvas @wnd/context) w )
-    (wdg/register (:canvas @wnd/context) (assoc w key value))))
+      (let [keys (if (seqable? key) key (vector key))]
+        (wdg/register (:canvas @wnd/context) (assoc-in w keys value)))))
 
 (defn window [width height]
   (wnd/create-window width height))

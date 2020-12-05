@@ -19,4 +19,6 @@
   (gui/remove! "inp1")
   (gui/update! "inp3" :value "Hello")
   (gui/update! "a" :events {:mouse-clicked (fn [wdg]
-                                                (gui/info "Button A pressed"))}))
+                                                (gui/info "Button A pressed"))})
+  (gui/update! "b" [:events :mouse-clicked] (fn [wdg]
+                                                (gui/info "Button B clicked"))))
