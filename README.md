@@ -8,7 +8,7 @@ Event actions can be attached to widgets at any time.
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha2"]]
+:dependencies [[strigui "0.0.1-alpha3"]]
 ```
 
 ```
@@ -25,10 +25,11 @@ In project.clj:
                                   :font-size 20 :font-style [:bold]})
   (gui/button "c" "Blah" {:x 50 :y 150 :color [:blue :yellow] :min-width 100})
   (gui/button "d" "Bye" {:x 50 :y 200 :color [:yellow :green] :min-width 100})
-  (gui/input "inp1" "" {:x 250 :y 50 :color [:white :red] :min-width 100})
-  (gui/input "inp2" "" {:x 250 :y 100 :color [:white :red] :min-width 100})
-  (gui/input "inp3" "last" {:x 250 :y 150 :color [:white :red] :min-width 100})
-  (gui/stacks "stacks" '(5 1 8 2 0 3 0 5 7) {:x 150 :y 400})
+  (gui/button "e" "t" {:x 50 :y 250 :color [:green :red]})
+  (gui/input "inp1" "" {:x 350 :y 50 :color [:white :red] :min-width 100})
+  (gui/input "inp2" "" {:x 350 :y 100 :color [:white :red] :min-width 100})
+  (gui/input "inp3" "last" {:x 350 :y 150 :color [:white :red] :min-width 100})
+  (gui/stacks "stacks" '(5 1 8 2 0 3 0 5 7) {:x 100 :y 400})
   (gui/find-by-name "inp2")
   (gui/remove! "inp1")
   (gui/update! "inp3" :value "Hello")
@@ -39,4 +40,4 @@ In project.clj:
 
 ```
 
-![](resources/strigui-alpha1.png)
+![](resources/strigui-alpha3.png)

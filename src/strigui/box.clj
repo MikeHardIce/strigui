@@ -25,8 +25,10 @@
 (defn box-coord 
   "Computes the full box coordinates.
   Returns the vector [x y border-width border-heigth]"
-  [canvas text {:keys [^long x ^long y ^long min-width]}]
-  (let [text-box (c2d/with-canvas-> canvas
+  [canvas text {:keys [^long x ^long y ^long min-width font-size]}]
+  (let [size (if (number? font-size) font-size default-font-size)
+        text-box (c2d/with-canvas-> canvas
+                  (c2d/set-font-attributes size)
                   (c2d/text-bounding-box text))
       text-width (nth text-box 2)
       text-heigth  (nth text-box 3)
@@ -41,7 +43,9 @@
   [canvas text {:keys [^long x ^long y color ^long min-width align font-style font-size]}]
   (let [style (if (empty? font-style) :bold (first font-style))
         size (if (number? font-size) font-size default-font-size)
-        [_ _ border-width border-heigth] (box-coord canvas text {:x x :y y :min-width min-width})
+        [_ _ border-width border-heigth] (box-coord canvas text {:x x :y y 
+                                                                 :min-width min-width 
+                                                                 :font-size font-size})
         [_ text-y text-width _] (c2d/with-canvas-> canvas
                           (c2d/set-font-attributes size style)
                           (c2d/text-bounding-box text))
