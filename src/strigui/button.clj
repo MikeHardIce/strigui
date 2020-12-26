@@ -3,9 +3,9 @@
             [strigui.box :as b]
             [strigui.widget :as wdg]))
 
-(defrecord Button [name value coordinates args events]
+(defrecord Button [name value args events]
   wdg/Widget
-  (coord [this] (:coordinates this)) ;; could be a mapping if the record would look different
+  (coord [this canvas] (apply b/box-coord [canvas (:value this) (:args this)])) ;; could be a mapping if the record would look different
   (value [this] (:value this))
   (args [this] (:args this))
   (widget-name [this] (:name this))
@@ -34,9 +34,7 @@
       supported event atm :clicked"
   ([canvas name text args] (button canvas name text args {}))
   ([canvas name text args events]
-  (let [arg [canvas text args]
-        coord (apply b/box-coord arg)]
-    (Button. name text coord args events))))
+    (Button. name text args events)))
 
 (defmethod wdg/widget-event [strigui.button.Button :mouse-moved] 
   [_ canvas widget]

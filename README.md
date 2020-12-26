@@ -8,7 +8,7 @@ Event actions can be attached to widgets at any time.
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha1"]]
+:dependencies [[strigui "0.0.1-alpha2"]]
 ```
 
 ```

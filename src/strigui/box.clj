@@ -33,6 +33,7 @@
       btn-w (* text-width 1.8)
       border-width (if (and (number? min-width) (< btn-w min-width)) min-width btn-w)
       border-heigth (* text-heigth 1.8)]
+      (println (str "x: " x " y: " y " width: " border-width " height: " border-heigth))
       [x y border-width border-heigth]))
 
 (defn box-draw-text 
@@ -49,6 +50,7 @@
         x-offset (if (and (number? min-width) (= min-width border-width))
                    (/ (- border-width text-width) 2.0)
                    (* border-width 0.12))]
+      (print (str "*box-draw-text* x: " x " y: " y " width: " border-width " height: " border-heigth))
       (c2d/with-canvas-> canvas
         (c2d/set-color background-color)
         (c2d/rect x y border-width border-heigth)
@@ -89,7 +91,7 @@
   ([^strigui.box.Box box canvas color] (box-draw-border box canvas color 1))
   ([^strigui.box.Box box canvas color strength] (box-draw-border box canvas color strength false))
   ([^strigui.box.Box box canvas color strength fill]
-  (let [[x y w h] (wdg/coord box)]
+  (let [[x y w h] (wdg/coord box canvas)]
     (box-border canvas color strength x y w h (not fill)))))
 
 (defn box-draw-hover 
@@ -99,8 +101,8 @@
 
 (defn box-redraw 
   [^strigui.box.Box box canvas] 
-  (let [coord (wdg/coord box)]
-    (when (not-empty coord)
+  (let [coord (wdg/coord box canvas)]
+    (when (seq coord)
     (box-draw-border box canvas :white 2)
       (box-draw-border box canvas :black 1)
       (wdg/draw box canvas)

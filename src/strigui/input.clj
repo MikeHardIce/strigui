@@ -5,9 +5,9 @@
             [strigui.box :as b]))
 
 ;; TODO: check out alternatives to records
-(defrecord Input [name value coordinates args]
+(defrecord Input [name value args]
   wdg/Widget
-  (coord [this] (:coordinates this))
+  (coord [this canvas] (apply b/box-coord [canvas (:value this) (:args this)]))
   (value [this] (:value this))
   (args [this] (:args this))
   (widget-name [this] (:name this))
@@ -50,9 +50,7 @@
       color - vector consisting of [background-color font-color]
       min-width - the minimum width"
   [canvas name text args]
-  (let [arg [canvas text args]
-        coord (apply b/box-coord arg)]
-    (Input. name text coord args)))
+    (Input. name text args))
 
 (defmethod wdg/widget-event [strigui.input.Input :mouse-moved] 
   [_ canvas widget]

@@ -12,14 +12,16 @@
       (c2d/set-color font-color)
       (c2d/text text x y alignment))))
     
-(defrecord Label [name value coordinates args]
+(defrecord Label [name value args]
   wdg/Widget
-    (coord [this] (:coordinates this))
+    (coord [this canvas] (let [[_ _ width height] (c2d/with-canvas-> canvas
+                                           (c2d/text-bounding-box (:value this)))]
+                                            [(:x (:args this)) (:y (:args this)) width height]))
     (value [this] (:value this))
     (args [this] (:args this))
     (widget-name [this] (:name this))
     (draw [this canvas] 
-      (let [[x y] (wdg/coord this)]
+      (let [[x y] (wdg/coord this canvas)]
         (create-label canvas (:value this) args)
         this))
     (redraw 
@@ -28,6 +30,4 @@
 
 (defn create 
   [canvas name text {:keys [x y color align font-style font-size] :as arg}]
-(let [[_ _ width height] (c2d/with-canvas-> canvas
-                            (c2d/text-bounding-box text))]
-  (Label. name text [x y width height] arg)))
+  (Label. name text arg))

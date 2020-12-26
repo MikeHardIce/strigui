@@ -39,14 +39,17 @@
               (draw-stack canvas (nth stack-vals cur-index) x-offset y (height stack-vals))
               (recur (+ x-offset 45) (inc cur-index)))))
 
-(defrecord Stack [name value coordinates args]
+(defrecord Stack [name value args]
   wdg/Widget
-    (coord [this] (:coordinates this))
+    (coord [this canvas] [(:x (:args this)) 
+                          (:y (:args this)) 
+                          (* (count (:value this)) width-per-stack) 
+                          (height (:value this))])
     (value [this] (:value this))
     (args [this] (:args this))
     (widget-name [this] (:name this))
     (draw [this canvas] 
-      (let [[x y _ _] (wdg/coord this)]
+      (let [[x y _ _] (wdg/coord this canvas)]
         (draw-stacks canvas (wdg/value this) x y)
         this))
     (redraw 
@@ -55,7 +58,4 @@
 
 (defn create
   [canvas name item-list args]
-  (let [width (* (count item-list) width-per-stack)
-        coord [(:x args) (:y args) width (height item-list)]
-        stack (Stack. name item-list coord args)]
-      stack))
+  (Stack. name item-list args))
