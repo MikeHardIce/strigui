@@ -43,8 +43,8 @@
   wdg/Widget
     (coord [this canvas] [(:x (:args this)) 
                           (:y (:args this)) 
-                          (* (count (:value this)) width-per-stack) 
-                          (height (:value this))])
+                          (+ (* (count (:value this)) width-per-stack) 35)
+                          (+ (height (:value this)) 20)])
     (value [this] (:value this))
     (args [this] (:args this))
     (widget-name [this] (:name this))

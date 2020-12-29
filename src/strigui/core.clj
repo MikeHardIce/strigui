@@ -46,7 +46,6 @@
      x - x coordinate of top left corner
      y - y coordinate of top left corner
      color - vector consisting of [font-color]
-     align - vector consisting of either :right :center :left
      font-style - vector consisting of either :bold :italic :italic-bold
      font-size - number"
   [name text args]

@@ -35,7 +35,6 @@
       btn-w (* text-width 1.8)
       border-width (if (and (number? min-width) (< btn-w min-width)) min-width btn-w)
       border-heigth (* text-heigth 1.8)]
-      (println (str "x: " x " y: " y " width: " border-width " height: " border-heigth))
       [x y border-width border-heigth]))
 
 (defn box-draw-text 
@@ -54,7 +53,6 @@
         x-offset (if (and (number? min-width) (= min-width border-width))
                    (/ (- border-width text-width) 2.0)
                    (* border-width 0.12))]
-      (print (str "*box-draw-text* x: " x " y: " y " width: " border-width " height: " border-heigth))
       (c2d/with-canvas-> canvas
         (c2d/set-color background-color)
         (c2d/rect x y border-width border-heigth)

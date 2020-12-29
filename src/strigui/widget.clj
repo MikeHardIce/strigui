@@ -19,9 +19,10 @@
 (defn hide 
   [^strigui.widget.Widget widget canvas]
   (let [[x y w h] (coord widget canvas)]
+    (println (str "x: " x " y: " y " w: " w " h: " h))
     (c2d/with-canvas-> canvas
       (c2d/set-color :white)
-      (c2d/rect (- x 2) (- y 2) (+ w 8) (+ h 8)))))
+      (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8)))))
 
 (defn register 
   [canvas ^strigui.widget.Widget widget]

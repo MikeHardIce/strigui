@@ -3,8 +3,8 @@
 
 (defn main []
   (gui/window 600 600)
-  (gui/label "welcome" "Welcome to Strigui" {:x 300 :y 20 
-                                              :color [:red] :align [:center]
+  (gui/label "welcome" "Welcome to Strigui" {:x 190 :y 20 
+                                              :color [:red]
                                               :font-size 20 :font-style [:bold]})
   (gui/button "a" "Hello World!" {:x 50 :y 50 :color [:green :red]})
   (gui/button "b" "How are you?" {:x 50 :y 100 :color [:red :blue] 
