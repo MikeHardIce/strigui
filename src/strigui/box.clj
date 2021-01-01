@@ -144,4 +144,6 @@
       (doall (map #(wdg/unregister canvas %1) @boxes-focused))
       (doall (map #(wdg/register canvas %1) new-focused-inputs))
       (doall (map #(box-draw-text canvas (wdg/value %1) (wdg/args %1)) new-focused-inputs))
-      (reset! boxes-focused (set new-focused-inputs)))))
+      (if (= code :enter)
+        (reset! boxes-focused #{})
+        (reset! boxes-focused (set new-focused-inputs))))))

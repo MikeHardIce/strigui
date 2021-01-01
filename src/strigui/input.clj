@@ -4,7 +4,6 @@
             [strigui.widget :as wdg]
             [strigui.box :as b]))
 
-;; TODO: check out alternatives to records
 (defrecord Input [name value args]
   wdg/Widget
   (coord [this canvas] (apply b/box-coord [canvas (:value this) (:args this)]))
@@ -54,12 +53,10 @@
 
 (defmethod wdg/widget-event [strigui.input.Input :mouse-moved] 
   [_ canvas widget]
-  (println "mouse moved Input")
   (b/draw-hover widget canvas))
 
 (defmethod wdg/widget-event [strigui.input.Input :mouse-clicked]
   [_ canvas widget]
-  (println "mouse clicked Input")
   (clicked widget)
   (b/draw-clicked widget canvas)
   (swap! b/boxes-clicked #(conj %1 %2) widget))
