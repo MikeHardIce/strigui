@@ -17,8 +17,8 @@ In project.clj:
 
 (defn main []
   (gui/window 600 600)
-  (gui/label "welcome" "Welcome to Strigui" {:x 300 :y 20 
-                                              :color [:red] :align [:center]
+  (gui/label "welcome" "Welcome to Strigui" {:x 190 :y 20 
+                                              :color [:red]
                                               :font-size 20 :font-style [:bold]})
   (gui/button "a" "Hello World!" {:x 50 :y 50 :color [:green :red]})
   (gui/button "b" "How are you?" {:x 50 :y 100 :color [:red :blue] 
@@ -36,7 +36,11 @@ In project.clj:
   (gui/update! "a" :events {:mouse-clicked (fn [wdg]
                                                 (gui/info "Button A pressed"))})
   (gui/update! "b" [:events :mouse-clicked] (fn [wdg]
-                                                (gui/info "Button B clicked"))))
+                                                (gui/info "Button B clicked")))
+  (gui/update! "inp3" [:events :key-pressed] (fn [wdg code]
+                                                (println (str "code in event: " code))
+                                                (when (= code :enter) 
+                                                  (gui/info "EEENNNTTTEERRR!!!")))))
 
 ```
 

@@ -22,4 +22,8 @@
   (gui/update! "a" :events {:mouse-clicked (fn [wdg]
                                                 (gui/info "Button A pressed"))})
   (gui/update! "b" [:events :mouse-clicked] (fn [wdg]
-                                                (gui/info "Button B clicked"))))
+                                                (gui/info "Button B clicked")))
+  (gui/update! "inp3" [:events :key-pressed] (fn [wdg code]
+                                                (println (str "code in event: " code))
+                                                (when (= code :enter) 
+                                                  (gui/info "EEENNNTTTEERRR!!!")))))

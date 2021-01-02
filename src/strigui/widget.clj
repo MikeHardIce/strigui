@@ -36,9 +36,9 @@
     (swap! widgets-to-redraw #(s/difference %1 #{widget}))))
 
 (defn trigger-custom-event 
-  [action ^strigui.widget.Widget widget]
+  [action ^strigui.widget.Widget widget & args]
   (when-let [event-fn (-> widget :events action)]
-    (event-fn widget)))
+    (apply event-fn widget args)))
 
 (defmulti widget-event 
   (fn [action canvas widget] 
@@ -92,5 +92,5 @@
         canvas (:canvas @wnd/context)]
     (widget-global-event :key-pressed canvas char code)
     (when-let [wdg (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))]
-      (trigger-custom-event :key-pressed wdg)))
+      (trigger-custom-event :key-pressed wdg code)))
   state)
