@@ -25,8 +25,11 @@
       (let [keys (if (seqable? key) key (vector key))]
         (wdg/register (:canvas @wnd/context) (assoc-in w keys value)))))
 
-(defn window [width height]
-  (wnd/create-window width height))
+(defn window!
+  "Initializes a new window or reuses an existing one"
+  ([wind] (wnd/init-window wind))
+  ([width height title]
+   (wnd/init-window width height title)))
 
 (defn button
   "name - name of the element

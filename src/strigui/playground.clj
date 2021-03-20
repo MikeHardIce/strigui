@@ -2,7 +2,7 @@
   (:require [strigui.core :as gui]))
 
 (defn main []
-  (gui/window 600 600)
+  (gui/window! 600 600 "Strigui")
   (gui/label "welcome" "Welcome to Strigui" {:x 190 :y 20 
                                               :color [:red]
                                               :font-size 20 :font-style [:bold]})

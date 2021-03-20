@@ -3,12 +3,26 @@
 
 (def context (atom {:canvas nil :window nil}))
 
-(defn create-window [width height]
-  (let [canvas (c2d/canvas width height)
-        new-context {:canvas canvas
-                     :window (c2d/show-window canvas "main-window")}]
-    (swap! context merge new-context)
-    new-context))
+(defn init-window
+  "Creates a window based on the canvas size. Alternatively, also accepts an already
+   existing window."
+  ([^clojure2d.core.Window window]
+   (let [title (:window-name window)
+         window (assoc window :window-name "main-window")]
+     ;; change the title of the underlying frame, so it doesn't mess with the
+     ;; window name used for the clojure2d events
+     (.setTitle (:frame window) title)
+     (swap! context merge {:canvas (c2d/get-canvas window) :window window})))
+  ([width height ^String title]
+   (let [canvas (c2d/canvas width height)
+         window (c2d/show-window canvas "main-window")
+         new-context {:canvas canvas
+                      :window window}]
+     ;; change the title of the underlying frame, so it doesn't mess with the
+     ;; window name used for the clojure2d events
+     (.setTitle (:frame window) title)
+     (swap! context merge new-context)
+     new-context)))
 
 (defn display-info [context text]
   (let [canvas (:canvas context)
