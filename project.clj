@@ -1,6 +1,6 @@
 (defproject strigui "0.0.1-alpha4"
   :description "A small GUI library."
-  :url "https://github.com/OgreBelly/strigui"
+  :url "https://github.com/MikeHardIce/strigui"
   :license {:name "MIT License"
             :url "none"
             :year 2020
