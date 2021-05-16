@@ -3,7 +3,7 @@
   :url "https://github.com/MikeHardIce/strigui"
   :license {:name "MIT License"
             :url "none"
-            :year 2020
+            :year 2021
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.10.3"]
                  [clojure2d "1.4.2"]]

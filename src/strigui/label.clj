@@ -11,28 +11,31 @@
       (c2d/set-font-attributes size style)
       (c2d/set-color font-color)
       (c2d/text text x y alignment))))
-    
+
+(defn coord-label
+  [lbl canvas]
+  (let [font-size (:font-size (:args lbl))
+                             size (if (number? font-size) font-size 11)
+                             [_ _ width height] (c2d/with-canvas-> canvas
+                                                  (c2d/set-font-attributes size)
+                                                  (c2d/text-bounding-box (:value lbl)))]
+                         [(-> lbl (:args) (:x))
+                          (-> lbl (:args) (:y) (- height))
+                          (* width 1.15) (* height 1.05)]))
+
+(defn draw-label
+  [lbl canvas]
+  (let [[x y] (coord-label lbl canvas)]
+    (create-label canvas (:value lbl) (:args lbl))
+    lbl))
+
 (defrecord Label [name value args]
   wdg/Widget
-    (coord [this canvas] (let [font-size (:font-size (:args this))
-                              size (if (number? font-size) font-size 11)
-                              [_ _ width height] (c2d/with-canvas-> canvas
-                                            (c2d/set-font-attributes size)
-                                            (c2d/text-bounding-box (:value this)))]
-                              [(-> this (:args) (:x))
-                               (-> this (:args) (:y) (- height)) 
-                               (* width 1.15) (* height 1.05)]))
-    (value [this] (:value this))
-    (args [this] (:args this))
-    (widget-name [this] (:name this))
-    (draw [this canvas] 
-      (let [[x y] (wdg/coord this canvas)]
-        (create-label canvas (:value this) args)
-        this))
-    (redraw 
-      [this canvas]
-      (wdg/draw this canvas)))
-
-(defn create 
-  [canvas name text {:keys [x y color font-style font-size] :as arg}]
-  (Label. name text arg))
+  (coord [this canvas] (coord-label this canvas))
+  (value [this] (:value this))
+  (args [this] (:args this))
+  (widget-name [this] (:name this))
+  (draw [this canvas] (draw-label this canvas))
+  (redraw
+    [this canvas]
+    (draw-label this canvas)))

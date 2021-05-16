@@ -1,10 +1,15 @@
 (ns strigui.core
-  (:require [strigui.button :as btn]
-            [strigui.label :as lbl]
-            [strigui.input :as inp]
-            [strigui.stacks :as st]
-            [strigui.window :as wnd]
-            [strigui.widget :as wdg]))
+  (:require
+   [strigui.button]
+   [strigui.label]
+   [strigui.input]
+   [strigui.stacks]
+   [strigui.window :as wnd]
+   [strigui.widget :as wdg])
+  (:import [strigui.button Button]
+           [strigui.label Label]
+           [strigui.input Input]
+           [strigui.stacks Stack]))
 
 (defn find-by-name 
   [name]
@@ -31,6 +36,10 @@
   ([width height title]
    (wnd/init-window width height title)))
 
+(defn create 
+  [^strigui.widget.Widget widget]
+  (wdg/register (:canvas @wnd/context) widget))
+
 (defn button
   "name - name of the element
   text - text displayed inside the button
@@ -40,7 +49,7 @@
      color - vector consisting of [background-color font-color]
      min-width - the minimum width"
   [name text args]
-  (wdg/register (:canvas @wnd/context) (btn/button (:canvas @wnd/context) name text args)))
+  (create (Button. name text args {})))
 
 (defn label
    "name - name of the element
@@ -52,7 +61,7 @@
      font-style - vector consisting of either :bold :italic :italic-bold
      font-size - number"
   [name text args]
-  (wdg/register (:canvas @wnd/context) (lbl/create (:canvas @wnd/context) name text args)))
+  (create (Label. name text args)))
 
 (defn input
   "name - name of the element
@@ -63,7 +72,7 @@
     color - vector consisting of [background-color font-color]
     min-width - the minimum width"
   [name text args]
-  (wdg/register (:canvas @wnd/context) (inp/input (:canvas @wnd/context) name text args)))
+  (create (Input. name text args)))
 
 (defn stacks
   "name - name of the elemnt
@@ -75,7 +84,7 @@
     x - x coordinate of top left corner
     y - y coordinate of top left corner"
   [name item-list args]
-  (wdg/register (:canvas @wnd/context) (st/create (:canvas @wnd/context) name item-list args)))
+  (create (Stack. name item-list args)))
 
 (defn info 
   [text]
