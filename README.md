@@ -25,7 +25,7 @@ Create the main window via
 (gui/window 600 600)
 ```
 
-Basic widgets like button, input and label can be created via
+Basic widgets like buttons, input boxes and labels can be created via
 
 ```
 (gui/label "welcome" "Welcome to Strigui" {:x 190 :y 100
@@ -34,7 +34,7 @@ Basic widgets like button, input and label can be created via
 (gui/button "click" "Click me" {:x 400 :y 200 :color [:white :black]})
 (gui/input "input" "" {:x 100 :y 150 :color [:white :red] :min-width 420})
 ```
-The parameters are the name of the widget, the value and a map that position it on the window or for setting the colors.
+The parameters are the name of the widget, the value and a map for the position and optional settings like color etc. ...
 The name is used when widgets are modified.
 
 Events can be attached by using the chosen widget name.
