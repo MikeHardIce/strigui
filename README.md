@@ -22,7 +22,7 @@ You need the core namespace.
 Create the main window via
 
 ```
-(gui/window 600 600)
+(gui/window! 600 600)
 ```
 
 Basic widgets like buttons, input boxes and labels can be created via
