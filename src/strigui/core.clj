@@ -40,6 +40,10 @@
   [^strigui.widget.Widget widget]
   (wdg/register (:canvas @wnd/context) widget))
 
+(defn close-window
+  []
+  (wnd/close-window (:window @wnd/context)))
+
 (defn button
   "name - name of the element
   text - text displayed inside the button

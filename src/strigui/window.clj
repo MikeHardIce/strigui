@@ -1,5 +1,6 @@
 (ns strigui.window
-  (:require [clojure2d.core :as c2d]))
+  (:require [clojure2d.core :as c2d])
+  (:import [javax.swing JFrame]))
 
 (def context (atom {:canvas nil :window nil}))
 
@@ -21,8 +22,13 @@
      ;; change the title of the underlying frame, so it doesn't mess with the
      ;; window name used for the clojure2d events
      (.setTitle (:frame window) title)
+     (.setDefaultCloseOperation (:frame window) (. JFrame EXIT_ON_CLOSE))
      (swap! context merge new-context)
      new-context)))
+
+(defn close-window
+  [^clojure2d.core.Window window]
+  (c2d/close-window window))
 
 (defn display-info [context text]
   (let [canvas (:canvas context)
