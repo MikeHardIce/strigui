@@ -3,13 +3,11 @@
    [strigui.button]
    [strigui.label]
    [strigui.input]
-   [strigui.stacks]
    [strigui.window :as wnd]
    [strigui.widget :as wdg])
   (:import [strigui.button Button]
            [strigui.label Label]
-           [strigui.input Input]
-           [strigui.stacks Stack]))
+           [strigui.input Input]))
 
 (defn find-by-name 
   [name]

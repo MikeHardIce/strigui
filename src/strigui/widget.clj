@@ -19,7 +19,6 @@
 (defn hide 
   [^strigui.widget.Widget widget canvas]
   (let [[x y w h] (coord widget canvas)]
-    (println (str "x: " x " y: " y " w: " w " h: " h))
     (c2d/with-canvas-> canvas
       (c2d/set-color :white)
       (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8)))))
@@ -42,10 +41,9 @@
 
 (defmulti widget-event 
   (fn [action canvas widget] 
-    (println (str "dispatch: " [(class widget) action]))
     [(class widget) action]))
 
-(defmethod widget-event :default [action canvas widget] (println (str "default " action " " (class widget))))
+(defmethod widget-event :default [action canvas widget] nil)
 
 (defmulti widget-global-event
   (fn [action canvas & args] action))
