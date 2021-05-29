@@ -1,7 +1,6 @@
 (ns strigui.box
   (:require [clojure2d.core :as c2d]
             [clojure.set :as s]
-            [strigui.window :as wnd]
             [strigui.widget :as wdg]))
 
 (set! *warn-on-reflection* true)

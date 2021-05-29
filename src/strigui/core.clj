@@ -76,18 +76,6 @@
   [name text args]
   (create (Input. name text args)))
 
-(defn stacks
-  "name - name of the elemnt
-  item-list - list consisting of the number of
-              items on each stack for example:
-              (5 4 5) for 3 stacks with 5 on the 1st,
-                4 on the 2nd and 5 and the last stack
-  args - map of:
-    x - x coordinate of top left corner
-    y - y coordinate of top left corner"
-  [name item-list args]
-  (create (Stack. name item-list args)))
-
 (defn info 
   [text]
   (wnd/display-info @wnd/context text))
