@@ -86,9 +86,13 @@
 (defmethod c2d/key-event ["main-window" :key-pressed] [event state]
   (let [char (c2d/key-char event)
         code (c2d/key-code event)
-        window (:window @wnd/context)
+        ;;window (:window @wnd/context)
         canvas (:canvas @wnd/context)]
     (widget-global-event :key-pressed canvas char code)
-    (when-let [wdg (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))]
-      (trigger-custom-event :key-pressed wdg code)))
+    ;; (when-let [wdg (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))]
+    ;;   (trigger-custom-event :key-pressed wdg code))
+    (loop [widgets @widgets]
+      (when (seq widgets)
+        (trigger-custom-event :key-pressed (first widgets) code)
+        (recur (rest widgets)))))
   state)

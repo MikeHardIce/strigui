@@ -49,7 +49,11 @@
       color - vector consisting of [background-color font-color]
       min-width - the minimum width"
   [canvas name text args]
-    (Input. name text args))
+    (let [input (Input. name text args)]
+      (when (:focus args)
+        (clicked input)
+        (b/draw-clicked input canvas))
+      input))
 
 (defmethod wdg/widget-event [strigui.input.Input :mouse-moved] 
   [_ canvas widget]

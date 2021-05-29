@@ -1,6 +1,5 @@
 (ns strigui.box
   (:require [clojure2d.core :as c2d]
-            [clojure.set :as s]
             [strigui.widget :as wdg]))
 
 (set! *warn-on-reflection* true)
@@ -19,7 +18,7 @@
 
 (def boxes-clicked (atom #{}))
 
-(def boxes-focused (atom #{}))
+(def box-focused (atom nil))
 
 (defn box-coord 
   "Computes the full box coordinates.
@@ -115,15 +114,12 @@
 
 (defn swap-focused!
   [box]
-  (let [focus @boxes-focused
-        new (if (contains? focus box)
-                (s/difference focus #{box})
-                (s/union focus #{box}))] 
-    (reset! boxes-focused new)))
+  (reset! box-focused box))
 
 (defn focused? 
   [box]
-  (contains? @boxes-focused box))
+  (when (= box @box-focused)
+    @box-focused))
 
 (defmethod wdg/widget-global-event :mouse-released 
   [_ canvas & args]
@@ -132,17 +128,20 @@
 
 (defmethod wdg/widget-global-event :mouse-pressed-on-empty-space
   [_ canvas & args]
-  (reset! boxes-focused #{}))
+  (reset! box-focused nil))
 
 (defmethod wdg/widget-global-event :key-pressed
   [_ canvas & args]
-  (let [char (first args)
-        code (nth args 1)
-        new-focused-inputs (doall (map #(key-pressed %1 char code) @boxes-focused))]
-    (when (not-empty new-focused-inputs)
-      (doall (map #(wdg/unregister canvas %1) @boxes-focused))
-      (doall (map #(wdg/register canvas %1) new-focused-inputs))
-      (doall (map #(box-draw-text canvas (wdg/value %1) (wdg/args %1)) new-focused-inputs))
-      (if (= code :enter)
-        (reset! boxes-focused #{})
-        (reset! boxes-focused (set new-focused-inputs))))))
+  (when-let [focused @box-focused]
+    (let [char (first args)
+          code (nth args 1)
+          box-with-new-input (key-pressed focused char code)]
+      (when box-with-new-input
+        (wdg/unregister canvas focused)
+        (wdg/register canvas box-with-new-input)
+        (box-draw-text canvas (wdg/value box-with-new-input) (wdg/args box-with-new-input))
+        (if (= code :enter)
+          (reset! box-focused nil)
+          (do 
+            (reset! box-focused box-with-new-input)
+            (draw-clicked @box-focused canvas)))))))

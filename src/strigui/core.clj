@@ -2,7 +2,7 @@
   (:require
    [strigui.button]
    [strigui.label]
-   [strigui.input]
+   [strigui.input :as inp]
    [strigui.window :as wnd]
    [strigui.widget :as wdg])
   (:import [strigui.button Button]
@@ -74,7 +74,7 @@
     color - vector consisting of [background-color font-color]
     min-width - the minimum width"
   [name text args]
-  (create (Input. name text args)))
+  (create (inp/input (:canvas @wnd/context) name text args)))
 
 (defn info 
   [text]
