@@ -87,3 +87,9 @@ A custom widget could be invoked via
 As mentioned in the begining, https://github.com/MikeHardIce/Dame is another example.
 
 The game board and the 2 buttons are strigui widgets.
+
+
+## Releasing standalone apps:
+
+When releasing an app which uses strigui, delete the /org/bytedeco directory inside your jar file.
+This will make your jar about 960 mb smaller. I believe that is being used in clojure2d when working with images. There must be an alternative way skipping this dependency by default.
