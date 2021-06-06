@@ -56,7 +56,7 @@
         window (:window context)
         btn (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))
         btns @widgets-to-redraw]
-    (wnd/display-info context (str (c2d/mouse-pos window) " " @widgets-to-redraw))
+    ;;(wnd/display-info context (str (c2d/mouse-pos window) " " @widgets-to-redraw))
     (if (empty? btn)
       (let [redrawn-buttons (map #(redraw % canvas) btns)]
         (swap! widgets-to-redraw #(s/difference %1 (set %2))  redrawn-buttons))

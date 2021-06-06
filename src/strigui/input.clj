@@ -4,6 +4,9 @@
             [strigui.widget :as wdg]
             [strigui.box :as b]))
 
+(defonce dont-display [:shift :alt :alt_graph :left :right :up
+                       :down :tab])
+
 (defrecord Input [name value args]
   wdg/Widget
   (coord [this canvas] (apply b/box-coord [canvas (:value this) (:args this)]))
@@ -37,7 +40,9 @@
 (extend-protocol b/Event
   Input
   (key-pressed [this char code]
-    (assoc this :value (adjust-text (:value this) char code))))
+    (if (some #(= code %) dont-display)
+      this
+      (assoc this :value (adjust-text (:value this) char code)))))
 
 (defn input
   "canvas - clojure2d canvas

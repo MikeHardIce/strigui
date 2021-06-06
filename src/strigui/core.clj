@@ -29,11 +29,19 @@
         (wdg/register (:canvas @wnd/context) (assoc-in w keys value)))))
 
 (defn window!
-  "Initializes a new window or reuses an existing one"
+  "Initializes a new window or reuses an existing one
+   wind - an already existing windows instance (experimental)
+   width
+   height
+   fps -  frames per second
+   quality - rendering quality :low :mid :high :highest"
   ([wind] (wnd/init-window wind))
   ([width height title]
-   (wnd/init-window width height title)))
-
+   (wnd/init-window width height title))
+  ([width height title ^Integer fps quality]
+   {:pre [(> fps 0) (some #(= % quality) [:low :mid :high :highest])]}
+   (wnd/init-window width height title fps quality)))
+  
 (defn create 
   [^strigui.widget.Widget widget]
   (wdg/register (:canvas @wnd/context) widget))

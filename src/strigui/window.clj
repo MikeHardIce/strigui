@@ -14,9 +14,10 @@
      ;; window name used for the clojure2d events
      (.setTitle (:frame window) title)
      (swap! context merge {:canvas (c2d/get-canvas window) :window window})))
-  ([width height ^String title]
-   (let [canvas (c2d/canvas width height)
-         window (c2d/show-window canvas "main-window")
+  ([width height ^String title] (init-window width height title 10 :mid))
+  ([width height ^String title fps quality]
+   (let [canvas (c2d/canvas width height quality)
+         window (c2d/show-window canvas "main-window" width height fps)
          new-context {:canvas canvas
                       :window window}]
      ;; change the title of the underlying frame, so it doesn't mess with the
