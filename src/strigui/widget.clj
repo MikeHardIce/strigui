@@ -16,6 +16,30 @@
 
 (def ^:private widgets-to-redraw (atom #{}))
 
+(defn within?
+  "Checks wheter the point (x y) is within the given coord
+   coord - vector [x-coord y-coord width height]
+   x - x-coord of point to check
+   y - y-coord of point to check"
+  ([coord x y]
+  (and (>= x (first coord))
+       (>= y (nth coord 1))
+       (<= x (+ (first coord) (nth coord 2)))
+       (<= y (+ (nth coord 1) (nth coord 3)))))
+  ([coord1 coord2]
+   (let [[x2 y2 w2 h2] coord2
+         x2+w2 (+ x2 w2)
+         y2+h2 (+ y2 h2)]
+     (or (within? coord1 x2 y2)
+         (within? coord1 x2+w2 y2+h2)
+         (within? coord1 x2 y2+h2)
+         (within? coord1 x2+w2 y2)))))
+
+(defn intersect?
+  [coord1 coord2]
+  (or (within? coord1 coord2) 
+      (within? coord2 coord1)))
+
 (defn hide 
   [^strigui.widget.Widget widget canvas]
   (let [[x y w h] (coord widget canvas)]
@@ -54,16 +78,16 @@
   (let [context @wnd/context
         canvas (:canvas context)
         window (:window context)
-        btn (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))
-        btns @widgets-to-redraw]
-    ;;(wnd/display-info context (str (c2d/mouse-pos window) " " @widgets-to-redraw))
-    (if (empty? btn)
-      (let [redrawn-buttons (map #(redraw % canvas) btns)]
+        widget (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))
+        widgets (sort-by #(-> % :args :z) @widgets-to-redraw)]
+    (println (map #(str " " (:name %)) widgets))
+      (let [redrawn-buttons (map #(redraw % canvas) widgets)]
         (swap! widgets-to-redraw #(s/difference %1 (set %2))  redrawn-buttons))
-      (do
-        (widget-event :mouse-moved canvas btn)
-        (swap! widgets-to-redraw  #(conj %1 %2) btn)
-        (trigger-custom-event :mouse-moved btn))))
+    (when (seq widget)  ;; TODO
+      (let [neighbouring-widgets (set (filter #(intersect? (coord widget canvas) (coord % canvas)) @widgets))]
+        (swap! widgets-to-redraw s/union neighbouring-widgets))
+      (widget-event :mouse-moved canvas widget)
+      (trigger-custom-event :mouse-moved widget)))
   state)
   
 ;; TODO: maybe its not necessary to go to @wnd/context directly
@@ -86,11 +110,8 @@
 (defmethod c2d/key-event ["main-window" :key-pressed] [event state]
   (let [char (c2d/key-char event)
         code (c2d/key-code event)
-        ;;window (:window @wnd/context)
         canvas (:canvas @wnd/context)]
     (widget-global-event :key-pressed canvas char code)
-    ;; (when-let [wdg (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))]
-    ;;   (trigger-custom-event :key-pressed wdg code))
     (loop [widgets @widgets]
       (when (seq widgets)
         (trigger-custom-event :key-pressed (first widgets) code)
