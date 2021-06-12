@@ -79,12 +79,13 @@
         canvas (:canvas context)
         window (:window context)
         widget (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))
-        widgets (sort-by #(-> % :args :z) @widgets-to-redraw)]
-    (println (map #(str " " (:name %)) widgets))
-      (let [redrawn-buttons (map #(redraw % canvas) widgets)]
+        redraw-widgets (sort-by #(-> % :args :z) @widgets-to-redraw)]
+      (let [redrawn-buttons (map #(redraw % canvas) redraw-widgets)]
         (swap! widgets-to-redraw #(s/difference %1 (set %2))  redrawn-buttons))
-    (when (seq widget)  ;; TODO
-      (let [neighbouring-widgets (set (filter #(intersect? (coord widget canvas) (coord % canvas)) @widgets))]
+    (when (seq widget)
+      (let [widget-coords (coord widget canvas)
+            neighbouring-widgets (set (filter #(and (intersect? widget-coords (coord % canvas))
+                                                    (not= widget %)) @widgets))]
         (swap! widgets-to-redraw s/union neighbouring-widgets))
       (widget-event :mouse-moved canvas widget)
       (trigger-custom-event :mouse-moved widget)))
