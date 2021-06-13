@@ -13,9 +13,11 @@
   (value [this] (:value this))
   (args [this] (:args this))
   (widget-name [this] (:name this))
-  (redraw [this canvas] 
-    (when (not (b/focused? this))
-      (b/box-redraw this canvas)))
+  (redraw [this canvas]
+    ;; (when (not (b/focused? this))
+    ;;   (b/box-redraw this canvas))
+          (b/box-draw-border this canvas)
+          (b/box-draw canvas (:value this) (:args this)))
   (draw [this canvas]
     (b/box-draw-border this canvas) 
     (b/box-draw canvas (:value this) (:args this))))
@@ -40,7 +42,9 @@
 (extend-protocol b/Event
   Input
   (key-pressed [this char code]
-    (if (some #(= code %) dont-display)
+    (println code)
+    (if (or (some #(= code %) dont-display)
+            (and (= code :back_space) (< (count (:value this)) 1)))
       this
       (assoc this :value (adjust-text (:value this) char code)))))
 
