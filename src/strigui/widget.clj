@@ -16,6 +16,8 @@
 
 (def ^:private widgets-to-redraw (atom #{}))
 
+(def ^:private previous-mouse-position (atom nil))
+
 (defn within?
   "Checks wheter the point (x y) is within the given coord
    coord - vector [x-coord y-coord width height]
@@ -76,8 +78,13 @@
 
 (defn- handle-widget-dragging 
   [canvas ^strigui.widget.Widget widget [x y]]
-  (unregister canvas widget)
-  (register canvas (update widget :args #(merge % {:x x :y y}))))
+  (when-let [old-position @previous-mouse-position]
+    (let [dx (- x (first old-position))
+          dy (- y (second old-position))
+          new-x (+ (-> widget :args :x) dx)
+          new-y (+ (-> widget :args :y) dy)]
+      (unregister canvas widget)
+      (register canvas (update widget :args #(merge % {:x new-x :y new-y}))))))
 
 (defn handle-mouse-moved 
   []
@@ -89,8 +96,6 @@
     (let [redrawn-buttons (map #(redraw % canvas) redraw-widgets)]
       (swap! widgets-to-redraw #(s/difference %1 (set %2))  redrawn-buttons))
     (when (seq widget)
-      (println "Mouse pressed: " (c2d/mouse-pressed? window) \newline
-               "can-move? " (-> widget :args :can-move?))
       (when (and (c2d/mouse-pressed? window) (-> widget :args :can-move?))
         (handle-widget-dragging canvas widget [(c2d/mouse-x window) (c2d/mouse-y window)])
         (widget-event :widget-moved canvas widget)
@@ -104,6 +109,9 @@
 
 (defmethod c2d/mouse-event ["main-window" :mouse-dragged] [event state]
   (handle-mouse-moved)
+  (let [context @wnd/context
+        window (:window context)]
+    (reset! previous-mouse-position [(c2d/mouse-x window) (c2d/mouse-y window)]))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-moved] [event state]
@@ -115,18 +123,17 @@
   (let [context @wnd/context
         canvas (:canvas context)
         window (:window context)
-        btn (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))]
-    (if (not-empty btn)
+        widget (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))]
+    (if (seq widget)
       (do 
-        (println "Mouse pressed: " (c2d/mouse-pressed? window) \newline
-                 "can-move? " (-> btn :args :can-move?))
-        (widget-event :mouse-clicked canvas btn)
-        (trigger-custom-event :mouse-clicked btn))
+        (widget-event :mouse-clicked canvas widget)
+        (trigger-custom-event :mouse-clicked widget))
       (widget-global-event :mouse-pressed-on-empty-space canvas)))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
   (widget-global-event :mouse-released (:canvas @wnd/context))
+  (reset! previous-mouse-position nil)
   state)
 
 (defmethod c2d/key-event ["main-window" :key-pressed] [event state]
