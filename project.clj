@@ -6,5 +6,5 @@
             :year 2021
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.10.3"]
-                 [clojure2d "1.4.2"]]
+                 [clojure2d "1.4.3"]]
   :repl-options {:init-ns strigui.playground})
