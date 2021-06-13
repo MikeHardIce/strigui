@@ -42,7 +42,6 @@
 (extend-protocol b/Event
   Input
   (key-pressed [this char code]
-    (println code)
     (if (or (some #(= code %) dont-display)
             (and (= code :back_space) (< (count (:value this)) 1)))
       this
