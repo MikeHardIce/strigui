@@ -63,9 +63,13 @@
         (b/draw-clicked input canvas))
       input))
 
-(defmethod wdg/widget-event [strigui.input.Input :mouse-moved] 
+(defmethod wdg/widget-event [strigui.input.Input :widget-focus-in]
   [_ canvas widget]
   (b/draw-hover widget canvas))
+
+(defmethod wdg/widget-event [strigui.input.Input :widget-focus-out]
+  [_ canvas widget]
+  (b/box-remove-drawn widget canvas))
 
 (defmethod wdg/widget-event [strigui.input.Input :mouse-clicked]
   [_ canvas widget]

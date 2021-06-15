@@ -110,7 +110,7 @@
 
 (defn box-remove-drawn 
   [^strigui.box.Box box canvas]
-  (box-draw-border box canvas :white 1 true))
+  (box-draw-border box canvas :white 1 false))
 
 (defn swap-focused!
   [box]
@@ -130,6 +130,7 @@
   [_ canvas & args]
   (reset! box-focused nil))
 
+;; TODO: should remove global events
 (defmethod wdg/widget-global-event :key-pressed
   [_ canvas & args]
   (when-let [focused @box-focused]

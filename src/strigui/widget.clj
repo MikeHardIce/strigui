@@ -18,6 +18,8 @@
 
 (def ^:private previous-mouse-position (atom nil))
 
+(def ^:private widget-focused (atom nil))
+
 (defn within?
   "Checks wheter the point (x y) is within the given coord
    coord - vector [x-coord y-coord width height]
@@ -91,10 +93,20 @@
   (let [context @wnd/context
         canvas (:canvas context)
         window (:window context)
-        widget (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))
+        widget (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) (sort-by #(-> % :args :z) @widgets)))
         redraw-widgets (sort-by #(-> % :args :z) @widgets-to-redraw)]
     (let [redrawn-buttons (map #(redraw % canvas) redraw-widgets)]
       (swap! widgets-to-redraw #(s/difference %1 (set %2))  redrawn-buttons))
+    (when (not= widget @widget-focused)
+      (let [focused-widget @widget-focused]
+        (reset! widget-focused widget)
+        (if (seq widget)
+          (do
+            (widget-event :widget-focus-in canvas widget)
+            (trigger-custom-event :widget-focus-in widget))
+          (do
+            (widget-event :widget-focus-out canvas focused-widget)
+            (trigger-custom-event :widget-focus-out focused-widget)))))
     (when (seq widget)
       (when (and (c2d/mouse-pressed? window) (-> widget :args :can-move?))
         (handle-widget-dragging canvas widget [(c2d/mouse-x window) (c2d/mouse-y window)])

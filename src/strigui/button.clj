@@ -20,9 +20,13 @@
     (b/box-draw-border this canvas :blue 2)
     this))
 
-(defmethod wdg/widget-event [strigui.button.Button :mouse-moved] 
+(defmethod wdg/widget-event [strigui.button.Button :widget-focus-in] 
   [_ canvas widget]
   (b/draw-hover widget canvas))
+
+(defmethod wdg/widget-event [strigui.button.Button :widget-focus-out]
+  [_ canvas widget]
+  (b/box-remove-drawn widget canvas))
 
 (defmethod wdg/widget-event [strigui.button.Button :mouse-clicked]
   [_ canvas widget]
