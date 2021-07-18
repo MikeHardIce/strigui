@@ -1,7 +1,5 @@
 (ns strigui.input
-  (:require [clojure2d.core :as c2d]
-            [clojure.set :as s]
-            [strigui.widget :as wdg]
+  (:require [strigui.widget :as wdg]
             [strigui.box :as b]))
 
 (defonce dont-display [:shift :alt :alt_graph :left :right :up
@@ -14,7 +12,7 @@
   (args [this] (:args this))
   (widget-name [this] (:name this))
   (redraw [this canvas]
-    ;; (when (not (b/focused? this))
+    ;; (when (not (b/selected? this))
     ;;   (b/box-redraw this canvas))
           (b/box-draw-border this canvas)
           (b/box-draw canvas (:value this) (:args this)))
@@ -25,7 +23,7 @@
 (extend-protocol b/Box
   Input
   (draw-hover [this canvas] 
-    (when (not (b/focused? this))
+    (when (not (wdg/selected? this))
       (b/box-draw-hover this canvas)))
   (draw-clicked [this canvas]  
     (b/box-draw-border this canvas :blue 2)
@@ -37,7 +35,7 @@
     (str text char)))
 
 (defn clicked [^strigui.input.Input inp] 
-  (b/swap-focused! inp))
+  (reset! wdg/selected-widget inp))
 
 (extend-protocol b/Event
   Input
@@ -58,7 +56,7 @@
       min-width - the minimum width"
   [canvas name text args]
     (let [input (Input. name text args)]
-      (when (:focus args)
+      (when (:selected? args)
         (clicked input)
         (b/draw-clicked input canvas))
       input))
@@ -76,3 +74,7 @@
   (clicked widget)
   (b/draw-clicked widget canvas)
   (swap! b/boxes-clicked #(conj %1 %2) widget))
+
+(defmethod wdg/widget-event [strigui.input.Input :key-pressed]
+  [_ canvas widget char code]
+  (b/handle-key-pressed canvas widget char code))

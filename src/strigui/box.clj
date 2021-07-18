@@ -18,8 +18,6 @@
 
 (def boxes-clicked (atom #{}))
 
-(def box-focused (atom nil))
-
 (defn box-coord 
   "Computes the full box coordinates.
   Returns the vector [x y border-width border-heigth]"
@@ -110,39 +108,25 @@
 
 (defn box-remove-drawn 
   [^strigui.box.Box box canvas]
-  (box-draw-border box canvas :white 1 false))
-
-(defn swap-focused!
-  [box]
-  (reset! box-focused box))
-
-(defn focused? 
-  [box]
-  (when (= box @box-focused)
-    @box-focused))
+  (box-draw-border box canvas :white 2 false)
+  (box-draw-border box canvas :black 1 false))
 
 (defmethod wdg/widget-global-event :mouse-released 
   [_ canvas & args]
   (map #(draw-hover %1 canvas) @boxes-clicked)
   (reset! boxes-clicked  #{}))
 
-(defmethod wdg/widget-global-event :mouse-pressed-on-empty-space
-  [_ canvas & args]
-  (reset! box-focused nil))
-
 ;; TODO: should remove global events
-(defmethod wdg/widget-global-event :key-pressed
-  [_ canvas & args]
-  (when-let [focused @box-focused]
-    (let [char (first args)
-          code (nth args 1)
-          box-with-new-input (key-pressed focused char code)]
+(defn handle-key-pressed
+  [canvas widget char code]
+  (when (wdg/selected? widget)
+    (let [box-with-new-input (key-pressed widget char code)]
       (when box-with-new-input
-        (wdg/unregister canvas focused)
+        (wdg/unregister canvas widget)
         (wdg/register canvas box-with-new-input)
         (box-draw-text canvas (wdg/value box-with-new-input) (wdg/args box-with-new-input))
         (if (= code :enter)
-          (reset! box-focused nil)
+          (reset! wdg/selected-widget nil)
           (do 
-            (reset! box-focused box-with-new-input)
-            (draw-clicked @box-focused canvas)))))))
+            (reset! wdg/selected-widget box-with-new-input)
+            (draw-clicked @wdg/selected-widget canvas)))))))
