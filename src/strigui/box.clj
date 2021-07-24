@@ -126,7 +126,7 @@
         (wdg/register canvas box-with-new-input)
         (box-draw-text canvas (wdg/value box-with-new-input) (wdg/args box-with-new-input))
         (if (= code :enter)
-          (reset! wdg/selected-widget nil)
+          (swap! wdg/widget-props assoc :selected nil)
           (do 
-            (reset! wdg/selected-widget box-with-new-input)
-            (draw-clicked @wdg/selected-widget canvas)))))))
+            (swap! wdg/widget-props assoc :selected box-with-new-input)
+            (draw-clicked (:selected @wdg/widget-props) canvas)))))))

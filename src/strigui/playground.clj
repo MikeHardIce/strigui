@@ -12,7 +12,14 @@
   (gui/input "input1" "" {:x 100 :y 200 :color [:white :red] :min-width 420})
   (gui/update! "click" [:events :mouse-clicked] (fn [wdg]
                                                   (gui/close-window)))
-  (gui/update! "input" [:args :key-pressed] (fn [wdg code]
-                                              (println "Input | Code: " code " Value: " (:value wdg) " Widget: " wdg)))
-  (gui/update! "input1" [:args :key-pressed] (fn [wdg code]
-                                              (println "Input1 | Code: " code " Value: " (:value wdg) " Widget: " wdg))))
+  (gui/update! "input" [:events :key-pressed] (fn [wdg code]
+                                              (println "Input | Code: " code " Value: " (:value wdg) " Widget: " wdg)
+                                              (when (= code :enter)
+                                                (println "Enter input1")
+                                                (gui/update! "input1" [:args :selected?] true))))
+  (gui/update! "input1" [:events :key-pressed] (fn [wdg code]
+                                              (println "Input1 | Code: " code " Value: " (:value wdg) " Widget: " wdg)
+                                               (when (= code :enter)
+                                                 (println "Enter input")
+                                                 (gui/update! "input" [:args :selected?] true)))))
+                                                

@@ -34,9 +34,6 @@
     (subs text 0 (- (count text) 1))
     (str text char)))
 
-(defn clicked [^strigui.input.Input inp] 
-  (reset! wdg/selected-widget inp))
-
 (extend-protocol b/Event
   Input
   (key-pressed [this char code]
@@ -55,9 +52,9 @@
       color - vector consisting of [background-color font-color]
       min-width - the minimum width"
   [canvas name text args]
-    (let [input (Input. name text args)]
+    (let [input (->Input name text args)]
       (when (:selected? args)
-        (clicked input)
+        (swap! wdg/widget-props assoc :selected input)
         (b/draw-clicked input canvas))
       input))
 
@@ -71,7 +68,7 @@
 
 (defmethod wdg/widget-event [strigui.input.Input :mouse-clicked]
   [_ canvas widget]
-  (clicked widget)
+  (swap! wdg/widget-props assoc :selected widget)
   (b/draw-clicked widget canvas)
   (swap! b/boxes-clicked #(conj %1 %2) widget))
 
