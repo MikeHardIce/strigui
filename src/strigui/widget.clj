@@ -64,14 +64,17 @@
   (when (draw widget canvas)
     (swap! widgets conj widget)
     (when (-> widget :args :selected?)
-      (swap! widget-props assoc :selected widget))))
+      (swap! widget-props assoc :selected widget)
+      (println "widget: " widget)
+      (println "condition: " (-> widget :args :selected?)))))
 
 (defn unregister
   [canvas ^strigui.widget.Widget widget]
   (when (hide widget canvas)
     (swap! widgets #(filter (fn [item] (not= item %2)) %1) widget)
     (swap! widgets-to-redraw #(s/difference %1 #{widget}))
-    (swap! widget-props assoc :selected nil :focused nil)))
+    (when (= (:selected @widget-props) widget)
+      (swap! widget-props assoc :selected nil))))
 
 (defn trigger-custom-event 
   [action ^strigui.widget.Widget widget & args]
@@ -151,10 +154,9 @@
       (do
         (widget-event :mouse-clicked canvas widget)
         (trigger-custom-event :mouse-clicked widget))
-      (do
-        (when (:selected @widget-props)
-          (redraw (:selected @widget-props) canvas))
-        (swap! widget-props assoc :selected nil))))
+      (when (:selected @widget-props)
+        (redraw (:selected @widget-props) canvas)))
+    (swap! widget-props assoc :selected widget))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]

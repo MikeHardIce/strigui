@@ -54,7 +54,6 @@
   [canvas name text args]
     (let [input (->Input name text args)]
       (when (:selected? args)
-        (swap! wdg/widget-props assoc :selected input)
         (b/draw-clicked input canvas))
       input))
 
