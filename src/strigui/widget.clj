@@ -65,8 +65,7 @@
     (swap! widgets conj widget)
     (when (-> widget :args :selected?)
       (swap! widget-props assoc :selected widget)
-      (println "widget: " widget)
-      (println "condition: " (-> widget :args :selected?)))))
+      (redraw widget canvas))))
 
 (defn unregister
   [canvas ^strigui.widget.Widget widget]

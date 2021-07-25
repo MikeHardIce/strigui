@@ -12,10 +12,10 @@
   (args [this] (:args this))
   (widget-name [this] (:name this))
   (redraw [this canvas]
-    ;; (when (not (b/selected? this))
-    ;;   (b/box-redraw this canvas))
-          (b/box-draw-border this canvas)
-          (b/box-draw canvas (:value this) (:args this)))
+     (if (wdg/selected? this)
+       (b/box-draw-border this canvas :blue 2)
+       (b/box-redraw this canvas))
+     (b/box-draw canvas (:value this) (:args this)))
   (draw [this canvas]
     (b/box-draw-border this canvas) 
     (b/box-draw canvas (:value this) (:args this))))
