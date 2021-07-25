@@ -12,21 +12,21 @@
     (draw [this canvas] "draw the widget, returns the widget on success")
     (redraw [this canvas] "redraw the widget"))
 
+(def state (atom {:widgets ()
+                  :widgets-to-redraw #{}
+                  :previous-mouse-position nil
+                  :selected nil
+                  :focused nil}))
+
 (def widgets (atom ()))
-
-(def ^:private widgets-to-redraw (atom #{}))
-
-(def ^:private previous-mouse-position (atom nil))
-
-(def widget-props (atom nil))
 
 (defn selected?
   [wdg]
-  (= wdg (:selected @widget-props)))
+  (= wdg (:selected @state)))
 
 (defn focused?
   [wdg]
-  (= wdg (:selected @widget-props)))
+  (= wdg (:selected @state)))
 
 (defn within?
   "Checks wheter the point (x y) is within the given coord
@@ -64,16 +64,16 @@
   (when (draw widget canvas)
     (swap! widgets conj widget)
     (when (-> widget :args :selected?)
-      (swap! widget-props assoc :selected widget)
+      (swap! state assoc :selected widget)
       (redraw widget canvas))))
 
 (defn unregister
   [canvas ^strigui.widget.Widget widget]
   (when (hide widget canvas)
     (swap! widgets #(filter (fn [item] (not= item %2)) %1) widget)
-    (swap! widgets-to-redraw #(s/difference %1 #{widget}))
-    (when (= (:selected @widget-props) widget)
-      (swap! widget-props assoc :selected nil))))
+    (swap! state update :widgets-to-redraw #(s/difference %1 #{widget}))
+    (when (= (:selected @state) widget)
+      (swap! state assoc :selected nil))))
 
 (defn trigger-custom-event 
   [action ^strigui.widget.Widget widget & args]
@@ -93,7 +93,7 @@
 
 (defn- handle-widget-dragging 
   [canvas ^strigui.widget.Widget widget [x y]]
-  (when-let [old-position @previous-mouse-position]
+  (when-let [old-position (:previous-mouse-position @state)]
     (let [dx (- x (first old-position))
           dy (- y (second old-position))
           new-x (+ (-> widget :args :x) dx)
@@ -107,19 +107,19 @@
         canvas (:canvas context)
         window (:window context)
         widget (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) (sort-by #(-> % :args :z) @widgets)))
-        redraw-widgets (sort-by #(-> % :args :z) @widgets-to-redraw)]
+        redraw-widgets (sort-by #(-> % :args :z) (:widgets-to-redraw state))]
     (let [redrawn-buttons (map #(redraw % canvas) redraw-widgets)]
-      (swap! widgets-to-redraw #(s/difference %1 (set %2))  redrawn-buttons))
+      (swap! state update :widgets-to-redraw #(s/difference %1 (set redrawn-buttons))))
       (if (seq widget)
         (when (not (focused? widget))
-          (swap! widget-props assoc :focused widget)
+          (swap! state assoc :focused widget)
           (widget-event :widget-focus-in canvas widget)
           (trigger-custom-event :widget-focus-in widget))
         (do
-          (widget-event :widget-focus-out canvas (:focused @widget-props))
-          (trigger-custom-event :widget-focus-out (:focused @widget-props))
-          (when (not= (:focused @widget-props) (:selected @widget-props))
-            (swap! widget-props assoc :focused nil))))
+          (widget-event :widget-focus-out canvas (:focused @state))
+          (trigger-custom-event :widget-focus-out (:focused @state))
+          (when (not= (:focused @state) (:selected @state))
+            (swap! state assoc :focused nil))))
     (when (seq widget)
       (when (and (c2d/mouse-pressed? window) (-> widget :args :can-move?))
         (handle-widget-dragging canvas widget [(c2d/mouse-x window) (c2d/mouse-y window)])
@@ -128,7 +128,7 @@
       (let [widget-coords (coord widget canvas)
             neighbouring-widgets (set (filter #(and (intersect? widget-coords (coord % canvas))
                                                     (not= widget %)) @widgets))]
-        (swap! widgets-to-redraw s/union neighbouring-widgets))
+        (swap! state update :widgets-to-redraw #(s/union % neighbouring-widgets)))
       (widget-event :mouse-moved canvas widget)
       (trigger-custom-event :mouse-moved widget))))
 
@@ -136,7 +136,7 @@
   (handle-mouse-moved)
   (let [context @wnd/context
         window (:window context)]
-    (reset! previous-mouse-position [(c2d/mouse-x window) (c2d/mouse-y window)]))
+    (swap! strigui.widget/state assoc :previous-mouse-position [(c2d/mouse-x window) (c2d/mouse-y window)]))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-moved] [event state]
@@ -153,21 +153,21 @@
       (do
         (widget-event :mouse-clicked canvas widget)
         (trigger-custom-event :mouse-clicked widget))
-      (when (:selected @widget-props)
-        (redraw (:selected @widget-props) canvas)))
-    (swap! widget-props assoc :selected widget))
+      (when (:selected @strigui.widget/state)
+        (redraw (:selected @strigui.widget/state) canvas)))
+    (swap! strigui.widget/state assoc :selected widget))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
   (widget-global-event :mouse-released (:canvas @wnd/context))
-  (reset! previous-mouse-position nil)
+  (swap! strigui.widget/state assoc :previous-mouse-position nil)
   state)
 
 (defmethod c2d/key-event ["main-window" :key-pressed] [event state]
   (let [char (c2d/key-char event)
         code (c2d/key-code event)
         canvas (:canvas @wnd/context)
-        widget (:selected @widget-props)]
+        widget (:selected @strigui.widget/state)]
     (widget-global-event :key-pressed canvas char code)
     (when (seq widget)
       (widget-event :key-pressed canvas widget char code)

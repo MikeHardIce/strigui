@@ -67,7 +67,7 @@
 
 (defmethod wdg/widget-event [strigui.input.Input :mouse-clicked]
   [_ canvas widget]
-  (swap! wdg/widget-props assoc :selected widget)
+  (swap! wdg/state assoc :selected widget)
   (b/draw-clicked widget canvas)
   (swap! b/boxes-clicked #(conj %1 %2) widget))
 
