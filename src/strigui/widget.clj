@@ -169,8 +169,6 @@
         canvas (:canvas @wnd/context)
         widget (:selected @widget-props)]
     (widget-global-event :key-pressed canvas char code)
-    (println "class: " (class widget))
-    (println "widget: " widget)
     (when (seq widget)
       (widget-event :key-pressed canvas widget char code)
       (trigger-custom-event :key-pressed widget code)))

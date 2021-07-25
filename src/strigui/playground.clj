@@ -13,12 +13,10 @@
   (gui/update! "click" [:events :mouse-clicked] (fn [wdg]
                                                   (gui/close-window)))
   (gui/update! "input" [:events :key-pressed] (fn [wdg code]
-                                              (println "Input | Code: " code " Value: " (:value wdg) " Widget: " wdg)
                                               (when (= code :enter)
                                                 (gui/update! "input" [:args :selected?] nil)
                                                 (gui/update! "input1" [:args :selected?] true))))
   (gui/update! "input1" [:events :key-pressed] (fn [wdg code]
-                                              (println "Input1 | Code: " code " Value: " (:value wdg) " Widget: " wdg)
                                                (when (= code :enter)
                                                  (gui/update! "input1" [:args :selected?] nil)
                                                  (gui/update! "input" [:args :selected?] true)))))
