@@ -26,7 +26,7 @@
 
 (defn focused?
   [wdg]
-  (= wdg (:selected @state)))
+  (= wdg (:focused @state)))
 
 (defn within?
   "Checks wheter the point (x y) is within the given coord
@@ -107,8 +107,8 @@
         canvas (:canvas context)
         window (:window context)
         widget (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) (sort-by #(-> % :args :z) @widgets)))
-        redraw-widgets (sort-by #(-> % :args :z) (:widgets-to-redraw state))]
-    (let [redrawn-buttons (map #(redraw % canvas) redraw-widgets)]
+        redraw-widgets (sort-by #(-> % :args :z) (:widgets-to-redraw @state))]
+    (let [redrawn-buttons (mapv #(redraw % canvas) redraw-widgets)]
       (swap! state update :widgets-to-redraw #(s/difference %1 (set redrawn-buttons))))
       (if (seq widget)
         (when (not (focused? widget))
