@@ -16,7 +16,8 @@
                   :widgets-to-redraw #{}
                   :previous-mouse-position nil
                   :selected nil
-                  :focused nil}))
+                  :focused nil
+                  :context {:canvas nil :window nil}}))
 
 (def widgets (atom ()))
 
@@ -103,10 +104,10 @@
 
 (defn handle-mouse-moved 
   []
-  (let [context @wnd/context
+  (let [context (:context @state)
         canvas (:canvas context)
         window (:window context)
-        widget (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) (sort-by #(-> % :args :z) @widgets)))
+        widget (first (filter #(within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) (sort-by #(-> % :args :z) @widgets)))
         redraw-widgets (sort-by #(-> % :args :z) (:widgets-to-redraw @state))]
     (let [redrawn-buttons (mapv #(redraw % canvas) redraw-widgets)]
       (swap! state update :widgets-to-redraw #(s/difference %1 (set redrawn-buttons))))
@@ -134,7 +135,7 @@
 
 (defmethod c2d/mouse-event ["main-window" :mouse-dragged] [event state]
   (handle-mouse-moved)
-  (let [context @wnd/context
+  (let [context (:context @strigui.widget/state)
         window (:window context)]
     (swap! strigui.widget/state assoc :previous-mouse-position [(c2d/mouse-x window) (c2d/mouse-y window)]))
   state)
@@ -143,12 +144,11 @@
   (handle-mouse-moved)
   state)
   
-;; TODO: maybe its not necessary to go to @wnd/context directly
 (defmethod c2d/mouse-event ["main-window" :mouse-pressed] [event state]
-  (let [context @wnd/context
+  (let [context (:context @strigui.widget/state)
         canvas (:canvas context)
         window (:window context)
-        widget (first (filter #(wnd/within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))]
+        widget (first (filter #(within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))]
     (if (seq widget)
       (do
         (widget-event :mouse-clicked canvas widget)
@@ -159,14 +159,14 @@
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
-  (widget-global-event :mouse-released (:canvas @wnd/context))
+  (widget-global-event :mouse-released (:canvas (:context @state)))
   (swap! strigui.widget/state assoc :previous-mouse-position nil)
   state)
 
 (defmethod c2d/key-event ["main-window" :key-pressed] [event state]
   (let [char (c2d/key-char event)
         code (c2d/key-code event)
-        canvas (:canvas @wnd/context)
+        canvas (:canvas (:context @strigui.widget/state))
         widget (:selected @strigui.widget/state)]
     (widget-global-event :key-pressed canvas char code)
     (when (seq widget)

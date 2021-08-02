@@ -2,8 +2,6 @@
   (:require [clojure2d.core :as c2d])
   (:import [javax.swing JFrame]))
 
-(def context (atom {:canvas nil :window nil}))
-
 (defn init-window
   "Creates a window based on the canvas size. Alternatively, also accepts an already
    existing window."
@@ -12,8 +10,7 @@
          window (assoc window :window-name "main-window")]
      ;; change the title of the underlying frame, so it doesn't mess with the
      ;; window name used for the clojure2d events
-     (.setTitle (:frame window) title)
-     (swap! context merge {:canvas (c2d/get-canvas window) :window window})))
+     (.setTitle (:frame window) title)))
   ([width height ^String title] (init-window width height title 10 :mid))
   ([width height ^String title fps quality]
    (let [canvas (c2d/canvas width height quality)
@@ -24,7 +21,6 @@
      ;; window name used for the clojure2d events
      (.setTitle (:frame window) title)
      (.setDefaultCloseOperation (:frame window) (. JFrame EXIT_ON_CLOSE))
-     (swap! context merge new-context)
      new-context)))
 
 (defn close-window
@@ -43,14 +39,3 @@
       (c2d/set-font-attributes 15)
       (c2d/set-color :black)
       (c2d/text (str text) 0 height))))
-
-(defn within?
-  "Checks wheter the point (x y) is within the given coord
-   coord - vector [x-coord y-coord width height]
-   x - x-coord of point to check
-   y - y-coord of point to check"
-  [coord x y]
-  (and (>= x (first coord))
-       (>= y (nth coord 1))
-       (<= x (+ (first coord) (nth coord 2)))
-       (<= y (+ (nth coord 1) (nth coord 3)))))
