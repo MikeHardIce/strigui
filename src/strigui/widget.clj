@@ -1,7 +1,6 @@
 (ns strigui.widget
     (:require [clojure2d.core :as c2d]
-              [clojure.set :as s]
-              [strigui.window :as wnd]))
+              [clojure.set :as s]))
 
 (defprotocol Widget 
     "collection of functions around redrawing widgets, managing the border etc. ..."
@@ -18,8 +17,6 @@
                   :selected nil
                   :focused nil
                   :context {:canvas nil :window nil}}))
-
-(def widgets (atom ()))
 
 (defn selected?
   [wdg]
@@ -63,7 +60,7 @@
 (defn register 
   [canvas ^strigui.widget.Widget widget]
   (when (draw widget canvas)
-    (swap! widgets conj widget)
+    (swap! state update :widgets conj widget)
     (when (-> widget :args :selected?)
       (swap! state assoc :selected widget)
       (redraw widget canvas))))
@@ -71,7 +68,7 @@
 (defn unregister
   [canvas ^strigui.widget.Widget widget]
   (when (hide widget canvas)
-    (swap! widgets #(filter (fn [item] (not= item %2)) %1) widget)
+    (swap! state update :widgets #(filter (fn [item] (not= item %2)) %1) widget)
     (swap! state update :widgets-to-redraw #(s/difference %1 #{widget}))
     (when (= (:selected @state) widget)
       (swap! state assoc :selected nil))))
@@ -107,7 +104,7 @@
   (let [context (:context @state)
         canvas (:canvas context)
         window (:window context)
-        widget (first (filter #(within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) (sort-by #(-> % :args :z) @widgets)))
+        widget (first (filter #(within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) (sort-by #(-> % :args :z) (:widgets @state))))
         redraw-widgets (sort-by #(-> % :args :z) (:widgets-to-redraw @state))]
     (let [redrawn-buttons (mapv #(redraw % canvas) redraw-widgets)]
       (swap! state update :widgets-to-redraw #(s/difference %1 (set redrawn-buttons))))
@@ -128,7 +125,7 @@
         (trigger-custom-event :widget-moved widget))
       (let [widget-coords (coord widget canvas)
             neighbouring-widgets (set (filter #(and (intersect? widget-coords (coord % canvas))
-                                                    (not= widget %)) @widgets))]
+                                                    (not= widget %)) (:widgets @state)))]
         (swap! state update :widgets-to-redraw #(s/union % neighbouring-widgets)))
       (widget-event :mouse-moved canvas widget)
       (trigger-custom-event :mouse-moved widget))))
@@ -148,7 +145,7 @@
   (let [context (:context @strigui.widget/state)
         canvas (:canvas context)
         window (:window context)
-        widget (first (filter #(within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) @widgets))]
+        widget (first (filter #(within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) (:widgets @strigui.widget/state)))]
     (if (seq widget)
       (do
         (widget-event :mouse-clicked canvas widget)
@@ -159,7 +156,7 @@
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
-  (widget-global-event :mouse-released (:canvas (:context @state)))
+  (widget-global-event :mouse-released (:canvas (:context @strigui.widget/state)))
   (swap! strigui.widget/state assoc :previous-mouse-position nil)
   state)
 

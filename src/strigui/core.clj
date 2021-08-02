@@ -12,7 +12,7 @@
 (defn find-by-name 
   "Find and return an widget by its name"
   [name]
-  (first (filter #(= (wdg/widget-name %) name) @wdg/widgets)))
+  (first (filter #(= (wdg/widget-name %) name) (:widgets @wdg/state))))
 
 (defn remove! 
   "Remove an widget by its name"
