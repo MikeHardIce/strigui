@@ -14,6 +14,7 @@
 (def state (atom {:widgets ()
                   :widgets-to-redraw #{}
                   :previous-mouse-position nil
+                  :previous-tabbed []
                   :selected nil
                   :focused nil
                   :context {:canvas nil :window nil}}))
@@ -49,6 +50,17 @@
   [coord1 coord2]
   (or (within? coord1 coord2) 
       (within? coord2 coord1)))
+
+(defn distance-x
+ "Manhatten distance that is sqashed on the x-axis,
+  meaning widgets on similar y positions are treated as
+  being closer together." 
+  ([canvas widget1 widget2]
+  (let [coord1 (coord widget1 canvas)
+        coord2 (coord widget2 canvas)]
+    (distance-x coord1 coord2)))
+  ([[x1 y1] [x2 y2]]
+   (+ (* 0.3 (Math/abs (- x1 x2))) (Math/abs (- y1 y2)))))
 
 (defn hide 
   [^strigui.widget.Widget widget canvas]
