@@ -35,7 +35,4 @@
   (value [this] (:value this))
   (args [this] (:args this))
   (widget-name [this] (:name this))
-  (draw [this canvas] (draw-label this canvas))
-  (redraw
-    [this canvas]
-    (draw-label this canvas)))
+  (draw [this canvas] (draw-label this canvas)))

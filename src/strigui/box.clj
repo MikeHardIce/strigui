@@ -119,14 +119,9 @@
 ;; TODO: should remove global events
 (defn handle-key-pressed
   [canvas widget char code]
-  (when (wdg/selected? widget)
-    (let [box-with-new-input (key-pressed widget char code)]
+  (when (-> widget :args :selected?)
+    (let [box-with-new-input (key-pressed widget char code)
+          box-with-new-input (assoc-in box-with-new-input [:args :selected?] (not= code :enter))]
       (when box-with-new-input
-        (wdg/unregister canvas widget)
-        (wdg/register canvas box-with-new-input)
-        (box-draw-text canvas (wdg/value box-with-new-input) (wdg/args box-with-new-input))
-        (if (= code :enter)
-          (swap! wdg/state assoc :selected nil)
-          (do 
-            (swap! wdg/state assoc :selected box-with-new-input)
-            (draw-clicked (:selected @wdg/state) canvas)))))))
+        (wdg/replace! canvas widget box-with-new-input)
+        (box-draw-text canvas (wdg/value box-with-new-input) (wdg/args box-with-new-input))))))

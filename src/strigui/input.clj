@@ -11,14 +11,11 @@
   (value [this] (:value this))
   (args [this] (:args this))
   (widget-name [this] (:name this))
-  (redraw [this canvas]
-     (if (wdg/selected? this)
-       (b/box-draw-border this canvas :blue 2)
-       (b/box-redraw this canvas))
-     (b/box-draw canvas (:value this) (:args this)))
   (draw [this canvas]
-    (b/box-draw-border this canvas) 
-    (b/box-draw canvas (:value this) (:args this))))
+    (b/box-draw canvas (:value this) (:args this))
+    (cond
+      (-> this :args :selected?) (b/box-draw-border this canvas :blue 2)
+      (-> this :args :focused?) (b/box-draw-border this canvas :black 2))))
 
 (extend-protocol b/Box
   Input
@@ -65,11 +62,14 @@
   [_ canvas widget]
   (b/box-remove-drawn widget canvas))
 
-(defmethod wdg/widget-event [strigui.input.Input :mouse-clicked]
-  [_ canvas widget]
-  (swap! wdg/state assoc :selected widget)
-  (b/draw-clicked widget canvas)
-  (swap! b/boxes-clicked #(conj %1 %2) widget))
+;; (defmethod wdg/widget-event [strigui.input.Input :mouse-clicked]
+;;   [_ canvas widget]
+;;   ;; (let [widget (assoc-in widget [:args :selected?] true)]
+;;   ;;   ())
+;;   ;; (swap! wdg/state assoc :selected widget)
+;;   ;; (b/draw-clicked widget canvas)
+;;   ;; (swap! b/boxes-clicked #(conj %1 %2) widget)
+;;   )
 
 (defmethod wdg/widget-event [strigui.input.Input :key-pressed]
   [_ canvas widget char code]

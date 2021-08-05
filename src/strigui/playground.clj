@@ -7,8 +7,8 @@
                                              :color [:green]
                                              :font-size 20 :font-style [:bold]
                                              :can-move? true})
-  (gui/button! "click" "Click me" {:x 400 :y 250 :z 10 :color [:white :black]})
-  (gui/input! "input" "" {:x 100 :y 150 :color [:white :red] :min-width 420 :selected? true})
+  (gui/button! "click" "Click me" {:x 400 :y 250 :z 10 :color [:white :black] :can-tab? true})
+  (gui/input! "input" "" {:x 100 :y 150 :color [:white :red] :min-width 420 :selected? true :can-tab? true})
   (gui/input! "input1" "" {:x 100 :y 200 :color [:white :red] :min-width 420})
   (gui/update! "click" [:events :mouse-clicked] (fn [wdg]
                                                   (gui/close-window)))
