@@ -9,10 +9,11 @@
   (args [this] (:args this))
   (widget-name [this] (:name this))
   (draw [this canvas]
-        (b/box-draw canvas (:value this) (:args this))
         (cond
           (-> this :args :selected?) (b/box-draw-border this canvas :blue 2)
-          (-> this :args :focused?) (b/box-draw-border this canvas :black 2))))
+          (-> this :args :focused?) (b/box-draw-border this canvas :black 2)
+          :else (b/box-draw-border this canvas :black 1))
+        (b/box-draw canvas (:value this) (:args this))))
 
 (extend-protocol b/Box
   Button
@@ -21,13 +22,13 @@
     (b/box-draw-border this canvas :blue 2)
     this))
 
-(defmethod wdg/widget-event [strigui.button.Button :widget-focus-in] 
-  [_ canvas widget]
-  (b/draw-hover widget canvas))
+;; (defmethod wdg/widget-event [strigui.button.Button :widget-focus-in] 
+;;   [_ canvas widget]
+;;   (b/draw-hover widget canvas))
 
-(defmethod wdg/widget-event [strigui.button.Button :widget-focus-out]
-  [_ canvas widget]
-  (b/box-remove-drawn widget canvas))
+;; (defmethod wdg/widget-event [strigui.button.Button :widget-focus-out]
+;;   [_ canvas widget]
+;;   (b/box-remove-drawn widget canvas))
 
 ;; (defmethod wdg/widget-event [strigui.button.Button :mouse-clicked]
 ;;   [_ canvas widget]

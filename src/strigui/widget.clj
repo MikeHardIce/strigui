@@ -59,17 +59,10 @@
         coord-widget (if (seq selected-widget) (coord selected-widget canvas) [0 0])
         dist (map #(merge {:widget %} {:dist (distance-x coord-widget (coord % canvas))}) to-be-tabbed)
         dist (sort-by :dist < dist)
-        new-selected (:widget (first dist))]
-    {:selected new-selected
-     :focused new-selected
+        new-selected (:widget (first dist))
+        new-selected (assoc-in new-selected [:args :selected?] true)]
+    {:widgets (conj (filter #(not= % selected-widget) widgets) new-selected)
      :previously-tabbed (if (seq not-tabbed) (s/union previously-tabbed #{new-selected}) #{new-selected})}))
-
-(defn redraw!
-  [canvas & widgets]
-  (when (seq widgets)
-    (println "Widget: " (first widgets))
-    (draw (first widgets) canvas)
-    (recur canvas (rest widgets))))
 
 (defn hide 
   [^strigui.widget.Widget widget canvas]
@@ -78,9 +71,17 @@
       (c2d/set-color :white)
       (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8)))))
 
+(defn redraw!
+  [canvas & widgets]
+  (when (seq widgets)
+    (hide (first widgets) canvas)
+    (draw (first widgets) canvas)
+    (recur canvas (rest widgets))))
+
 (defn register 
   [canvas ^strigui.widget.Widget widget]
   (when (draw widget canvas)
+    (println "draw " (:name widget))
     (swap! state update :widgets conj widget)))
 
 (defn unregister
@@ -109,7 +110,7 @@
   (fn [action canvas & args] action))
 
 (defmethod widget-global-event :default [_ canvas & args] nil)
-
+;;TODO remove side effect
 (defn- handle-widget-dragging 
   [canvas ^strigui.widget.Widget widget [x y]]
   (when-let [old-position (:previous-mouse-position @state)]
@@ -117,8 +118,7 @@
           dy (- y (second old-position))
           new-x (+ (-> widget :args :x) dx)
           new-y (+ (-> widget :args :y) dy)]
-      (unregister canvas widget)
-      (register canvas (update widget :args #(merge % {:x new-x :y new-y}))))))
+      (replace! canvas widget (update widget :args #(merge % {:x new-x :y new-y}))))))
 
 (defn handle-mouse-moved 
   []
@@ -126,31 +126,32 @@
         canvas (:canvas context)
         window (:window context)
         widget (first (filter #(within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) (sort-by #(-> % :args :z) (:widgets @state))))
-        redraw-widgets (sort-by #(-> % :args :z) (:widgets-to-redraw @state))]
-    (let [redrawn-buttons (mapv #(draw % canvas) redraw-widgets)]
-      (swap! state update :widgets-to-redraw #(s/difference %1 (set redrawn-buttons)))
-      (if (seq widget)
-        (do
-          (when (not (-> widget :args :focused?))
-            (replace! canvas widget (assoc-in widget [:args :focused?] true))
-            (widget-event :widget-focus-in canvas widget)
-            (trigger-custom-event :widget-focus-in widget))
-          (when (and (c2d/mouse-pressed? window) (-> widget :args :can-move?))
-            (handle-widget-dragging canvas widget [(c2d/mouse-x window) (c2d/mouse-y window)])
-            (widget-event :widget-moved canvas widget)
-            (trigger-custom-event :widget-moved widget))
-          (let [widget-coords (coord widget canvas)
-                neighbouring-widgets (set (filter #(and (intersect? widget-coords (coord % canvas))
-                                                        (not= widget %)) (:widgets @state)))]
-            (swap! state update :widgets-to-redraw #(s/union % neighbouring-widgets)))
-          (widget-event :mouse-moved canvas widget)
-          (trigger-custom-event :mouse-moved widget))
-        (loop [prev-widgets (filter #(-> % :args :focused?) (:widgets @state))]
-          (when (seq prev-widgets)
-            (replace! canvas (first prev-widgets) (assoc-in (first prev-widgets) [:args :focused?] nil))
-            (widget-event :widget-focus-out canvas (first prev-widgets))
-            (trigger-custom-event :widget-focus-out (first prev-widgets))
-            (recur (rest prev-widgets))))))))
+        widget (atom widget)]
+    ;;
+    ;; Remove all side effect within, do the updates at the end of this method and not in between (no replace! here and in handle-widget-dragging)
+    ;;
+    (when (seq @widget)
+      (let [widget-coords (coord @widget canvas)
+            neighbouring-widgets (set (filter #(and (intersect? widget-coords (coord % canvas))
+                                                    (not= widget %)) (:widgets @state)))
+            neighbouring-widgets (sort-by #(-> % :args :z) neighbouring-widgets)]
+        (apply redraw! canvas neighbouring-widgets)
+        (widget-event :mouse-moved canvas @widget)
+        (trigger-custom-event :mouse-moved @widget))
+      (when (not (-> @widget :args :focused?))
+        (replace! canvas @widget (swap! widget assoc-in [:args :focused?] true))
+        (widget-event :widget-focus-in canvas @widget)
+        (trigger-custom-event :widget-focus-in @widget))
+      (when (and (c2d/mouse-pressed? window) (-> @widget :args :can-move?))
+        (handle-widget-dragging canvas @widget [(c2d/mouse-x window) (c2d/mouse-y window)])
+        (widget-event :widget-moved canvas @widget)
+        (trigger-custom-event :widget-moved @widget)))
+    (loop [prev-widgets (filter #(-> % :args :focused?) (:widgets @state))]
+      (when (seq prev-widgets)
+        (replace! canvas (first prev-widgets) (assoc-in (first prev-widgets) [:args :focused?] nil))
+        (widget-event :widget-focus-out canvas (first prev-widgets))
+        (trigger-custom-event :widget-focus-out (first prev-widgets))
+        (recur (rest prev-widgets))))))
 
 (defmethod c2d/mouse-event ["main-window" :mouse-dragged] [event state]
   (handle-mouse-moved)
@@ -168,11 +169,11 @@
         canvas (:canvas context)
         window (:window context)
         widget (first (filter #(within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) (:widgets @strigui.widget/state)))]
-    (swap! strigui.widget/state update :widgets (fn [wdgs] (map #(assoc-in % [:args :selected] nil) wdgs)))
+    (swap! strigui.widget/state update :widgets (fn [wdgs] (map #(assoc-in % [:args :selected?] nil) wdgs)))
     (when (seq widget)
       (widget-event :mouse-clicked canvas widget)
       (trigger-custom-event :mouse-clicked widget)
-      (replace! canvas widget (assoc-in widget [:args :selected] true))))
+      (replace! canvas widget (assoc-in widget [:args :selected?] true))))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
@@ -185,7 +186,7 @@
         code (c2d/key-code event)
         canvas (:canvas (:context @strigui.widget/state))
         widgets (:widgets @strigui.widget/state)
-        widget (filter #(-> % :args :selected?) widgets)
+        widget (first (filter #(-> % :args :selected?) widgets))
         prev-tabbed (:previously-tabbed @strigui.widget/state)]
     (when (= code :tab)
       (let [new-widget-map (next-tabbed-widget-map canvas widgets prev-tabbed widget)]

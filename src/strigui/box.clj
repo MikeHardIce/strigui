@@ -16,7 +16,7 @@
 
 (def ^:private default-font-size 15)
 
-(def boxes-clicked (atom #{}))
+;;(def boxes-clicked (atom #{}))
 
 (defn box-coord 
   "Computes the full box coordinates.
@@ -111,17 +111,18 @@
   (box-draw-border box canvas :white 2 false)
   (box-draw-border box canvas :black 1 false))
 
-(defmethod wdg/widget-global-event :mouse-released 
-  [_ canvas & args]
-  (map #(draw-hover %1 canvas) @boxes-clicked)
-  (reset! boxes-clicked  #{}))
-
 ;; TODO: should remove global events
+;; (defmethod wdg/widget-global-event :mouse-released 
+;;   [_ canvas & args]
+;;   (map #(draw-hover %1 canvas) @boxes-clicked)
+;;   (reset! boxes-clicked  #{}))
+
 (defn handle-key-pressed
   [canvas widget char code]
   (when (-> widget :args :selected?)
     (let [box-with-new-input (key-pressed widget char code)
-          box-with-new-input (assoc-in box-with-new-input [:args :selected?] (not= code :enter))]
+          box-with-new-input (assoc-in box-with-new-input [:args :selected?] (or (not= code :enter)
+                                                                                 (not= code :tab)))]
       (when box-with-new-input
         (wdg/replace! canvas widget box-with-new-input)
         (box-draw-text canvas (wdg/value box-with-new-input) (wdg/args box-with-new-input))))))

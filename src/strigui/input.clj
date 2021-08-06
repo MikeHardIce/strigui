@@ -12,15 +12,17 @@
   (args [this] (:args this))
   (widget-name [this] (:name this))
   (draw [this canvas]
-    (b/box-draw canvas (:value this) (:args this))
-    (cond
-      (-> this :args :selected?) (b/box-draw-border this canvas :blue 2)
-      (-> this :args :focused?) (b/box-draw-border this canvas :black 2))))
+        (b/box-draw canvas (:value this) (:args this))
+        (cond
+          (-> this :args :selected?) (b/box-draw-border this canvas :blue 2)
+          (-> this :args :focused?) (b/box-draw-border this canvas :black 2)
+          :else (b/box-draw-border this canvas :black 1))
+        this))
 
 (extend-protocol b/Box
   Input
   (draw-hover [this canvas] 
-    (when (not (wdg/selected? this))
+    (when (not (-> this :args :selected?))
       (b/box-draw-hover this canvas)))
   (draw-clicked [this canvas]  
     (b/box-draw-border this canvas :blue 2)
@@ -50,17 +52,17 @@
       min-width - the minimum width"
   [canvas name text args]
     (let [input (->Input name text args)]
-      (when (:selected? args)
-        (b/draw-clicked input canvas))
+      ;; (when (:selected? args)
+      ;;   (b/draw-clicked input canvas))
       input))
 
-(defmethod wdg/widget-event [strigui.input.Input :widget-focus-in]
-  [_ canvas widget]
-  (b/draw-hover widget canvas))
+;; (defmethod wdg/widget-event [strigui.input.Input :widget-focus-in]
+;;   [_ canvas widget]
+;;   (b/draw-hover widget canvas))
 
-(defmethod wdg/widget-event [strigui.input.Input :widget-focus-out]
-  [_ canvas widget]
-  (b/box-remove-drawn widget canvas))
+;; (defmethod wdg/widget-event [strigui.input.Input :widget-focus-out]
+;;   [_ canvas widget]
+;;   (b/box-remove-drawn widget canvas))
 
 ;; (defmethod wdg/widget-event [strigui.input.Input :mouse-clicked]
 ;;   [_ canvas widget]
