@@ -126,6 +126,23 @@
           new-y (+ (-> widget :args :y) dy)]
       (update widget :args #(merge % {:x new-x :y new-y})))))
 
+(defn handle-clicked
+  [x-pos y-pos]
+  (let [context (:context @strigui.widget/state)
+        canvas (:canvas context)
+        widgets (:widgets @strigui.widget/state)
+        widget (first (filter #(within? (coord % canvas) x-pos y-pos) widgets))
+        selected (filter #(and (-> % :args :selected?) (not= % widget)) widgets)]
+    (when (seq widget)
+      (widget-event :mouse-clicked canvas widget)
+      (trigger-custom-event :mouse-clicked widget)
+      (replace! canvas widget (assoc-in widget [:args :selected?] true)))
+    (when (seq selected)
+      (loop [sel selected]
+        (when (seq sel)
+          (replace! canvas (first sel) (assoc-in (first sel) [:args :selected?] nil))
+          (recur (rest sel)))))))
+
 (defn handle-mouse-moved
   []
   (let [context (:context @state)
@@ -176,21 +193,8 @@
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-pressed] [event state]
-  (let [context (:context @strigui.widget/state)
-        canvas (:canvas context)
-        window (:window context)
-        widgets (:widgets @strigui.widget/state)
-        widget (first (filter #(within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) widgets))
-        selected (filter #(and (-> % :args :selected?) (not= % widget)) widgets)]
-    (when (seq widget)
-      (widget-event :mouse-clicked canvas widget)
-      (trigger-custom-event :mouse-clicked widget)
-      (replace! canvas widget (assoc-in widget [:args :selected?] true)))
-    (when (seq selected)
-      (loop [sel selected]
-        (when (seq sel)
-          (replace! canvas (first sel) (assoc-in (first sel) [:args :selected?] nil))
-          (recur (rest sel))))))
+  (let [context (:context @strigui.widget/state)]
+    (handle-clicked (c2d/mouse-x (:window context)) (c2d/mouse-y (:window context))))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
