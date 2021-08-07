@@ -1,14 +1,14 @@
 (ns strigui.widget
-    (:require [clojure2d.core :as c2d]
-              [clojure.set :as s]))
+  (:require [clojure2d.core :as c2d]
+            [clojure.set :as s]))
 
-(defprotocol Widget 
-    "collection of functions around redrawing widgets, managing the border etc. ..."
-    (coord [this canvas] "gets the coordinates of the widget")
-    (value [this] "the current text of the widget")
-    (args [this] "the current args of the widget")
-    (widget-name [this] "name of the widget")
-    (draw [this canvas] "draw the widget, returns the widget on success"))
+(defprotocol Widget
+  "collection of functions around redrawing widgets, managing the border etc. ..."
+  (coord [this canvas] "gets the coordinates of the widget")
+  (value [this] "the current text of the widget")
+  (args [this] "the current args of the widget")
+  (widget-name [this] "name of the widget")
+  (draw [this canvas] "draw the widget, returns the widget on success"))
 
 (def state (atom {:widgets ()
                   :widgets-to-redraw #{}
@@ -22,10 +22,10 @@
    x - x-coord of point to check
    y - y-coord of point to check"
   ([coord x y]
-  (and (>= x (first coord))
-       (>= y (nth coord 1))
-       (<= x (+ (first coord) (nth coord 2)))
-       (<= y (+ (nth coord 1) (nth coord 3)))))
+   (and (>= x (first coord))
+        (>= y (nth coord 1))
+        (<= x (+ (first coord) (nth coord 2)))
+        (<= y (+ (nth coord 1) (nth coord 3)))))
   ([coord1 coord2]
    (let [[x2 y2 w2 h2] coord2
          x2+w2 (+ x2 w2)
@@ -37,34 +37,41 @@
 
 (defn intersect?
   [coord1 coord2]
-  (or (within? coord1 coord2) 
+  (or (within? coord1 coord2)
       (within? coord2 coord1)))
 
 (defn distance-x
- "Manhatten distance that is sqashed on the x-axis,
+  "Manhatten distance that is sqashed on the x-axis,
   meaning widgets on similar y positions are treated as
-  being closer together." 
+  being closer together."
   ([canvas ^strigui.widget.Widget widget1 ^strigui.widget.Widget widget2]
-  (let [coord1 (coord widget1 canvas)
-        coord2 (coord widget2 canvas)]
-    (distance-x coord1 coord2)))
+   (let [coord1 (coord widget1 canvas)
+         coord2 (coord widget2 canvas)]
+     (distance-x coord1 coord2)))
   ([[x1 y1] [x2 y2]]
    (+ (* 0.3 (Math/abs (- x1 x2))) (Math/abs (- y1 y2)))))
 
 (defn next-tabbed-widget-map
   [canvas widgets previously-tabbed ^strigui.widget.Widget selected-widget]
-  (let [widgets (filter #(-> % :args :can-tab?) widgets)
-        not-tabbed (s/difference (set widgets) previously-tabbed (when (seq selected-widget) (set '(selected-widget))))
-        to-be-tabbed (if (seq not-tabbed) not-tabbed widgets)
+  (let [widgets-can-tab (filter #(-> % :args :can-tab?) widgets)
+        prev-tab-widgets (filter #(some (fn [x] (= (:name %) x)) previously-tabbed) widgets-can-tab)
+        not-tabbed (s/difference (set widgets-can-tab) (set prev-tab-widgets) (when (seq selected-widget) (set '(selected-widget))))
+        to-be-tabbed (if (seq not-tabbed) not-tabbed widgets-can-tab)
+        bla (println "selected-widget: " selected-widget)
         coord-widget (if (seq selected-widget) (coord selected-widget canvas) [0 0])
         dist (map #(merge {:widget %} {:dist (distance-x coord-widget (coord % canvas))}) to-be-tabbed)
         dist (sort-by :dist < dist)
+        dist (filter #(> (:dist %) 0) dist)
         new-selected (:widget (first dist))
-        new-selected (assoc-in new-selected [:args :selected?] true)]
-    {:widgets (conj (filter #(not= % selected-widget) widgets) new-selected)
-     :previously-tabbed (if (seq not-tabbed) (s/union previously-tabbed #{new-selected}) #{new-selected})}))
+        new-selected (assoc-in new-selected [:args :selected?] true)
+        new-widgets (conj (filter #(and (not= (:name %) (:name selected-widget))
+                                 (not= (:name %) (:name new-selected))) widgets) new-selected)
+        new-widgets (if (seq selected-widget) (conj new-widgets (assoc-in selected-widget [:args :selected?] nil)) 
+                        new-widgets)]
+    {:widgets new-widgets
+     :previously-tabbed (if (seq not-tabbed) (s/union previously-tabbed #{(:name new-selected)}) #{(:name new-selected)})}))
 
-(defn hide 
+(defn hide
   [^strigui.widget.Widget widget canvas]
   (let [[x y w h] (coord widget canvas)]
     (c2d/with-canvas-> canvas
@@ -78,29 +85,29 @@
     (draw (first widgets) canvas)
     (recur canvas (rest widgets))))
 
-(defn register 
+(defn register!
   [canvas ^strigui.widget.Widget widget]
   (when (draw widget canvas)
     (swap! state update :widgets conj widget)))
 
-(defn unregister
+(defn unregister!
   [canvas ^strigui.widget.Widget widget]
   (when (hide widget canvas)
     (swap! state update :widgets #(filter (fn [item] (not= item %2)) %1) widget)
     (swap! state update :widgets-to-redraw #(s/difference %1 #{widget}))))
 
-(defn replace! 
+(defn replace!
   [canvas old-widget new-widget]
-  (unregister canvas old-widget)
-  (register canvas new-widget))
+  (unregister! canvas old-widget)
+  (register! canvas new-widget))
 
-(defn trigger-custom-event 
+(defn trigger-custom-event
   [action ^strigui.widget.Widget widget & args]
   (when-let [event-fn (-> widget :events action)]
     (apply event-fn widget args)))
 
-(defmulti widget-event 
-  (fn [action canvas widget & args] 
+(defmulti widget-event
+  (fn [action canvas widget & args]
     [(class widget) action]))
 
 (defmethod widget-event :default [action canvas widget & args] nil)
@@ -110,7 +117,7 @@
 
 (defmethod widget-global-event :default [_ canvas & args] nil)
 
-(defn- handle-widget-dragging 
+(defn- handle-widget-dragging
   [^strigui.widget.Widget widget [x y]]
   (when-let [old-position (:previous-mouse-position @state)]
     (let [dx (- x (first old-position))
@@ -119,7 +126,7 @@
           new-y (+ (-> widget :args :y) dy)]
       (update widget :args #(merge % {:x new-x :y new-y})))))
 
-(defn handle-mouse-moved 
+(defn handle-mouse-moved
   []
   (let [context (:context @state)
         canvas (:canvas context)
@@ -167,7 +174,7 @@
 (defmethod c2d/mouse-event ["main-window" :mouse-moved] [event state]
   (handle-mouse-moved)
   state)
-  
+
 (defmethod c2d/mouse-event ["main-window" :mouse-pressed] [event state]
   (let [context (:context @strigui.widget/state)
         canvas (:canvas context)
@@ -196,15 +203,15 @@
   (let [char (c2d/key-char event)
         code (c2d/key-code event)
         canvas (:canvas (:context @strigui.widget/state))
-        widgets (:widgets @strigui.widget/state)
-        widget (first (filter #(-> % :args :selected?) widgets))
-        prev-tabbed (:previously-tabbed @strigui.widget/state)]
+        state (atom (select-keys @strigui.widget/state [:widgets :previously-tabbed]))
+        widget (first (filter #(-> % :args :selected?) (:widgets @state)))]
     (when (= code :tab)
-      (let [new-widget-map (next-tabbed-widget-map canvas widgets prev-tabbed widget)]
-        (swap! strigui.widget/state merge new-widget-map)
-        (apply redraw! canvas (:previously-tabbed new-widget-map))))
+      (let [new-widget-map (next-tabbed-widget-map canvas (:widgets @state) (:previously-tabbed @state) widget)]
+        (swap! state merge new-widget-map)
+        (swap! strigui.widget/state merge @state)
+        (apply redraw! canvas (:widgets new-widget-map))))
     (widget-global-event :key-pressed canvas char code)
-    (when (seq widget)
+    (when-let [widget (first (filter #(-> % :args :selected?) (:widgets @state)))]
       (widget-event :key-pressed canvas widget char code)
       (trigger-custom-event :key-pressed widget code)))
   state)

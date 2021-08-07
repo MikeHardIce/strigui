@@ -18,7 +18,7 @@
   "Remove an widget by its name"
   [name]
   (when-let [box-to-remove (find-by-name name)]
-    (wdg/unregister (:canvas (:context @wdg/state)) box-to-remove)))
+    (wdg/unregister! (:canvas (:context @wdg/state)) box-to-remove)))
 
 (defn update! 
 "Update any property of a widget via the widget name.
@@ -27,9 +27,9 @@
  value - the new property value"
   [name key value]
   (when-let [w (find-by-name name)]
-    (wdg/unregister (:canvas (:context @wdg/state)) w )
+    (wdg/unregister! (:canvas (:context @wdg/state)) w )
       (let [keys (if (seqable? key) key (vector key))]
-        (wdg/register (:canvas (:context @wdg/state)) (assoc-in w keys value)))))
+        (wdg/register! (:canvas (:context @wdg/state)) (assoc-in w keys value)))))
 
 (defn window!
   "Initializes a new window or reuses an existing one
@@ -48,7 +48,7 @@
 (defn create! 
   "Register and show a custom widget"
   [^strigui.widget.Widget widget]
-  (wdg/register (:canvas (:context @wdg/state)) widget))
+  (wdg/register! (:canvas (:context @wdg/state)) widget))
 
 (defn close-window
   "Closes the current active window."
