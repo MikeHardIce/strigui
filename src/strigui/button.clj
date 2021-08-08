@@ -22,6 +22,12 @@
     (b/box-draw-border this canvas :blue 2)
     this))
 
+(defmethod wdg/widget-event [strigui.button.Button :key-pressed]
+  [_ canvas widget char code]
+  (when (= code :enter)
+    (let [[x y] (wdg/coord widget canvas)]
+      (wdg/handle-clicked x y))))
+
 ;; (defmethod wdg/widget-event [strigui.button.Button :widget-focus-in] 
 ;;   [_ canvas widget]
 ;;   (b/draw-hover widget canvas))

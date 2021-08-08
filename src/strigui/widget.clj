@@ -57,7 +57,6 @@
         prev-tab-widgets (filter #(some (fn [x] (= (:name %) x)) previously-tabbed) widgets-can-tab)
         not-tabbed (s/difference (set widgets-can-tab) (set prev-tab-widgets) (when (seq selected-widget) (set '(selected-widget))))
         to-be-tabbed (if (seq not-tabbed) not-tabbed widgets-can-tab)
-        bla (println "selected-widget: " selected-widget)
         coord-widget (if (seq selected-widget) (coord selected-widget canvas) [0 0])
         dist (map #(merge {:widget %} {:dist (distance-x coord-widget (coord % canvas))}) to-be-tabbed)
         dist (sort-by :dist < dist)
