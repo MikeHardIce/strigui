@@ -12,7 +12,7 @@ Note: This is in an early alpha stage. It is also my road to Clojure. Any sugges
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha8"]]
+:dependencies [[strigui "0.0.1-alpha9"]]
 ```
 Example at https://github.com/MikeHardIce/strigui-sample
 
@@ -32,13 +32,13 @@ Create the main window via
 Basic widgets like buttons, input boxes and labels can be created via
 
 ```
-(gui/label "welcome" "Welcome to Strigui" {:x 190 :y 100
+(gui/label! "welcome" "Welcome to Strigui" {:x 190 :y 100
                                              :color [:green]
                                              :font-size 20 :font-style [:bold]})
-(gui/button "click" "Click me" {:x 400 :y 200 :color [:white :black]})
-(gui/input "input" "" {:x 100 :y 150 :color [:white :red] :min-width 420})
+(gui/button! "click" "Click me" {:x 400 :y 200 :color [:white :black]})
+(gui/input! "input" "" {:x 100 :y 150 :color [:white :red] :min-width 420})
 ```
-The parameters are the name of the widget, the value and a map for the position and optional settings like color etc. ...
+The parameters are the name of the widget, the value and a map for the position and optional settings like color, selected?, focused?, can-tab?, can-move? etc. ...
 The name is used when widgets are modified.
 
 Events can be attached by using the chosen widget name.
@@ -80,7 +80,7 @@ A custom widget could be invoked via
 (:require ...
             [strigui-sample.widget-stacks :as st])
 ...
-(gui/create (st/->Stack "stacks" '(5 1 8 2 0 3 0 5 7) {:x 100 :y 400}))
+(gui/create! (st/->Stack "stacks" '(5 1 8 2 0 3 0 5 7) {:x 100 :y 400}))
 ```
 
 As mentioned in the begining, https://github.com/MikeHardIce/Dame is another example.
