@@ -62,16 +62,20 @@
         dist (sort-by :dist < dist)
         dist (filter #(> (:dist %) 0) dist)
         new-selected (:widget (first dist))
-        new-selected (assoc-in new-selected [:args :selected?] true)
-        new-widgets (conj (filter #(and (not= (:name %) (:name selected-widget))
-                                 (not= (:name %) (:name new-selected))) widgets) new-selected)
+        new-selected (when (seq new-selected) (assoc-in new-selected [:args :selected?] true))
+        widgets (filter #(and (not= (:name %) (:name selected-widget))
+                              (not= (:name %) (:name new-selected))) widgets)
+        new-widgets (if (seq new-selected) (conj widgets new-selected)
+                        widgets)
         new-widgets (if (seq selected-widget) (conj new-widgets (assoc-in selected-widget [:args :selected?] nil)) 
                         new-widgets)]
-    {:widgets new-widgets
-     :previously-tabbed (if (seq not-tabbed) (s/union previously-tabbed #{(:name new-selected)}) #{(:name new-selected)})}))
+    (when new-widgets
+      {:widgets new-widgets
+       :previously-tabbed (when (seq not-tabbed) (s/union previously-tabbed #{(:name new-selected)}))})))
 
 (defn hide
   [^strigui.widget.Widget widget canvas]
+  (println "inside hide: " widget)
   (let [[x y w h] (coord widget canvas)]
     (c2d/with-canvas-> canvas
       (c2d/set-color :white)
@@ -201,7 +205,6 @@
   (swap! strigui.widget/state assoc :previous-mouse-position nil)
   state)
 
-;; TODO bug when tabbing
 (defmethod c2d/key-event ["main-window" :key-pressed] [event state]
   (let [char (c2d/key-char event)
         code (c2d/key-code event)
@@ -209,8 +212,9 @@
         state (atom (select-keys @strigui.widget/state [:widgets :previously-tabbed]))
         widget (first (filter #(-> % :args :selected?) (:widgets @state)))]
     (when (= code :tab)
-      (let [new-widget-map (next-tabbed-widget-map canvas (:widgets @state) (:previously-tabbed @state) widget)]
+      (when-let [new-widget-map (next-tabbed-widget-map canvas (:widgets @state) (:previously-tabbed @state) widget)]
         (swap! state merge new-widget-map)
+        (println new-widget-map)
         (swap! strigui.widget/state merge @state)
         (apply redraw! canvas (:widgets new-widget-map))))
     (widget-global-event :key-pressed canvas char code)

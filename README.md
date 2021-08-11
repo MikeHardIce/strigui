@@ -12,7 +12,7 @@ Note: This is in an early alpha stage. It is also my road to Clojure. Any sugges
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha9"]]
+:dependencies [[strigui "0.0.1-alpha10"]]
 ```
 Example at https://github.com/MikeHardIce/strigui-sample
 
