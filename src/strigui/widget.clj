@@ -75,7 +75,6 @@
 
 (defn hide
   [^strigui.widget.Widget widget canvas]
-  (println "inside hide: " widget)
   (let [[x y w h] (coord widget canvas)]
     (c2d/with-canvas-> canvas
       (c2d/set-color :white)
@@ -214,7 +213,6 @@
     (when (= code :tab)
       (when-let [new-widget-map (next-tabbed-widget-map canvas (:widgets @state) (:previously-tabbed @state) widget)]
         (swap! state merge new-widget-map)
-        (println new-widget-map)
         (swap! strigui.widget/state merge @state)
         (apply redraw! canvas (:widgets new-widget-map))))
     (widget-global-event :key-pressed canvas char code)
