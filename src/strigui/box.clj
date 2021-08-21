@@ -3,20 +3,8 @@
             [strigui.widget :as wdg]))
 
 (set! *warn-on-reflection* true)
-;;(set! *unchecked-math* :warn-on-boxed)
-
-(defprotocol Box 
-  "collection of functions around redrawing boxes, managing the border etc. ..."
-  (draw-hover [this canvas] "draws the hover effect")
-  (draw-clicked [this canvas] "draws the clicked effect"))
-
-(defprotocol Event
-  "collection of functions to hook into events"
-  (key-pressed [this char code] ""))
 
 (def ^:private default-font-size 15)
-
-;;(def boxes-clicked (atom #{}))
 
 (defn box-coord 
   "Computes the full box coordinates.
@@ -85,44 +73,9 @@
       (box-border canvas color (- strength 1) x y w h no-fill))))
 
 (defn box-draw-border 
-  ([^strigui.box.Box box canvas] (box-draw-border box canvas :black 1))
-  ([^strigui.box.Box box canvas color] (box-draw-border box canvas color 1))
-  ([^strigui.box.Box box canvas color strength] (box-draw-border box canvas color strength false))
-  ([^strigui.box.Box box canvas color strength fill]
+  ([box canvas] (box-draw-border box canvas :black 1))
+  ([box canvas color] (box-draw-border box canvas color 1))
+  ([box canvas color strength] (box-draw-border box canvas color strength false))
+  ([box canvas color strength fill]
   (let [[x y w h] (wdg/coord box canvas)]
     (box-border canvas color strength x y w h (not fill)))))
-
-(defn box-draw-hover 
-  [^strigui.box.Box box canvas] 
-  (box-draw-border box canvas :black 2)
-  box)
-
-(defn box-redraw 
-  [^strigui.box.Box box canvas] 
-  (let [coord (wdg/coord box canvas)]
-    (when (seq coord)
-    (box-draw-border box canvas :white 2)
-      (box-draw-border box canvas :black 1)
-      (wdg/draw box canvas)
-      box)))
-
-(defn box-remove-drawn 
-  [^strigui.box.Box box canvas]
-  (box-draw-border box canvas :white 2 false)
-  (box-draw-border box canvas :black 1 false))
-
-;; TODO: should remove global events
-;; (defmethod wdg/widget-global-event :mouse-released 
-;;   [_ canvas & args]
-;;   (map #(draw-hover %1 canvas) @boxes-clicked)
-;;   (reset! boxes-clicked  #{}))
-
-(defn handle-key-pressed
-  [canvas widget char code]
-  (when (-> widget :args :selected?)
-    (let [box-with-new-input (key-pressed widget char code)
-          box-with-new-input (assoc-in box-with-new-input [:args :selected?] (or (not= code :enter)
-                                                                                 (not= code :tab)))]
-      (when box-with-new-input
-        (wdg/replace! canvas widget box-with-new-input)
-        (box-draw-text canvas (wdg/value box-with-new-input) (wdg/args box-with-new-input))))))

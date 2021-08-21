@@ -15,28 +15,8 @@
           :else (b/box-draw-border this canvas :black 1))
         (b/box-draw canvas (:value this) (:args this))))
 
-(extend-protocol b/Box
-  Button
-  (draw-hover [this canvas] (b/box-draw-hover this canvas))
-  (draw-clicked [this canvas] 
-    (b/box-draw-border this canvas :blue 2)
-    this))
-
 (defmethod wdg/widget-event [strigui.button.Button :key-pressed]
   [_ canvas widget char code]
   (when (= code :enter)
     (let [[x y] (wdg/coord widget canvas)]
       (wdg/handle-clicked x y))))
-
-;; (defmethod wdg/widget-event [strigui.button.Button :widget-focus-in] 
-;;   [_ canvas widget]
-;;   (b/draw-hover widget canvas))
-
-;; (defmethod wdg/widget-event [strigui.button.Button :widget-focus-out]
-;;   [_ canvas widget]
-;;   (b/box-remove-drawn widget canvas))
-
-;; (defmethod wdg/widget-event [strigui.button.Button :mouse-clicked]
-;;   [_ canvas widget]
-;;   (b/draw-clicked widget canvas)
-;;   (swap! b/boxes-clicked #(conj %1 %2) widget))

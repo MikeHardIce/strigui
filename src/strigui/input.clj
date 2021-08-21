@@ -19,27 +19,16 @@
           :else (b/box-draw-border this canvas :black 1))
         this))
 
-(extend-protocol b/Box
-  Input
-  (draw-hover [this canvas] 
-    (when (not (-> this :args :selected?))
-      (b/box-draw-hover this canvas)))
-  (draw-clicked [this canvas]  
-    (b/box-draw-border this canvas :blue 2)
-    this))
-
 (defn adjust-text [text char code]
   (if (and (= code :back_space) (> (count text) 0)) 
     (subs text 0 (- (count text) 1))
     (str text char)))
 
-(extend-protocol b/Event
-  Input
-  (key-pressed [this char code]
-    (if (or (some #(= code %) dont-display)
-            (and (= code :back_space) (< (count (:value this)) 1)))
-      this
-      (assoc this :value (adjust-text (:value this) char code)))))
+(defn key-pressed [this char code]
+  (if (or (some #(= code %) dont-display)
+          (and (= code :back_space) (< (count (:value this)) 1)))
+    this
+    (assoc this :value (adjust-text (:value this) char code))))
 
 (defn input
   "canvas - clojure2d canvas
@@ -52,27 +41,18 @@
       min-width - the minimum width"
   [canvas name text args]
     (let [input (->Input name text args)]
-      ;; (when (:selected? args)
-      ;;   (b/draw-clicked input canvas))
       input))
 
-;; (defmethod wdg/widget-event [strigui.input.Input :widget-focus-in]
-;;   [_ canvas widget]
-;;   (b/draw-hover widget canvas))
-
-;; (defmethod wdg/widget-event [strigui.input.Input :widget-focus-out]
-;;   [_ canvas widget]
-;;   (b/box-remove-drawn widget canvas))
-
-;; (defmethod wdg/widget-event [strigui.input.Input :mouse-clicked]
-;;   [_ canvas widget]
-;;   ;; (let [widget (assoc-in widget [:args :selected?] true)]
-;;   ;;   ())
-;;   ;; (swap! wdg/state assoc :selected widget)
-;;   ;; (b/draw-clicked widget canvas)
-;;   ;; (swap! b/boxes-clicked #(conj %1 %2) widget)
-;;   )
+(defn handle-key-pressed
+  [canvas widget char code]
+  (when (-> widget :args :selected?)
+    (let [box-with-new-input (key-pressed widget char code)
+          box-with-new-input (assoc-in box-with-new-input [:args :selected?] (or (not= code :enter)
+                                                                                 (not= code :tab)))]
+      (when box-with-new-input
+        (wdg/replace! canvas widget box-with-new-input)
+        (b/box-draw-text canvas (wdg/value box-with-new-input) (wdg/args box-with-new-input))))))
 
 (defmethod wdg/widget-event [strigui.input.Input :key-pressed]
   [_ canvas widget char code]
-  (b/handle-key-pressed canvas widget char code))
+  (handle-key-pressed canvas widget char code))
