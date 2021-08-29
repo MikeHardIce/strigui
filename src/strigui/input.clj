@@ -1,6 +1,7 @@
 (ns strigui.input
   (:require [strigui.widget :as wdg]
-            [strigui.box :as b]))
+            [strigui.box :as b]
+            [clojure2d.core :as c2d]))
 
 (defonce dont-display [:shift :alt :alt_graph :left :right :up
                        :down :tab])
@@ -18,6 +19,14 @@
           (-> this :args :focused?) (b/box-draw-border this canvas :black 2)
           :else (b/box-draw-border this canvas :black 1))
         this))
+
+;; (extend-protocol wdg/Hide
+;;  Input
+;;   (hide [this canvas] (let [[x y w h] (wdg/coord this canvas)]
+;;                         (println "hide call to overriden function!")
+;;                         (c2d/with-canvas-> canvas
+;;                           (c2d/set-color :white)
+;;                           (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
 
 (defn adjust-text [text char code]
   (if (and (= code :back_space) (> (count text) 0)) 

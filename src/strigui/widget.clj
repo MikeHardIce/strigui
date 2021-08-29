@@ -10,6 +10,9 @@
   (widget-name [this] "name of the widget")
   (draw [this canvas] "draw the widget, returns the widget on success"))
 
+(defprotocol Hide
+  (hide [this canvas] "to provide a custom implementation for hiding a widget per widget type"))
+
 (def state (atom {:widgets ()
                   :widgets-to-redraw #{}
                   :previous-mouse-position nil
@@ -73,8 +76,16 @@
       {:widgets new-widgets
        :previously-tabbed (when (seq not-tabbed) (s/union previously-tabbed #{(:name new-selected)}))})))
 
-(defn hide
-  [^strigui.widget.Widget widget canvas]
+(defmulti hide! (fn [widget _]
+                  (cond 
+                    (extends? Hide (class widget)) :custom)))
+
+(defmethod hide! :custom
+  [widget canvas]
+  (hide widget canvas))
+
+(defmethod hide! :default
+ [widget canvas] 
   (let [[x y w h] (coord widget canvas)]
     (c2d/with-canvas-> canvas
       (c2d/set-color :white)
@@ -83,7 +94,7 @@
 (defn redraw!
   [canvas & widgets]
   (when (seq widgets)
-    (hide (first widgets) canvas)
+    (hide! (first widgets) canvas)
     (draw (first widgets) canvas)
     (recur canvas (rest widgets))))
 
@@ -94,7 +105,7 @@
 
 (defn unregister!
   [canvas ^strigui.widget.Widget widget]
-  (when (hide widget canvas)
+  (when (hide! widget canvas)
     (swap! state update :widgets #(filter (fn [item] (not= item %2)) %1) widget)
     (swap! state update :widgets-to-redraw #(s/difference %1 #{widget}))))
 
