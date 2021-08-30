@@ -1,5 +1,7 @@
 (ns strigui.core
   (:require
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
    [strigui.button]
    [strigui.label]
    [strigui.input :as inp]
@@ -95,3 +97,18 @@
 (defn info 
   [text]
   (wnd/display-info (:context @wdg/state) text))
+
+(defn from-map
+  "Initializes the window and the widgets from a map"
+  [strigui-map]
+  (let [widget-types (filter #(not= % :window) (keys strigui-map))]
+    (when-let [window-args (:window strigui-map)]
+      (apply window! window-args))))
+
+(defn from-file
+  "Initializes the window and the widgets from a edn file"
+  [file-name]
+  (when (.exists (io/file file-name))
+    (->> (slurp file-name)
+         edn/read-string
+         from-map)))
