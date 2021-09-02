@@ -2,7 +2,7 @@
   (:require [strigui.box :as b]
             [strigui.widget :as wdg]))
 
-(defrecord Button [name value args events]
+(defrecord Button [name value args]
   wdg/Widget
   (coord [this canvas] (apply b/box-coord [canvas (:value this) (:args this)])) ;; could be a mapping if the record would look different
   (value [this] (:value this))

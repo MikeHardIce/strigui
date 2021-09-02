@@ -67,7 +67,7 @@
      color - vector consisting of [background-color font-color]
      min-width - the minimum width"
   [name text args]
-  (create! (Button. name text args {})))
+  (create! (Button. name text args)))
 
 (defn label!
    "Create a simple label on screen.
@@ -101,9 +101,15 @@
 (defn from-map
   "Initializes the window and the widgets from a map"
   [strigui-map]
-  (let [widget-types (filter #(not= % :window) (keys strigui-map))]
-    (when-let [window-args (:window strigui-map)]
-      (apply window! window-args))))
+  (when-let [window-args (:window strigui-map)]
+    (apply window! window-args))
+  (let [exprs (for [widget-key (filter #(not= % :window) (keys strigui-map))]
+                (for [widgets-args (map identity (widget-key strigui-map))]
+                  (str "(strigui.core/create! (apply " (namespace widget-key) "/->" (name widget-key) " " widgets-args "))")))]
+    (loop [exp (mapcat identity exprs)]
+      (when (seq exp)
+        (eval (read-string (first exp)))
+        (recur (rest exp))))))
 
 (defn from-file
   "Initializes the window and the widgets from a edn file"
