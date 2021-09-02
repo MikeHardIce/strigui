@@ -40,7 +40,8 @@
    height
    fps -  frames per second
    quality - rendering quality :low :mid :high :highest"
-  ([wind] (wnd/init-window wind))
+  ([wind] 
+   (swap! wdg/state assoc :context (wnd/init-window wind)))
   ([width height title]
    (swap! wdg/state assoc :context (wnd/init-window width height title)))
   ([width height title ^Integer fps quality]
@@ -48,8 +49,11 @@
    (swap! wdg/state assoc :context (wnd/init-window width height title fps quality))))
   
 (defn create! 
-  "Register and show a custom widget"
+  "Register and show a custom widget.
+   Registering a component with the same name will replace the existing component with the new one."
   [^strigui.widget.Widget widget]
+  (when-let [w (find-by-name (:name widget))]
+    (wdg/unregister! (:canvas (:context @wdg/state)) w))
   (wdg/register! (:canvas (:context @wdg/state)) widget))
 
 (defn close-window
