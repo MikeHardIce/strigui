@@ -52,8 +52,7 @@
   "Register and show a custom widget.
    Registering a component with the same name will replace the existing component with the new one."
   [^strigui.widget.Widget widget]
-  (when-let [w (find-by-name (:name widget))]
-    (wdg/unregister! (:canvas (:context @wdg/state)) w))
+  (remove! (:name widget))
   (wdg/register! (:canvas (:context @wdg/state)) widget))
 
 (defn close-window
