@@ -4,15 +4,15 @@
 
 A small straightforward GUI library that can be extended with new Widgets. At the moment, it only contains widgets for a button, input and a label plus the window component itself.
 The goal is to provide an easy to use tool to create a simple UI in Clojure. It should provide a few simple widgets to start with,
-but you should also be able to create your own widgets that are more or less "managed" by strigui. 
+but you can create your own widgets too. 
 It uses Clojure2d (https://github.com/Clojure2D/clojure2d) underneath. So anything that can be drawn could potentially be a widget (like the game board in https://github.com/MikeHardIce/Dame).
 
-Note: This is in an early alpha stage. It is also my road to Clojure. Any suggestion or help on coding is absolutely welcome!
+Note: This is in an alpha stage. I use it mainly to learn Clojure and to write simple desktop apps. Any suggestion or help on coding is absolutely welcome!
 
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha11"]]
+:dependencies [[strigui "0.0.1-alpha12"]]
 ```
 Example at https://github.com/MikeHardIce/strigui-sample
 
@@ -87,6 +87,34 @@ As mentioned in the begining, https://github.com/MikeHardIce/Dame is another exa
 
 The game board and the 2 buttons are strigui widgets.
 
+## Edn file
+
+Widgets can now be loaded from a edn file too.
+
+Example:
+gui-test.edn
+```
+{:window [600 600 "From a edn file"]
+ :strigui.label/Label [["welcome" "Welcome to Strigui" {:x 190 :y 100
+                                                      :color [:green]
+                                                      :font-size 20 :font-style [:bold]
+                                                      :can-move? true}]]
+ :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 :color [:white :black] :can-tab? true}]]
+ :strigui.input/Input [["input" "" {:x 100 :y 150 :color [:white :red] :min-width 420 :selected? true :can-tab? true}]
+                       ["input1" "" {:x 100 :y 200 :color [:white :red] :min-width 420 :can-tab? true}]]}
+```
+
+And load it in your clj file via
+```
+(ns example.core
+  (:require [strigui.core :as gui]))
+
+....
+(gui/from-file "gui-test.edn")
+...
+```
+
+If a widget name already exists, the widget gets unregistered and replaced by the new widget.
 
 ## Releasing standalone apps:
 
