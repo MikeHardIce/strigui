@@ -16,11 +16,33 @@
   [name]
   (first (filter #(= (wdg/widget-name %) name) (:widgets @wdg/state))))
 
+(defn find-by-group
+  "Retuns a vector of widgets by group name"
+  [name]
+  (filter #(= (-> % :args :group) name) (:widgets @wdg/state)))
+
 (defn remove! 
   "Remove an widget by its name"
   [name]
   (when-let [box-to-remove (find-by-name name)]
     (wdg/unregister! (:canvas (:context @wdg/state)) box-to-remove)))
+
+(defn remove-group!
+  "Removes all widgets assigned to the given group"
+  [name]
+  (when-let [widgets (find-by-group name)]
+    (loop [widgets widgets]
+      (when (seq widgets)
+        (wdg/unregister! (:canvas (:context @wdg/state)) (first widgets))
+        (recur (rest widgets))))
+    widgets))
+
+(defn- update-widget!
+  [widget key value]
+  (when (seq widget)
+    (wdg/unregister! (:canvas (:context @wdg/state)) widget)
+    (let [keys (if (seqable? key) key (vector key))]
+      (wdg/register! (:canvas (:context @wdg/state)) (assoc-in widget keys value)))))
 
 (defn update! 
 "Update any property of a widget via the widget name.
@@ -29,9 +51,16 @@
  value - the new property value"
   [name key value]
   (when-let [w (find-by-name name)]
-    (wdg/unregister! (:canvas (:context @wdg/state)) w )
-      (let [keys (if (seqable? key) key (vector key))]
-        (wdg/register! (:canvas (:context @wdg/state)) (assoc-in w keys value)))))
+    (update-widget! w key value)))
+
+(defn update-group!
+  [name key value]
+  (when-let [widgets (find-by-group name)]
+    (loop [widgets widgets]
+      (when (seq widgets)
+        (update-widget! (first widgets) key value)
+        (recur (rest widgets))))
+    widgets))
 
 (defn window!
   "Initializes a new window or reuses an existing one

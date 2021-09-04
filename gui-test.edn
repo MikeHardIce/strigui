@@ -2,7 +2,7 @@
  :strigui.label/Label [["welcome" "Welcome to Strigui" {:x 190 :y 100
                                                       :color [:green]
                                                       :font-size 20 :font-style [:bold]
-                                                      :can-move? true}]]
- :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 :color [:white :black] :can-tab? true}]]
- :strigui.input/Input [["input" "" {:x 100 :y 150 :color [:white :red] :min-width 420 :selected? true :can-tab? true}]
+                                                      :can-move? true :group "bla"}]]
+ :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 :color [:white :black] :can-tab? true :group "bla"}]]
+ :strigui.input/Input [["input" "" {:x 100 :y 150 :color [:white :red] :min-width 420 :selected? true :can-tab? true :group "inputs"}]
                        ["input1" "" {:x 100 :y 200 :color [:white :red] :min-width 420 :can-tab? true}]]}
