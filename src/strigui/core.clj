@@ -19,7 +19,9 @@
 (defn find-by-group
   "Retuns a vector of widgets by group name"
   [name]
-  (filter #(= (-> % :args :group) name) (:widgets @wdg/state)))
+  (let [get-seq (fn [x] (if (string? x) (vector x) x))
+        filter-crit (fn [x] (some #(= name %) (-> x :args :group get-seq)))]
+    (filter filter-crit (:widgets @wdg/state))))
 
 (defn remove! 
   "Remove an widget by its name"
