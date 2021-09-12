@@ -10,14 +10,10 @@
   wdg/Widget
   (coord [this canvas] (apply b/box-coord [canvas (:value this) (:args this)]))
   (value [this] (:value this))
-  (args [this] (:args this))
+  (defaults [this] (assoc-in this [:args :has-border?] true))
   (widget-name [this] (:name this))
   (draw [this canvas]
         (b/box-draw canvas (:value this) (:args this))
-        (cond
-          (-> this :args :selected?) (b/box-draw-border this canvas :blue 2)
-          (-> this :args :focused?) (b/box-draw-border this canvas :black 2)
-          :else (b/box-draw-border this canvas :black 1))
         this))
 
 ;; (extend-protocol wdg/Hide
@@ -60,7 +56,7 @@
                                                                                  (not= code :tab)))]
       (when box-with-new-input
         (wdg/replace! canvas widget box-with-new-input)
-        (b/box-draw-text canvas (wdg/value box-with-new-input) (wdg/args box-with-new-input))))))
+        (b/box-draw-text canvas (:value box-with-new-input) (:args box-with-new-input))))))
 
 (defmethod wdg/widget-event [strigui.input.Input :key-pressed]
   [_ canvas widget char code]

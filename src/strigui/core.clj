@@ -85,7 +85,8 @@
   [^strigui.widget.Widget widget]
   (remove! (:name widget))
   (let [canvas (-> @wdg/state :context :canvas)
-        widget (wdg/adjust-dimensions canvas widget)]
+        widget (wdg/adjust-dimensions canvas widget)
+        widget (wdg/defaults widget)]
     (wdg/register! canvas widget)))
 
 (defn close-window

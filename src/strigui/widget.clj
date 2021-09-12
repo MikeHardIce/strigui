@@ -6,7 +6,7 @@
   "collection of functions around redrawing widgets, managing the border etc. ..."
   (coord [this canvas] "gets the coordinates of the widget")
   (value [this] "the current text of the widget")
-  (args [this] "the current args of the widget")
+  (defaults [this] "attach default values")
   (widget-name [this] "name of the widget")
   (draw [this canvas] "draw the widget, returns the widget on success"))
 
@@ -54,6 +54,30 @@
   [coord1 coord2]
   (or (within? coord1 coord2)
       (within? coord2 coord1)))
+
+(defn- draw-border-rec
+  ([canvas color strength x y w h no-fill]
+   (when (> strength 0)
+     (c2d/with-canvas-> canvas
+       (c2d/set-color color)
+       (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) no-fill))
+     (draw-border-rec canvas color (- strength 1) x y w h no-fill))))
+
+(defn- draw-border
+  ([box canvas] (draw-border box canvas :black 1))
+  ([box canvas color] (draw-border box canvas color 1))
+  ([box canvas color strength] (draw-border box canvas color strength false))
+  ([box canvas color strength fill]
+   (let [[x y w h] (coord box canvas)]
+     (draw-border-rec canvas color strength x y w h (not fill)))))
+
+(defn draw-widget-border
+  [^strigui.widget.Widget widget canvas]
+  (when (-> widget :args :has-border?)
+    (cond
+      (-> widget :args :selected?) (draw-border widget canvas :blue 2)
+      (-> widget :args :focused?) (draw-border widget canvas :black 2)
+      :else (draw-border widget canvas :black 1))))
 
 (defn distance-x
   "Manhatten distance that is sqashed on the x-axis,
@@ -106,9 +130,11 @@
 (defn redraw!
   [canvas & widgets]
   (when (seq widgets)
-    (hide! (first widgets) canvas)
-    (draw (first widgets) canvas)
-    (recur canvas (rest widgets))))
+    (let [widget (first widgets)]
+      (hide! widget canvas)
+      (draw widget canvas)
+      (draw-widget-border widget canvas)
+      (recur canvas (rest widgets)))))
 
 (defn adjust-dimensions 
   [canvas ^strigui.widget.Widget widget]
@@ -122,6 +148,7 @@
 (defn register!
   [canvas ^strigui.widget.Widget widget]
   (when (draw widget canvas)
+    (draw-widget-border widget canvas)
     (swap! state update :widgets conj widget)))
 
 (defn unregister!

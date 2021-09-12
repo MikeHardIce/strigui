@@ -33,6 +33,6 @@
   wdg/Widget
   (coord [this canvas] (coord-label this canvas))
   (value [this] (:value this))
-  (args [this] (:args this))
+  (defaults [this] this)
   (widget-name [this] (:name this))
   (draw [this canvas] (draw-label this canvas)))
