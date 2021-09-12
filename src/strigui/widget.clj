@@ -98,6 +98,15 @@
     (draw (first widgets) canvas)
     (recur canvas (rest widgets))))
 
+(defn adjust-dimensions 
+  [canvas ^strigui.widget.Widget widget]
+  (let [[_ _ w h] (coord widget canvas)
+        {{width :width height :height :as args} :args} widget
+        width (if (and (number? width) (>= width w)) width w)
+        height (if (and (number? height) (>= height h)) height h)
+        args (assoc args :width width :height height)]
+    (assoc widget :args args)))
+
 (defn register!
   [canvas ^strigui.widget.Widget widget]
   (when (draw widget canvas)

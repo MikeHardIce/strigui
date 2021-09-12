@@ -84,7 +84,9 @@
    Registering a component with the same name will replace the existing component with the new one."
   [^strigui.widget.Widget widget]
   (remove! (:name widget))
-  (wdg/register! (:canvas (:context @wdg/state)) widget))
+  (let [canvas (-> @wdg/state :context :canvas)
+        widget (wdg/adjust-dimensions canvas widget)]
+    (wdg/register! canvas widget)))
 
 (defn close-window
   "Closes the current active window."
