@@ -27,7 +27,7 @@
   "Remove an widget by its name"
   [name]
   (when-let [box-to-remove (find-by-name name)]
-    (wdg/unregister! (:canvas (:context @wdg/state)) box-to-remove)))
+    (wdg/unregister! (-> @wdg/state :context :canvas) box-to-remove)))
 
 (defn remove-group!
   "Removes all widgets assigned to the given group"
@@ -35,16 +35,16 @@
   (when-let [widgets (find-by-group name)]
     (loop [widgets widgets]
       (when (seq widgets)
-        (wdg/unregister! (:canvas (:context @wdg/state)) (first widgets))
+        (wdg/unregister! (-> @wdg/state :context :canvas) (first widgets))
         (recur (rest widgets))))
     widgets))
 
 (defn- update-widget!
   [widget key value]
   (when (seq widget)
-    (wdg/unregister! (:canvas (:context @wdg/state)) widget)
+    (wdg/unregister! (-> @wdg/state :context :canvas) widget)
     (let [keys (if (seqable? key) key (vector key))]
-      (wdg/register! (:canvas (:context @wdg/state)) (assoc-in widget keys value)))))
+      (wdg/register! (-> @wdg/state :context :canvas) (assoc-in widget keys value)))))
 
 (defn update! 
 "Update any property of a widget via the widget name.
@@ -92,7 +92,7 @@
 (defn close-window
   "Closes the current active window."
   []
-  (wnd/close-window (:window (:context @wdg/state))))
+  (wnd/close-window (-> @wdg/state :context :window)))
 
 (defn button!
   "Create a simple button on screen.
@@ -129,7 +129,7 @@
     color - vector consisting of [background-color font-color]
     min-width - the minimum width"
   [name text args]
-  (create! (inp/input (:canvas (:context @wdg/state)) name text args)))
+  (create! (inp/input (-> @wdg/state :context :canvas) name text args)))
 
 (defn info 
   [text]
