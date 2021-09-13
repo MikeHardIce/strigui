@@ -1,7 +1,6 @@
 (ns strigui.input
   (:require [strigui.widget :as wdg]
-            [strigui.box :as b]
-            [clojure2d.core :as c2d]))
+            [strigui.box :as b]))
 
 (defonce dont-display [:shift :alt :alt_graph :left :right :up
                        :down :tab])
@@ -9,9 +8,7 @@
 (defrecord Input [name value args]
   wdg/Widget
   (coord [this canvas] (apply b/box-coord [canvas (:value this) (:args this)]))
-  (value [this] (:value this))
   (defaults [this] (assoc-in this [:args :has-border?] true))
-  (widget-name [this] (:name this))
   (draw [this canvas]
         (b/box-draw canvas (:value this) (:args this))
         this))

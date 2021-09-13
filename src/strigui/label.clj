@@ -32,7 +32,5 @@
 (defrecord Label [name value args]
   wdg/Widget
   (coord [this canvas] (coord-label this canvas))
-  (value [this] (:value this))
   (defaults [this] this)
-  (widget-name [this] (:name this))
   (draw [this canvas] (draw-label this canvas)))

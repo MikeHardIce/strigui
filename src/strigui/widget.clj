@@ -5,9 +5,7 @@
 (defprotocol Widget
   "collection of functions around redrawing widgets, managing the border etc. ..."
   (coord [this canvas] "gets the coordinates of the widget")
-  (value [this] "the current text of the widget")
   (defaults [this] "attach default values")
-  (widget-name [this] "name of the widget")
   (draw [this canvas] "draw the widget, returns the widget on success"))
 
 (defprotocol Hide

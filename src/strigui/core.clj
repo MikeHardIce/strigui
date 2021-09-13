@@ -14,7 +14,7 @@
 (defn find-by-name 
   "Find and return an widget by its name"
   [name]
-  (first (filter #(= (wdg/widget-name %) name) (:widgets @wdg/state))))
+  (first (filter #(= (:name %) name) (:widgets @wdg/state))))
 
 (defn find-by-group
   "Retuns a vector of widgets by group name"
