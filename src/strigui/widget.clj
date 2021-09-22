@@ -19,7 +19,7 @@
 
 (defn on-border?
   [[x y w h] x0 y0]
-  (let [thickness 5
+  (let [thickness 10
         bottom-start (+ y (- h thickness))
         right-start (+ x (- w thickness))]
     (or (and (<= x x0 (+ right-start thickness))
@@ -73,6 +73,7 @@
   [^strigui.widget.Widget widget canvas]
   (when (-> widget :args :has-border?)
     (cond
+      (-> widget :args :resizing?) (draw-border widget canvas :orange 2)
       (-> widget :args :selected?) (draw-border widget canvas :blue 2)
       (-> widget :args :focused?) (draw-border widget canvas :black 2)
       :else (draw-border widget canvas :black 1))))
@@ -185,6 +186,15 @@
           new-y (+ (-> widget :args :y) dy)]
       (update widget :args #(merge % {:x new-x :y new-y})))))
 
+(defn- handle-widget-resizing
+  [^strigui.widget.Widget widget [x y]]
+  (when-let [old-position (:previous-mouse-position @state)]
+    (let [dx (- x (first old-position))
+          dy (- y (second old-position))
+          new-width (+ (-> widget :args :width) dx)
+          new-height (+ (-> widget :args :height) dy)]
+      (update widget :args #(merge % {:width new-width :height new-height})))))
+
 (defn handle-clicked
   [x-pos y-pos]
   (let [context (:context @strigui.widget/state)
@@ -193,9 +203,10 @@
         widget (first (filter #(within? (coord % canvas) x-pos y-pos) widgets))
         selected (filter #(and (-> % :args :selected?) (not= % widget)) widgets)]
     (when (seq widget)
-      (widget-event :mouse-clicked canvas widget)
-      (trigger-custom-event :mouse-clicked widget)
-      (replace! canvas widget (assoc-in widget [:args :selected?] true)))
+      (when (not (-> widget :args :resizing?))
+        (widget-event :mouse-clicked canvas widget)
+        (trigger-custom-event :mouse-clicked widget)
+        (replace! canvas widget (assoc-in widget [:args :selected?] true))))
     (when (seq selected)
       (loop [sel selected]
         (when (seq sel)
@@ -208,7 +219,8 @@
         canvas (:canvas context)
         window (:window context)
         widgets (:widgets @state)
-        widget (first (filter #(within? (coord % canvas) (c2d/mouse-x window) (c2d/mouse-y window)) (sort-by #(-> % :args :z) widgets)))
+        [x y] [(c2d/mouse-x window) (c2d/mouse-y window)]
+        widget (first (filter #(within? (coord % canvas) x y) (sort-by #(-> % :args :z) widgets)))
         widget-mut (atom widget)]
     (when (seq widget)
       (let [widget-coords (coord widget canvas)
@@ -218,25 +230,29 @@
         (apply redraw! canvas neighbouring-widgets)
         (widget-event :mouse-moved canvas widget)
         (trigger-custom-event :mouse-moved widget))
+        (swap! widget-mut assoc-in [:args :resizing?] (and (-> widget :args :can-resize) (on-border? (coord widget canvas) x y)))
       ;; handle widget focusing
       (when (not (-> widget :args :focused?))
-        ;;(replace! canvas @widget (swap! widget assoc-in [:args :focused?] true))
         (swap! widget-mut assoc-in [:args :focused?] true)
         (widget-event :widget-focus-in canvas widget)
         (trigger-custom-event :widget-focus-in widget))
-      ;; handle widget dragging
-      (when (and (c2d/mouse-pressed? window) (-> widget :args :can-move?))
-        (swap! widget-mut merge (handle-widget-dragging widget [(c2d/mouse-x window) (c2d/mouse-y window)]))
-        ;;(handle-widget-dragging canvas @widget [(c2d/mouse-x window) (c2d/mouse-y window)])
-        (widget-event :widget-moved canvas widget)
-        (trigger-custom-event :widget-moved widget)))
+      (when (c2d/mouse-pressed? window)
+        (cond 
+          (and (-> widget :args :can-resize) (on-border? (coord widget canvas) x y)) (swap! widget-mut merge (handle-widget-resizing widget [x y]))
+          (-> widget :args :can-move?) (do
+                                         (swap! widget-mut merge (handle-widget-dragging widget [x y]))
+                                         (widget-event :widget-moved canvas widget)
+                                         (trigger-custom-event :widget-moved widget)))))
     ;; reset all previously focused widgets
     (loop [prev-widgets (filter #(and (-> % :args :focused?) (not= widget %)) widgets)]
       (when (seq prev-widgets)
-        (replace! canvas (first prev-widgets) (assoc-in (first prev-widgets) [:args :focused?] nil))
-        (widget-event :widget-focus-out canvas (first prev-widgets))
-        (trigger-custom-event :widget-focus-out (first prev-widgets))
-        (recur (rest prev-widgets))))
+        (let [prev-widget (first prev-widgets)
+              prev-new-widget (assoc-in prev-widget [:args :focused?] nil)
+              prev-new-widget (assoc-in prev-new-widget [:args :resizing?] nil)]
+        (replace! canvas prev-widget prev-new-widget)
+        (widget-event :widget-focus-out canvas prev-widget)
+        (trigger-custom-event :widget-focus-out prev-widget)
+        (recur (rest prev-widgets)))))
     (when (not= @widget-mut widget)
       (replace! canvas widget @widget-mut))))
 
