@@ -35,10 +35,10 @@
    x - x-coord of point to check
    y - y-coord of point to check"
   ([coord x y]
-   (and (>= x (first coord))
-        (>= y (nth coord 1))
-        (<= x (+ (first coord) (nth coord 2)))
-        (<= y (+ (nth coord 1) (nth coord 3)))))
+   (and (>= (+ x 5) (first coord))
+        (>= (+ y 5) (nth coord 1))
+        (<= (- x 5) (+ (first coord) (nth coord 2)))
+        (<= (- y 5) (+ (nth coord 1) (nth coord 3)))))
   ([coord1 coord2]
    (let [[x2 y2 w2 h2] coord2
          x2+w2 (+ x2 w2)
