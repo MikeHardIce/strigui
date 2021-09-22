@@ -20,14 +20,14 @@
 (defn on-border?
   [[x y w h] x0 y0]
   (let [thickness 10
-        bottom-start (+ y (- h thickness))
-        right-start (+ x (- w thickness))]
-    (or (and (<= x x0 (+ right-start thickness))
-             (or (<= y y0 (+ y thickness))
-                 (<= bottom-start y0 (+ bottom-start thickness))))
-        (and (<= y y0 (+ bottom-start thickness))
-                 (or (<= x x0 (+ x thickness))
-                     (<= right-start x0 (+ right-start thickness)))))))
+        bottom-start (+ y h)
+        right-start (+ x w)]
+    (or (and (<= (- x thickness) x0 (+ right-start thickness))
+             (or (<= (- y thickness) y0 (+ y thickness))
+                 (<= (- bottom-start thickness) y0 (+ bottom-start thickness))))
+        (and (<= (- y thickness) y0 (+ bottom-start thickness))
+                 (or (<= (- x thickness) x0 (+ x thickness))
+                     (<= (- right-start thickness) x0 (+ right-start thickness)))))))
 
 (defn within?
   "Checks wheter the point (x y) is within the given coord
