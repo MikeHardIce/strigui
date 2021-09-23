@@ -249,9 +249,9 @@
           (cond
             (and (-> widget :args :can-resize) at-border) (swap! widget-mut merge (handle-widget-resizing widget [x y]))
             (-> widget :args :can-move?) (do
-                                           (swap! widget-mut merge (handle-widget-dragging widget-mut [x y]))
-                                           (widget-event :widget-moved canvas widget-mut)
-                                           (trigger-custom-event :widget-moved widget-mut))))))
+                                           (swap! widget-mut merge (handle-widget-dragging widget [x y]))
+                                           (widget-event :widget-moved canvas widget)
+                                           (trigger-custom-event :widget-moved widget))))))
     ;; reset all previously focused widgets
     (loop [prev-widgets (filter #(and (-> % :args :focused?) (not= widget %)) widgets)]
       (when (seq prev-widgets)
