@@ -2,6 +2,8 @@
   (:require [clojure2d.core :as c2d]
             [clojure.set :as s]))
 
+(def ^:private border-thickness 10)
+
 (defprotocol Widget
   "collection of functions around redrawing widgets, managing the border etc. ..."
   (coord [this canvas] "gets the coordinates of the widget")
@@ -19,15 +21,14 @@
 
 (defn on-border?
   [[x y w h] x0 y0]
-  (let [thickness 10
-        bottom-start (+ y h)
+  (let [bottom-start (+ y h)
         right-start (+ x w)]
-    (or (and (<= (- x thickness) x0 (+ right-start thickness))
-             (or (<= (- y thickness) y0 (+ y thickness))
-                 (<= (- bottom-start thickness) y0 (+ bottom-start thickness))))
-        (and (<= (- y thickness) y0 (+ bottom-start thickness))
-                 (or (<= (- x thickness) x0 (+ x thickness))
-                     (<= (- right-start thickness) x0 (+ right-start thickness)))))))
+    (or (and (<= (- x border-thickness) x0 (+ right-start border-thickness))
+             (or (<= (- y border-thickness) y0 (+ y border-thickness))
+                 (<= (- bottom-start border-thickness) y0 (+ bottom-start border-thickness))))
+        (and (<= (- y border-thickness) y0 (+ bottom-start border-thickness))
+                 (or (<= (- x border-thickness) x0 (+ x border-thickness))
+                     (<= (- right-start border-thickness) x0 (+ right-start border-thickness)))))))
 
 (defn within?
   "Checks wheter the point (x y) is within the given coord
@@ -189,11 +190,18 @@
 (defn- handle-widget-resizing
   [^strigui.widget.Widget widget [x y]]
   (when-let [old-position (:previous-mouse-position @state)]
-    (let [dx (- x (first old-position))
-          dy (- y (second old-position))
-          new-width (+ (-> widget :args :width) dx)
-          new-height (+ (-> widget :args :height) dy)]
-      (update widget :args #(merge % {:width new-width :height new-height})))))
+    (let [[dx dy] [(- x (first old-position)) (- y (second old-position))]
+          [x0 y0 w h] [(-> widget :args :x) (-> widget :args :y) (-> widget :args :width) (-> widget :args :height)]
+          position-f (fn [m0 m] (<= (- m0 border-thickness) m (+ m0 border-thickness)))
+          [left? top? right? bottom?] [(position-f x0 x) (position-f y0 y) (position-f (+ x0 w) x) (position-f (+ y0 h) y)]
+          [x1 y1 w1 h1] (cond 
+                          left? [(+ x0 dx) y0 (- w dx) h]
+                          top? [x0 (+ y0 dy) w (- h dy)]
+                          right? [x0 y0 (+ w dx) h]
+                          bottom? [x0 y0 w (+ h dy)]
+                          :else [x0 y0 w h])]
+      (update widget :args #(merge % {:width w1 :height h1
+                                      :x x1 :y y1})))))
 
 (defn handle-clicked
   [x-pos y-pos]
@@ -223,26 +231,27 @@
         widget (first (filter #(within? (coord % canvas) x y) (sort-by #(-> % :args :z) widgets)))
         widget-mut (atom widget)]
     (when (seq widget)
-      (let [widget-coords (coord widget canvas)
-            neighbouring-widgets (set (filter #(and (intersect? widget-coords (coord % canvas))
-                                                    (not= widget %)) widgets))
-            neighbouring-widgets (sort-by #(-> % :args :z) neighbouring-widgets)]
-        (apply redraw! canvas neighbouring-widgets)
-        (widget-event :mouse-moved canvas widget)
-        (trigger-custom-event :mouse-moved widget))
-        (swap! widget-mut assoc-in [:args :resizing?] (and (-> widget :args :can-resize) (on-border? (coord widget canvas) x y)))
+      (let [at-border (on-border? (coord widget canvas) x y)]
+        (let [widget-coords (coord widget canvas)
+              neighbouring-widgets (set (filter #(and (intersect? widget-coords (coord % canvas))
+                                                      (not= widget %)) widgets))
+              neighbouring-widgets (sort-by #(-> % :args :z) neighbouring-widgets)]
+          (apply redraw! canvas neighbouring-widgets)
+          (widget-event :mouse-moved canvas widget)
+          (trigger-custom-event :mouse-moved widget))
+        (swap! widget-mut assoc-in [:args :resizing?] (and (-> widget :args :can-resize) at-border))
       ;; handle widget focusing
-      (when (not (-> widget :args :focused?))
-        (swap! widget-mut assoc-in [:args :focused?] true)
-        (widget-event :widget-focus-in canvas widget)
-        (trigger-custom-event :widget-focus-in widget))
-      (when (c2d/mouse-pressed? window)
-        (cond 
-          (and (-> widget :args :can-resize) (on-border? (coord widget canvas) x y)) (swap! widget-mut merge (handle-widget-resizing widget [x y]))
-          (-> widget :args :can-move?) (do
-                                         (swap! widget-mut merge (handle-widget-dragging widget [x y]))
-                                         (widget-event :widget-moved canvas widget)
-                                         (trigger-custom-event :widget-moved widget)))))
+        (when (not (-> widget :args :focused?))
+          (swap! widget-mut assoc-in [:args :focused?] true)
+          (widget-event :widget-focus-in canvas widget)
+          (trigger-custom-event :widget-focus-in widget))
+        (when (c2d/mouse-pressed? window)
+          (cond
+            (and (-> widget :args :can-resize) at-border) (swap! widget-mut merge (handle-widget-resizing widget [x y]))
+            (-> widget :args :can-move?) (do
+                                           (swap! widget-mut merge (handle-widget-dragging widget-mut [x y]))
+                                           (widget-event :widget-moved canvas widget-mut)
+                                           (trigger-custom-event :widget-moved widget-mut))))))
     ;; reset all previously focused widgets
     (loop [prev-widgets (filter #(and (-> % :args :focused?) (not= widget %)) widgets)]
       (when (seq prev-widgets)
