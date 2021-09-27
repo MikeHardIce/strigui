@@ -173,3 +173,13 @@
                  w-map))
         strigui-map (merge strigui-map widget-map)]
     strigui-map))
+
+(defn to-file
+  "Writes the current state of strigui into a edn file"
+  [file-name]
+  (when (.exists (io/file file-name))
+    (io/delete-file file-name))
+  (->> (to-map)
+       str
+       (#(clojure.string/replace % #"]," "]\n"))
+       (spit file-name)))
