@@ -157,7 +157,7 @@
          from-map)))
 
 (defn to-map
-  "exports the current state to a map that could be stored in a file"
+  "converts the current state to a map that could be stored in a file"
   []
   (let [window (select-keys (-> @wdg/state :context :window) [:w :h :fps :frame])
         window-name (-> window :frame .getTitle)
