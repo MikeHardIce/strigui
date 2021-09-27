@@ -155,3 +155,21 @@
     (->> (slurp file-name)
          edn/read-string
          from-map)))
+
+(defn to-map
+  "exports the current state to a map that could be stored in a file"
+  []
+  (let [window (select-keys (-> @wdg/state :context :window) [:w :h :fps :frame])
+        window-name (-> window :frame .getTitle)
+        {:keys [w h name fps]} (assoc (select-keys window [:w :h :fps]) :name window-name)
+        strigui-map {:window [w h name fps]}
+        widgets-grouped (group-by #(class %) (-> @wdg/state :widgets))
+        widget-types (keys widgets-grouped)
+        widget-map (loop [w-types widget-types
+                    w-map {}]
+               (if (seq w-types)
+                 (recur (rest w-types) (merge w-map {(keyword (clojure.string/replace-first (str (first w-types)) #"class " ""))
+                                              (mapv #(vec (vals (select-keys % (filter (fn [k] (not= k :events)) (keys %))))) (get widgets-grouped (first w-types)))}))
+                 w-map))
+        strigui-map (merge strigui-map widget-map)]
+    strigui-map))
