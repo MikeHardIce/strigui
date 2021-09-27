@@ -181,5 +181,6 @@
     (io/delete-file file-name))
   (->> (to-map)
        str
-       (#(clojure.string/replace % #"]," "]\n"))
+       (#(clojure.string/replace % #"]]," "]]\n"))
+       (#(clojure.string/replace % #"," ""))
        (spit file-name)))
