@@ -9,6 +9,8 @@ It uses Clojure2d (https://github.com/Clojure2D/clojure2d) underneath. So anythi
 
 Note: This is in an alpha stage. I use it mainly to learn Clojure and to write simple desktop apps. Any suggestion or help on coding is absolutely welcome!
 
+[See Changes](CHANGES.md)
+
 In project.clj:
 
 ```
