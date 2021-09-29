@@ -5,7 +5,7 @@
 A small straightforward GUI library that can be extended with new Widgets. At the moment, it only contains widgets for a button, input and a label plus the window component itself.
 The goal is to provide an easy to use tool to create a simple UI in Clojure. It should provide a few simple widgets to start with,
 but you can create your own widgets too. 
-It uses Clojure2d (https://github.com/Clojure2D/clojure2d) underneath. So anything that can be drawn could potentially be a widget (like the game board in https://github.com/MikeHardIce/Dame).
+It uses [Clojure2d](https://github.com/Clojure2D/clojure2d) underneath. So anything that can be drawn could potentially be a widget (like the game board in [Dame](https://github.com/MikeHardIce/Dame)).
 
 Note: This is in an alpha stage. I use it mainly to learn Clojure and to write simple desktop apps. Any suggestion or help on coding is absolutely welcome!
 
@@ -16,7 +16,7 @@ In project.clj:
 ```
 :dependencies [[strigui "0.0.1-alpha13"]]
 ```
-Example at https://github.com/MikeHardIce/strigui-sample
+[Example](https://github.com/MikeHardIce/strigui-sample)
 
 You need the core namespace.
 
@@ -73,7 +73,7 @@ Custom widgets can be defined by creating a record that implements the protocol 
     (widget-name [this] "name of the widget")
     (draw [this canvas] "draw the widget, returns the widget on success"))
 ```
-See https://github.com/MikeHardIce/strigui-sample/blob/main/src/strigui_sample/widget_stacks.clj#L42 for reference
+See [example](https://github.com/MikeHardIce/strigui-sample/blob/main/src/strigui_sample/widget_stacks.clj#L42) for reference
 
 A custom widget could be invoked via
 
@@ -85,7 +85,7 @@ A custom widget could be invoked via
 (gui/create! (st/->Stack "stacks" '(5 1 8 2 0 3 0 5 7) {:x 100 :y 400}))
 ```
 
-As mentioned in the begining, https://github.com/MikeHardIce/Dame is another example.
+As mentioned in the begining, [Dame](https://github.com/MikeHardIce/Dame) is another example.
 
 The game board and the 2 buttons are strigui widgets.
 
