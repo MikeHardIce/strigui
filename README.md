@@ -67,11 +67,10 @@ Custom widgets can be defined by creating a record that implements the protocol 
 ```
 (defprotocol Widget 
     "collection of functions around redrawing widgets, managing the border etc. ..."
-    (coord [this canvas] "gets the coordinates of the widget")
-    (value [this] "the current text of the widget")
-    (args [this] "the current args of the widget")
-    (widget-name [this] "name of the widget")
-    (draw [this canvas] "draw the widget, returns the widget on success"))
+  (coord [this canvas] "gets the coordinates of the widget")
+  (defaults [this] "attach default values")
+  (draw [this canvas] "draw the widget, returns the widget on success"))
+
 ```
 See [example](https://github.com/MikeHardIce/strigui-sample/blob/main/src/strigui_sample/widget_stacks.clj#L42) for reference
 
