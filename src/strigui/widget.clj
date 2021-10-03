@@ -264,6 +264,8 @@
 
 (defn handle-mouse-moved
   []
+  ;; this functions needs a rework, i think it can be optimized a lot.
+  ;; need to find a better strategy to redraw widgets
   (let [context (:context @state)
         canvas (:canvas context)
         window (:window context)

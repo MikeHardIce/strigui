@@ -14,7 +14,7 @@ Note: This is in an alpha stage. I use it mainly to learn Clojure and to write s
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha13"]]
+:dependencies [[strigui "0.0.1-alpha14"]]
 ```
 [Example](https://github.com/MikeHardIce/strigui-sample)
 

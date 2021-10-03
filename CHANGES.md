@@ -1,6 +1,11 @@
 
 [back](README.md)
 
+### 0.0.1-alpha14
+
+* some fixes to the drawing order, this probably needs a rework/different strategy
+* resizing, selecting and focusing state drawing functions can be overriden when defining custom widgets
+
 ### 0.0.1-alpha13
 
 * the entire gui can now be stored into an edn file
