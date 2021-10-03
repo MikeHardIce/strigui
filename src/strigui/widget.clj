@@ -1,6 +1,7 @@
 (ns strigui.widget
   (:require [clojure2d.core :as c2d]
-            [clojure.set :as s]))
+            [clojure.set :as s]
+            [clojure.string]))
 
 (def ^:private border-thickness 10)
 
@@ -10,8 +11,22 @@
   (defaults [this] "attach default values")
   (draw [this canvas] "draw the widget, returns the widget on success"))
 
-(defprotocol Hide
-  (hide [this canvas] "to provide a custom implementation for hiding a widget per widget type"))
+(defmacro def-action
+  [name default-fn]
+  (let [symb-big (symbol (clojure.string/capitalize name))
+        symb-small (symbol (clojure.string/lower-case name))
+        symb-mult (symbol (clojure.string/lower-case (str name "!")))]
+    `(do (defprotocol ~symb-big
+             (~symb-small [this# canvas#] ""))
+          (defmulti ~symb-mult (fn [widget# _#]
+                                  (cond
+                                    (extends? ~symb-big (class widget#)) :custom)))
+         (defmethod ~symb-mult :custom 
+           [this# canvas#]
+           (~symb-small this# canvas#))
+         (defmethod ~symb-mult :default
+           [this# canvas#]
+           (~default-fn this# canvas#)))))
 
 (def state (atom {:widgets ()
                   :widgets-to-redraw #{}
@@ -70,13 +85,28 @@
    (let [[x y w h] (coord box canvas)]
      (draw-border-rec canvas color strength x y w h (not fill)))))
 
+(def-action "hide" (fn [widget canvas]
+                     (let [[x y w h] (coord widget canvas)]
+                       (c2d/with-canvas-> canvas
+                         (c2d/set-color :white)
+                         (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
+
+(def-action "draw-resizing" (fn [widget canvas]
+                              (draw-border widget canvas :orange 2)))
+
+(def-action "draw-selected" (fn [widget canvas]
+                              (draw-border widget canvas :blue 2)))
+
+(def-action "draw-focused" (fn [widget canvas]
+                              (draw-border widget canvas :black 2)))
+
 (defn draw-widget-border
   [^strigui.widget.Widget widget canvas]
   (when (-> widget :args :has-border?)
     (cond
-      (-> widget :args :resizing?) (draw-border widget canvas :orange 2)
-      (-> widget :args :selected?) (draw-border widget canvas :blue 2)
-      (-> widget :args :focused?) (draw-border widget canvas :black 2)
+      (-> widget :args :resizing?) (draw-resizing! widget canvas)
+      (-> widget :args :selected?) (draw-selected! widget canvas)
+      (-> widget :args :focused?) (draw-focused! widget canvas)
       :else (draw-border widget canvas :black 1))))
 
 (defn distance-x
@@ -112,20 +142,20 @@
       {:widgets new-widgets
        :previously-tabbed (when (seq not-tabbed) (s/union previously-tabbed #{(:name new-selected)}))})))
 
-(defmulti hide! (fn [widget _]
-                  (cond 
-                    (extends? Hide (class widget)) :custom)))
+;; (defmulti hide! (fn [widget _]
+;;                   (cond 
+;;                     (extends? Hide (class widget)) :custom)))
 
-(defmethod hide! :custom
-  [widget canvas]
-  (hide widget canvas))
+;; (defmethod hide! :custom
+;;   [widget canvas]
+;;   (hide widget canvas))
 
-(defmethod hide! :default
- [widget canvas] 
-  (let [[x y w h] (coord widget canvas)]
-    (c2d/with-canvas-> canvas
-      (c2d/set-color :white)
-      (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8)))))
+;; (defmethod hide! :default
+;;  [widget canvas] 
+;;   (let [[x y w h] (coord widget canvas)]
+;;     (c2d/with-canvas-> canvas
+;;       (c2d/set-color :white)
+;;       (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8)))))
 
 (defn redraw!
   [canvas & widgets]
@@ -135,6 +165,16 @@
       (draw widget canvas)
       (draw-widget-border widget canvas)
       (recur canvas (rest widgets)))))
+
+(defn neighbouring-widgets
+  "get all neighbours of the given widget. Neighbours are sorted by their :z coordinate
+   in ascending order"
+  [canvas ^strigui.widget.Widget widget widgets]
+  (let [widget-coords (coord widget canvas)
+              neighbours (set (filter #(and (intersect? widget-coords (coord % canvas))
+                                                      ) widgets))  ;;(not= widget %)
+              neighbours (sort-by #(-> % :args :z) neighbours)]
+    neighbours))
 
 (defn adjust-dimensions 
   [canvas ^strigui.widget.Widget widget]
@@ -209,7 +249,8 @@
         canvas (:canvas context)
         widgets (:widgets @strigui.widget/state)
         widget (first (filter #(within? (coord % canvas) x-pos y-pos) widgets))
-        selected (filter #(and (-> % :args :selected?) (not= % widget)) widgets)]
+        selected (filter #(and (-> % :args :selected?) (not= % widget)) widgets)
+        selected (sort-by #(-> % :args :z) selected)]
     (when (seq widget)
       (when (not (-> widget :args :resizing?))
         (widget-event :mouse-clicked canvas widget)
@@ -228,15 +269,13 @@
         window (:window context)
         widgets (:widgets @state)
         [x y] [(c2d/mouse-x window) (c2d/mouse-y window)]
-        widget (first (filter #(within? (coord % canvas) x y) (sort-by #(-> % :args :z) widgets)))
+        widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) widgets))))
         widget-mut (atom widget)]
     (when (seq widget)
       (let [at-border (on-border? (coord widget canvas) x y)]
-        (let [widget-coords (coord widget canvas)
-              neighbouring-widgets (set (filter #(and (intersect? widget-coords (coord % canvas))
-                                                      (not= widget %)) widgets))
-              neighbouring-widgets (sort-by #(-> % :args :z) neighbouring-widgets)]
-          (apply redraw! canvas neighbouring-widgets)
+        (let [neighbours (neighbouring-widgets canvas widget widgets)]
+          (apply redraw! canvas neighbours)
+          ;(redraw! canvas widget)
           (widget-event :mouse-moved canvas widget)
           (trigger-custom-event :mouse-moved widget))
         (swap! widget-mut assoc-in [:args :resizing?] (and (-> widget :args :can-resize) at-border))
@@ -253,7 +292,7 @@
                                            (widget-event :widget-moved canvas widget)
                                            (trigger-custom-event :widget-moved widget))))))
     ;; reset all previously focused widgets
-    (loop [prev-widgets (filter #(and (-> % :args :focused?) (not= widget %)) widgets)]
+    (loop [prev-widgets (sort-by #(-> % :args :z) (filter #(and (-> % :args :focused?) (not= widget %)) widgets))]
       (when (seq prev-widgets)
         (let [prev-widget (first prev-widgets)
               prev-new-widget (assoc-in prev-widget [:args :focused?] nil)
@@ -291,12 +330,12 @@
         code (c2d/key-code event)
         canvas (:canvas (:context @strigui.widget/state))
         state (atom (select-keys @strigui.widget/state [:widgets :previously-tabbed]))
-        widget (first (filter #(-> % :args :selected?) (:widgets @state)))]
+        widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (:widgets @state)))))]
     (when (= code :tab)
       (when-let [new-widget-map (next-tabbed-widget-map canvas (:widgets @state) (:previously-tabbed @state) widget)]
         (swap! state merge new-widget-map)
         (swap! strigui.widget/state merge @state)
-        (apply redraw! canvas (:widgets new-widget-map))))
+        (apply redraw! canvas (sort-by #(-> % :args :z) (:widgets new-widget-map)))))
     (widget-global-event :key-pressed canvas char code)
     (when-let [widget (first (filter #(-> % :args :selected?) (:widgets @state)))]
       (widget-event :key-pressed canvas widget char code)

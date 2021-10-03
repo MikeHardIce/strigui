@@ -1,6 +1,7 @@
 (ns strigui.input
   (:require [strigui.widget :as wdg]
-            [strigui.box :as b]))
+            [strigui.box :as b]
+            [clojure2d.core :as c2d]))
 
 (defonce dont-display [:shift :alt :alt_graph :left :right :up
                        :down :tab])
@@ -13,6 +14,13 @@
         (b/box-draw canvas (:value this) (:args this))
         this))
 
+;; (extend-protocol wdg/Draw-resizing
+;;   Input
+;;   (draw-resizing [this canvas] (let [[x y w h] (wdg/coord this canvas)]
+;;                                  (c2d/with-canvas-> canvas
+;;                                    (c2d/set-color :orange)
+;;                                    (c2d/rect x y w h))
+;;                                  this)))
 ;; (extend-protocol wdg/Hide
 ;;  Input
 ;;   (hide [this canvas] (let [[x y w h] (wdg/coord this canvas)]

@@ -86,7 +86,9 @@
   (remove! (:name widget))
   (let [canvas (-> @wdg/state :context :canvas)
         widget (wdg/adjust-dimensions canvas widget)
-        widget (wdg/defaults widget)]
+        widget (wdg/defaults widget)
+        neighbours (wdg/neighbouring-widgets canvas widget (-> @wdg/state :widgets))]
+    (apply wdg/redraw! canvas neighbours)
     (wdg/register! canvas widget)))
 
 (defn close-window
