@@ -145,12 +145,13 @@
 
 (defn redraw!
   [canvas & widgets]
-  (when (seq widgets)
-    (let [widget (first widgets)]
-      (hide! widget canvas)
-      (draw widget canvas)
-      (draw-widget-border widget canvas)
-      (recur canvas (rest widgets)))))
+  (loop [widgets (sort-by #(-> % :args :z) widgets)]
+    (when (seq widgets)
+      (let [widget (first widgets)]
+        (hide! widget canvas)
+        (draw widget canvas)
+        (draw-widget-border widget canvas)
+        (recur (rest widgets))))))
 
 (defn neighbouring-widgets
   "get all neighbours of the given widget. Neighbours are sorted by their :z coordinate
@@ -265,7 +266,9 @@
       (let [at-border (on-border? (coord widget canvas) x y)
             was-focused (and (= (:name widget) (-> @state :previously-selected :name)) (not= :mouse-dragged action))]
           (let [neighbours (neighbouring-widgets canvas widget widgets)
-                neighbours (if was-focused 
+                neighbours (map #(neighbouring-widgets canvas % widgets) neighbours)
+                neighbours (mapcat identity neighbours)
+                neighbours (if was-focused
                              (filter #(> (-> % :args :z) (-> widget :args :z)) neighbours)
                              neighbours)]
             (apply redraw! canvas neighbours)
@@ -287,6 +290,9 @@
                                            (trigger-custom-event :widget-moved widget))))))
     ;; reset all previously focused widgets
     (let [previous-widgets (filter #(and (-> % :args :focused?) (not= widget %)) widgets)
+          previous-widgets (map #(neighbouring-widgets canvas % widgets) previous-widgets)
+          previous-widgets (mapcat identity previous-widgets)
+          ;; the neighbours of the noughbours - I probably need to extract this entire thing
           previous-widgets (map #(neighbouring-widgets canvas % widgets) previous-widgets)
           previous-widgets (mapcat identity previous-widgets)
           previous-widgets (sort-by #(-> % :args :z) (set previous-widgets))]
@@ -333,7 +339,7 @@
       (when-let [new-widget-map (next-tabbed-widget-map canvas (:widgets @state) (:previously-tabbed @state) widget)]
         (swap! state merge new-widget-map)
         (swap! strigui.widget/state merge @state)
-        (apply redraw! canvas (sort-by #(-> % :args :z) (:widgets new-widget-map)))))
+        (apply redraw! canvas (:widgets new-widget-map))))
     (widget-global-event :key-pressed canvas char code)
     (when-let [widget (first (filter #(-> % :args :selected?) (:widgets @state)))]
       (widget-event :key-pressed canvas widget char code)
