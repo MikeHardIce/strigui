@@ -1,6 +1,11 @@
 
 [back](README.md)
 
+### 0.0.1-alpha15
+
+* fixes around the drawing order of widgets and their neighbouring widgets
+* when the mouse moves within a widgets, it is not constantly redrawn anymore
+
 ### 0.0.1-alpha14
 
 * some fixes to the drawing order, this probably needs a rework/different strategy
