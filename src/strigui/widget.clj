@@ -165,10 +165,12 @@
 (defn adjust-dimensions 
   [canvas ^strigui.widget.Widget widget]
   (let [[_ _ w h] (coord widget canvas)
-        {{width :width height :height :as args} :args} widget
+        set-default (fn [value] (if (number? value) value 0))
+        {{width :width height :height x :x y :y z :z :as args} :args} widget
         width (if (and (number? width) (>= width w)) width w)
         height (if (and (number? height) (>= height h)) height h)
-        args (assoc args :width width :height height)]
+        [x y z] (map set-default [x y z])
+        args (assoc args :width width :height height :x x :y y :z z)]
     (assoc widget :args args)))
 
 (defn register!
@@ -262,10 +264,12 @@
     (when (seq widget)
       (let [at-border (on-border? (coord widget canvas) x y)
             was-focused (and (= (:name widget) (-> @state :previously-selected :name)) (not= :mouse-dragged action))]
-        (when-not was-focused
-          (let [neighbours (neighbouring-widgets canvas widget widgets)]
+          (let [neighbours (neighbouring-widgets canvas widget widgets)
+                neighbours (if was-focused 
+                             (filter #(> (-> % :args :z) (-> widget :args :z)) neighbours)
+                             neighbours)]
             (apply redraw! canvas neighbours)
-            (swap! state assoc :previously-selected widget)))
+            (swap! state assoc :previously-selected widget))
         (widget-event :mouse-moved canvas widget)
         (trigger-custom-event :mouse-moved widget)
         (swap! widget-mut assoc-in [:args :resizing?] (and (-> widget :args :can-resize) at-border))
@@ -282,15 +286,19 @@
                                            (widget-event :widget-moved canvas widget)
                                            (trigger-custom-event :widget-moved widget))))))
     ;; reset all previously focused widgets
-    (loop [prev-widgets (sort-by #(-> % :args :z) (filter #(and (-> % :args :focused?) (not= widget %)) widgets))]
-      (when (seq prev-widgets)
-        (let [prev-widget (first prev-widgets)
-              prev-new-widget (assoc-in prev-widget [:args :focused?] nil)
-              prev-new-widget (assoc-in prev-new-widget [:args :resizing?] nil)]
-        (replace! canvas prev-widget prev-new-widget)
-        (widget-event :widget-focus-out canvas prev-widget)
-        (trigger-custom-event :widget-focus-out prev-widget)
-        (recur (rest prev-widgets)))))
+    (let [previous-widgets (filter #(and (-> % :args :focused?) (not= widget %)) widgets)
+          previous-widgets (map #(neighbouring-widgets canvas % widgets) previous-widgets)
+          previous-widgets (mapcat identity previous-widgets)
+          previous-widgets (sort-by #(-> % :args :z) (set previous-widgets))]
+      (loop [prev-widgets previous-widgets]
+        (when (seq prev-widgets)
+          (let [prev-widget (first prev-widgets)
+                prev-new-widget (assoc-in prev-widget [:args :focused?] nil)
+                prev-new-widget (assoc-in prev-new-widget [:args :resizing?] nil)]
+            (replace! canvas prev-widget prev-new-widget)
+            (widget-event :widget-focus-out canvas prev-widget)
+            (trigger-custom-event :widget-focus-out prev-widget)
+            (recur (rest prev-widgets))))))
     (when (not= @widget-mut widget)
       (replace! canvas widget @widget-mut))))
 
