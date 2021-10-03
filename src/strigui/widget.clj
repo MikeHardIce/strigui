@@ -32,6 +32,7 @@
                   :widgets-to-redraw #{}
                   :previous-mouse-position nil
                   :previously-tabbed #{}
+                  :previously-selected nil
                   :context {:canvas nil :window nil}}))
 
 (defn on-border?
@@ -142,21 +143,6 @@
       {:widgets new-widgets
        :previously-tabbed (when (seq not-tabbed) (s/union previously-tabbed #{(:name new-selected)}))})))
 
-;; (defmulti hide! (fn [widget _]
-;;                   (cond 
-;;                     (extends? Hide (class widget)) :custom)))
-
-;; (defmethod hide! :custom
-;;   [widget canvas]
-;;   (hide widget canvas))
-
-;; (defmethod hide! :default
-;;  [widget canvas] 
-;;   (let [[x y w h] (coord widget canvas)]
-;;     (c2d/with-canvas-> canvas
-;;       (c2d/set-color :white)
-;;       (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8)))))
-
 (defn redraw!
   [canvas & widgets]
   (when (seq widgets)
@@ -172,7 +158,7 @@
   [canvas ^strigui.widget.Widget widget widgets]
   (let [widget-coords (coord widget canvas)
               neighbours (set (filter #(and (intersect? widget-coords (coord % canvas))
-                                                      ) widgets))  ;;(not= widget %)
+                                                      ) widgets)) ;;(not= widget %)  
               neighbours (sort-by #(-> % :args :z) neighbours)]
     neighbours))
 
@@ -263,7 +249,7 @@
           (recur (rest sel)))))))
 
 (defn handle-mouse-moved
-  []
+  [action]
   ;; this functions needs a rework, i think it can be optimized a lot.
   ;; need to find a better strategy to redraw widgets
   (let [context (:context @state)
@@ -274,12 +260,14 @@
         widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) widgets))))
         widget-mut (atom widget)]
     (when (seq widget)
-      (let [at-border (on-border? (coord widget canvas) x y)]
-        (let [neighbours (neighbouring-widgets canvas widget widgets)]
-          (apply redraw! canvas neighbours)
-          ;(redraw! canvas widget)
-          (widget-event :mouse-moved canvas widget)
-          (trigger-custom-event :mouse-moved widget))
+      (let [at-border (on-border? (coord widget canvas) x y)
+            was-focused (and (= (:name widget) (-> @state :previously-selected :name)) (not= :mouse-dragged action))]
+        (when-not was-focused
+          (let [neighbours (neighbouring-widgets canvas widget widgets)]
+            (apply redraw! canvas neighbours)
+            (swap! state assoc :previously-selected widget)))
+        (widget-event :mouse-moved canvas widget)
+        (trigger-custom-event :mouse-moved widget)
         (swap! widget-mut assoc-in [:args :resizing?] (and (-> widget :args :can-resize) at-border))
       ;; handle widget focusing
         (when (not (-> widget :args :focused?))
@@ -307,14 +295,14 @@
       (replace! canvas widget @widget-mut))))
 
 (defmethod c2d/mouse-event ["main-window" :mouse-dragged] [event state]
-  (handle-mouse-moved)
+  (handle-mouse-moved :mouse-dragged)
   (let [context (:context @strigui.widget/state)
         window (:window context)]
     (swap! strigui.widget/state assoc :previous-mouse-position [(c2d/mouse-x window) (c2d/mouse-y window)]))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-moved] [event state]
-  (handle-mouse-moved)
+  (handle-mouse-moved :mouse-moved)
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-pressed] [event state]
