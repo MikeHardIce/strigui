@@ -60,7 +60,7 @@
           box-with-new-input (assoc-in box-with-new-input [:args :selected?] (or (not= code :enter)
                                                                                  (not= code :tab)))]
       (when box-with-new-input
-        (wdg/replace! canvas widget box-with-new-input)
+        (wdg/replace! canvas (:name widget) box-with-new-input)
         (b/box-draw-text canvas (:value box-with-new-input) (:args box-with-new-input))))))
 
 (defmethod wdg/widget-event [strigui.input.Input :key-pressed]

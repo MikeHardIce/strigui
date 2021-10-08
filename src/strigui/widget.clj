@@ -127,13 +127,11 @@
   ([widgets key value]
    (->> widgets
         (filter #(= (-> % :args key) value))
-        (merge {})
-        (map #(-> % :name))))
+        (map :name)))
   ([widgets key]
    (->> widgets
         (filter #(-> % :args key))
-        (merge {})
-        (map #(-> % :name)))))
+        (map :name))))
 
 (defn set-with-property
   ""
@@ -143,7 +141,7 @@
 
 (defn next-widget-to-tab
   [canvas widgets previously-tabbed ^strigui.widget.Widget selected-widget]
-  (let [widgets-can-tab (get-with-property widgets :can-tab?)
+  (let [widgets-can-tab (get-with-property (map val widgets) :can-tab?)
         previously-tabbed (map :name previously-tabbed)
         previously-tabbed (conj previously-tabbed (:name selected-widget))
         not-tabbed (s/difference (set widgets-can-tab) (set previously-tabbed))
@@ -151,7 +149,7 @@
         to-be-tabbed (if (seq not-tabbed) not-tabbed widgets-can-tab)
         coord-widget (if (seq selected-widget) (coord selected-widget canvas) [0 0])
         widgets-to-be-tabbed (select-keys widgets to-be-tabbed)
-        dist (map #(merge {:widget %} {:dist (distance-x coord-widget (coord % canvas))}) widgets-to-be-tabbed)
+        dist (map #(merge {:widget %} {:dist (distance-x coord-widget (coord % canvas))}) (map val widgets-to-be-tabbed))
         dist (sort-by :dist < dist)
         dist (filter #(> (:dist %) 0) dist)
         new-selected (:widget (first dist))]
@@ -205,7 +203,7 @@
   "Replaces the current widget of the given widget name with the
    new widget, if the current widget actually exists, otherwise it ignores it."
   [canvas old-widget-name ^strigui.widget.Widget new-widget]
-  (when-let [old-widget (-> @state :widgets (select-keys old-widget-name))]
+  (when-let [old-widget (val (first (-> @state :widgets (select-keys [old-widget-name]))))]
     (unregister! canvas old-widget)
     (register! canvas new-widget)))
 
@@ -255,14 +253,14 @@
   (let [context (:context @strigui.widget/state)
         canvas (:canvas context)
         ;widgets (:widgets @strigui.widget/state)
-        widget (merge {} (first (filter #(within? (coord % canvas) x-pos y-pos) (-> @state :widgets (map val)))))
-        selected (get-with-property (-> @state :widgets (map val)) :selected?)
-        selected (sort-by #(-> % val :args :z) (select-keys (-> @state :widgets (map val)) selected))]
+        widget (first (filter #(within? (coord % canvas) x-pos y-pos) (->> @state :widgets (map val))))
+        selected (get-with-property (->> @state :widgets (map val)) :selected?)
+        selected (sort-by #(-> % val :args :z) (map val (select-keys (->> @state :widgets) selected)))]
     (when (seq widget)
       (when (not (-> widget :args :resizing?))
         (widget-event :mouse-clicked canvas widget)
         (trigger-custom-event :mouse-clicked widget)
-        (replace! canvas widget (assoc-in widget [:args :selected?] true))))
+        (replace! canvas (:name widget) (assoc-in widget [:args :selected?] true))))
     (when (seq selected)
       (loop [unselected (set-with-property selected :selected? nil)]
         (when (seq unselected)
@@ -278,13 +276,13 @@
         window (:window context)
         ;widgets (:widgets @state)
         [x y] [(c2d/mouse-x window) (c2d/mouse-y window)]
-        widget (merge {} (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (-> @state :widgets (map val)))))))
+        widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (->> @state :widgets (map val))))))
         widget-mut (atom widget)]
     (when (seq widget)
       (let [at-border (on-border? (coord widget canvas) x y)
             was-focused (and (= (:name widget) (-> @state :previously-selected :name)) (not= :mouse-dragged action))]
-          (let [neighbours (neighbouring-widgets canvas widget (-> @state :widgets (map val)))
-                neighbours (map #(neighbouring-widgets canvas % (-> @state :widgets (map val))) neighbours)
+          (let [neighbours (neighbouring-widgets canvas widget (->> @state :widgets (map val)))
+                neighbours (map #(neighbouring-widgets canvas % (->> @state :widgets (map val))) neighbours)
                 neighbours (mapcat identity neighbours)
                 neighbours (if was-focused
                              (filter #(> (-> % :args :z) (-> widget :args :z)) neighbours)
@@ -307,11 +305,11 @@
                                            (widget-event :widget-moved canvas widget)
                                            (trigger-custom-event :widget-moved widget))))))
     ;; reset all previously focused widgets
-    (let [previous-widgets (filter #(and (-> % :args :focused?) (not= widget %)) (-> @state :widgets (map val)))
-          previous-widgets (map #(neighbouring-widgets canvas % (-> @state :widgets (map val))) previous-widgets)
+    (let [previous-widgets (filter #(and (-> % :args :focused?) (not= widget %)) (->> @state :widgets (map val)))
+          previous-widgets (map #(neighbouring-widgets canvas % (->> @state :widgets (map val))) previous-widgets)
           previous-widgets (mapcat identity previous-widgets)
           ;; the neighbours of the noughbours - I probably need to extract this entire thing
-          previous-widgets (map #(neighbouring-widgets canvas % (-> @state :widgets (map val))) previous-widgets)
+          previous-widgets (map #(neighbouring-widgets canvas % (->> @state :widgets (map val))) previous-widgets)
           previous-widgets (mapcat identity previous-widgets)
           previous-widgets (sort-by #(-> % :args :z) (set previous-widgets))]
       (loop [prev-widgets previous-widgets]
@@ -351,14 +349,14 @@
   (let [char (c2d/key-char event)
         code (c2d/key-code event)
         canvas (:canvas (:context @state))
-        widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (-> @state :widgets val)))))]
+        widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets (map val))))))]
     (when (= code :tab)
-      (when-let [new-widget (next-widget-to-tab canvas (-> @state :widgets val) (:previously-tabbed @state) widget)]
+      (when-let [new-widget (:name (next-widget-to-tab canvas (->> @state :widgets) (:previously-tabbed @state) widget))]
         (swap! state assoc-in [:widgets new-widget :args :selected?] true)
-        (swap! state update :previously-tabbed s/union (set (-> @state :widgets new-widget)))
+        (swap! state update :previously-tabbed s/union #{((-> @state :widgets) new-widget)})
         (apply redraw! canvas (:previously-tabbed @state))))
     (widget-global-event :key-pressed canvas char code)
-    (when-let [widget (first (filter #(-> % :args :selected?) (-> @state :widgets val)))]
+    (when-let [widget (first (filter #(-> % :args :selected?) (->> @state :widgets (map val))))]
       (widget-event :key-pressed canvas widget char code)
       (trigger-custom-event :key-pressed widget code)))
   state)
