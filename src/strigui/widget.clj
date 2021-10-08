@@ -28,7 +28,7 @@
            [this# canvas#]
            (~default-fn this# canvas#)))))
 
-(def state (atom {:widgets ()
+(def state (atom {:widgets {}
                   :widgets-to-redraw #{}
                   :previous-mouse-position nil
                   :previously-tabbed #{}
@@ -178,12 +178,12 @@
   [canvas ^strigui.widget.Widget widget]
   (when (draw widget canvas)
     (draw-widget-border widget canvas)
-    (swap! state update :widgets conj widget)))
+    (swap! state assoc-in [:widgets (:name widget)] widget)))
 
 (defn unregister!
   [canvas ^strigui.widget.Widget widget]
   (when (hide! widget canvas)
-    (swap! state update :widgets #(filter (fn [item] (not= item %2)) %1) widget)
+    (swap! state update :widgets dissoc (:name widget))
     (swap! state update :widgets-to-redraw #(s/difference %1 #{widget}))))
 
 (defn replace!
@@ -232,14 +232,28 @@
       (update widget :args #(merge % {:width w1 :height h1
                                       :x x1 :y y1})))))
 
+(defn get-with-property
+  "Returns the widget names for widgets that contain the specific key value pair 
+   or a truthy value for the specific key"
+  ([widgets key value]
+  (->> widgets
+       (filter #(= (-> (val %) :args key) value))
+       (merge {})
+       (map #(-> (val %) :name))))
+  ([widgets key]
+   (->> widgets
+        (filter #(-> (val %) :args key))
+        (merge {})
+        (map #(-> (val %) :name)))))
+
 (defn handle-clicked
   [x-pos y-pos]
   (let [context (:context @strigui.widget/state)
         canvas (:canvas context)
         widgets (:widgets @strigui.widget/state)
-        widget (first (filter #(within? (coord % canvas) x-pos y-pos) widgets))
-        selected (filter #(and (-> % :args :selected?) (not= % widget)) widgets)
-        selected (sort-by #(-> % :args :z) selected)]
+        widget (merge {} (val (first (filter #(within? (coord (val %) canvas) x-pos y-pos) widgets))))
+        selected (get-with-property widgets :selected?)
+        selected (sort-by #(-> % val :args :z) (select-keys widgets selected))]
     (when (seq widget)
       (when (not (-> widget :args :resizing?))
         (widget-event :mouse-clicked canvas widget)
