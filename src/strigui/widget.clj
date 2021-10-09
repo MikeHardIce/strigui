@@ -252,8 +252,8 @@
   [x-pos y-pos]
   (let [context (:context @strigui.widget/state)
         canvas (:canvas context)
-        ;widgets (:widgets @strigui.widget/state)
-        widget (first (filter #(within? (coord % canvas) x-pos y-pos) (->> @state :widgets (map val))))
+         ;; get the first widget that is on top close to the mouse position
+        widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x-pos y-pos) (->> @state :widgets (map val))))))
         selected (get-with-property (->> @state :widgets (map val)) :selected?)
         selected (sort-by #(-> % val :args :z) (map val (select-keys (->> @state :widgets) selected)))]
     (when (seq widget)
@@ -349,14 +349,25 @@
   (let [char (c2d/key-char event)
         code (c2d/key-code event)
         canvas (:canvas (:context @state))
-        widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets (map val))))))]
+        widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets (map val))))))
+        previously-tabbed (select-keys (:widgets @state) (:previously-tabbed @state))
+        previously-tabbed (when-not (= (set (map :name (get-with-property (->> @state :widgets (map val)) :can-tab?)))
+                                   (set (map :name previously-tabbed)))
+                            previously-tabbed)]
     (when (= code :tab)
-      (when-let [new-widget (:name (next-widget-to-tab canvas (->> @state :widgets) (:previously-tabbed @state) widget))]
+      (when-let [new-widget (:name (next-widget-to-tab canvas (->> @state :widgets) previously-tabbed widget))]
         (swap! state assoc-in [:widgets new-widget :args :selected?] true)
-        (swap! state update :previously-tabbed s/union #{((-> @state :widgets) new-widget)})
-        (apply redraw! canvas (:previously-tabbed @state))))
+        (loop [prev (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets (map val))))]
+          (when (seq prev)
+            (println (first prev))
+            (replace! canvas (:name (first prev)) (assoc-in (first prev) [:args :selected?] (= (-> prev first :name) new-widget)))
+            (recur (rest prev))))
+        (when-not (seq previously-tabbed)
+          (swap! state assoc :previously-tabbed #{}))
+        (swap! state update :previously-tabbed s/union #{new-widget})))
+        ;;(apply redraw! canvas (map val (select-keys (:widgets @state) (:previously-tabbed @state))))))
     (widget-global-event :key-pressed canvas char code)
-    (when-let [widget (first (filter #(-> % :args :selected?) (->> @state :widgets (map val))))]
+    (when-let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets (map val))))))]
       (widget-event :key-pressed canvas widget char code)
       (trigger-custom-event :key-pressed widget code)))
   state)
