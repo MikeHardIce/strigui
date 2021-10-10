@@ -256,16 +256,16 @@
         widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x-pos y-pos) (->> @state :widgets (map val))))))
         selected (get-with-property (->> @state :widgets (map val)) :selected?)
         selected (sort-by #(-> % val :args :z) (map val (select-keys (->> @state :widgets) selected)))]
-    (when (seq widget)
-      (when (not (-> widget :args :resizing?))
-        (widget-event :mouse-clicked canvas widget)
-        (trigger-custom-event :mouse-clicked widget)
-        (replace! canvas (:name widget) (assoc-in widget [:args :selected?] true))))
     (when (seq selected)
       (loop [unselected (set-with-property selected :selected? nil)]
         (when (seq unselected)
           (replace! canvas (-> unselected first :name) (-> unselected first))
-          (recur (rest unselected)))))))
+          (recur (rest unselected)))))
+    (when (seq widget)
+      (when (not (-> widget :args :resizing?))
+        (widget-event :mouse-clicked canvas widget)
+        (trigger-custom-event :mouse-clicked widget)
+        (replace! canvas (:name widget) (assoc-in widget [:args :selected?] true))))))
 
 (defn handle-mouse-moved
   [action]

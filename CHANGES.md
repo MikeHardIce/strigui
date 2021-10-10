@@ -1,6 +1,12 @@
 
 [back](README.md)
 
+### 0.0.1-alpha16
+
+* converting strigui.widget/state :widgets to a hashmap instead of a vector
+* fixing drawing order when widgets are above/below other widgets and 
+  how it affects their neighbours
+
 ### 0.0.1-alpha15
 
 * fixes around the drawing order of widgets and their neighbouring widgets
