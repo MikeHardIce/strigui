@@ -176,6 +176,27 @@
               neighbours (sort-by #(-> % :args :z) neighbours)]
     neighbours))
 
+(defn all-neighbouring-widgets
+  "Get all neighbouring widgets by following the neighouring chain.
+   operator-f is a optional order with truthy return (fn [neighbour current-widget] ....) that will be used in a filter , 
+    > - all widgets that are covering the current widget
+    < - all widgets that are covered by the current widget
+   If no order function is given, then take all widgets that touch the current widget."
+  ([canvas ^strigui.widget.Widget widget widgets] (all-neighbouring-widgets canvas widget widgets nil))
+  ([canvas ^strigui.widget.Widget widget widgets operator-f]
+   (loop [neighbours #{widget}
+          visited #{}]
+     (if (< (count visited) (count neighbours))
+       (let [not-visited (s/difference neighbours visited)
+             next-widget (first not-visited)
+             z-of-next (-> next-widget :args :z)
+             new-neighbours (filter #(not= next-widget %) (neighbouring-widgets canvas next-widget widgets))
+             new-neighbours (if operator-f 
+                              (filter #(operator-f (-> % :args :z) z-of-next) new-neighbours)
+                              new-neighbours)]
+         (recur (s/union neighbours (set new-neighbours)) (s/union visited (set next-widget))))
+       neighbours))))
+
 (defn adjust-dimensions 
   [canvas ^strigui.widget.Widget widget]
   (let [[_ _ w h] (coord widget canvas)
