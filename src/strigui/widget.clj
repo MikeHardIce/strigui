@@ -141,8 +141,8 @@
 
 (defn next-widget-to-tab
   [canvas widgets previously-tabbed ^strigui.widget.Widget selected-widget]
+  
   (let [widgets-can-tab (get-with-property (map val widgets) :can-tab?)
-        previously-tabbed (map :name previously-tabbed)
         previously-tabbed (conj previously-tabbed (:name selected-widget))
         not-tabbed (s/difference (set widgets-can-tab) (set previously-tabbed))
         ;; In case not-tabbed is empty, start new
@@ -350,22 +350,20 @@
         code (c2d/key-code event)
         canvas (:canvas (:context @state))
         widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets (map val))))))
-        previously-tabbed (select-keys (:widgets @state) (:previously-tabbed @state))
-        previously-tabbed (when-not (= (set (map :name (get-with-property (->> @state :widgets (map val)) :can-tab?)))
-                                   (set (map :name previously-tabbed)))
+        previously-tabbed (:previously-tabbed @state)
+        previously-tabbed (when-not (= (set (get-with-property (->> @state :widgets (map val)) :can-tab?))
+                                   (set previously-tabbed))
                             previously-tabbed)]
     (when (= code :tab)
       (when-let [new-widget (:name (next-widget-to-tab canvas (->> @state :widgets) previously-tabbed widget))]
         (swap! state assoc-in [:widgets new-widget :args :selected?] true)
         (loop [prev (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets (map val))))]
           (when (seq prev)
-            (println (first prev))
             (replace! canvas (:name (first prev)) (assoc-in (first prev) [:args :selected?] (= (-> prev first :name) new-widget)))
             (recur (rest prev))))
         (when-not (seq previously-tabbed)
           (swap! state assoc :previously-tabbed #{}))
         (swap! state update :previously-tabbed s/union #{new-widget})))
-        ;;(apply redraw! canvas (map val (select-keys (:widgets @state) (:previously-tabbed @state))))))
     (widget-global-event :key-pressed canvas char code)
     (when-let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets (map val))))))]
       (widget-event :key-pressed canvas widget char code)
