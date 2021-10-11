@@ -190,7 +190,7 @@
        (let [not-visited (s/difference neighbours visited)
              next-widget (first not-visited)
              z-of-next (-> next-widget :args :z)
-             new-neighbours (filter #(not= next-widget %) (neighbouring-widgets canvas next-widget widgets))
+             new-neighbours (neighbouring-widgets canvas next-widget widgets)
              new-neighbours (if operator-f 
                               (filter #(operator-f (-> % :args :z) z-of-next) new-neighbours)
                               new-neighbours)]
