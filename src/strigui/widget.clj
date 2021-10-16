@@ -301,13 +301,8 @@
     (when (seq widget)
       (let [at-border (on-border? (coord widget canvas) x y)
             was-focused (and (= (:name widget) (-> @state :previously-selected :name)) (not= :mouse-dragged action))]
-          (let [neighbours (neighbouring-widgets canvas widget (->> @state :widgets vals))
-                neighbours (map #(neighbouring-widgets canvas % (->> @state :widgets vals)) neighbours)
-                neighbours (mapcat identity neighbours)
-                neighbours (if was-focused
-                             (filter #(> (-> % :args :z) (-> widget :args :z)) neighbours)
-                             neighbours)]
-            (apply redraw! canvas neighbours)
+          (let [neighbours (all-neighbouring-widgets canvas widget (->> @state :widgets vals) (when was-focused >))]
+            (apply redraw! canvas (set neighbours))
             (swap! state assoc :previously-selected widget))
         (widget-event :mouse-moved canvas widget)
         (trigger-custom-event :mouse-moved widget)
@@ -326,10 +321,7 @@
                                            (trigger-custom-event :widget-moved widget))))))
     ;; reset all previously focused widgets
     (let [previous-widgets (filter #(and (-> % :args :focused?) (not= widget %)) (->> @state :widgets vals))
-          previous-widgets (map #(neighbouring-widgets canvas % (->> @state :widgets vals)) previous-widgets)
-          previous-widgets (mapcat identity previous-widgets)
-          ;; the neighbours of the noughbours - I probably need to extract this entire thing
-          previous-widgets (map #(neighbouring-widgets canvas % (->> @state :widgets vals)) previous-widgets)
+          previous-widgets (map #(all-neighbouring-widgets canvas % (->> @state :widgets vals) >) previous-widgets)
           previous-widgets (mapcat identity previous-widgets)
           previous-widgets (sort-by #(-> % :args :z) (set previous-widgets))]
       (loop [prev-widgets previous-widgets]
