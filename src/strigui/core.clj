@@ -87,7 +87,8 @@
   (let [canvas (-> @wdg/state :context :canvas)
         widget (wdg/adjust-dimensions canvas widget)
         widget (wdg/defaults widget)
-        neighbours (wdg/neighbouring-widgets canvas widget (->> @wdg/state :widgets (map val)))]
+        neighbours (wdg/all-neighbouring-widgets canvas widget (->> @wdg/state :widgets vals) >)
+        neighbours (sort-by #(-> % :args :z) neighbours)]
     (apply wdg/redraw! canvas neighbours)
     (wdg/register! canvas widget)))
 

@@ -7,7 +7,7 @@ The goal is to provide an easy to use tool to create a simple UI in Clojure. It 
 but you can create your own widgets too. 
 It uses [Clojure2d](https://github.com/Clojure2D/clojure2d) underneath. So anything that can be drawn could potentially be a widget (like the game board in [Dame](https://github.com/MikeHardIce/Dame)).
 
-Note: This is in an alpha stage. I use it mainly to learn Clojure and to write simple desktop apps. Any suggestion or help on coding is absolutely welcome!
+Goal: Have a little library to write simple desktop apps in Clojure.
 
 [See Changes](CHANGES.md)
 
