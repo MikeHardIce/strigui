@@ -194,7 +194,7 @@
              new-neighbours (if operator-f 
                               (filter #(operator-f (-> % :args :z) z-of-next) new-neighbours)
                               new-neighbours)]
-         (recur (s/union neighbours (set new-neighbours)) (s/union visited (set next-widget))))
+         (recur (s/union neighbours (set new-neighbours)) (s/union visited #{next-widget})))
        neighbours))))
 
 (defn adjust-dimensions 
