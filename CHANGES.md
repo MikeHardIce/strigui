@@ -6,7 +6,8 @@
 * converting strigui.widget/state :widgets to a hashmap instead of a vector
 * fixing drawing order when widgets are above/below other widgets and 
   how it affects their neighbours
-* fixed tabbing not tabbing through all tabbable widgets
+* fixed tabbing which wasn't tabbing through all tabbable widgets
+* register!/unregister!/replace! can now be used without redrawing the body of the widget
 
 ### 0.0.1-alpha15
 

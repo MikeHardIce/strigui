@@ -3,18 +3,16 @@
 [![Clojars Project](https://img.shields.io/clojars/v/strigui.svg)](https://clojars.org/strigui)
 
 A small straightforward GUI library that can be extended with new Widgets. At the moment, it only contains widgets for a button, input and a label plus the window component itself.
-The goal is to provide an easy to use tool to create a simple UI in Clojure. It should provide a few simple widgets to start with,
+The goal is to provide an easy to use library to create small desktop apps with Clojure. It should provide a few simple widgets to start with,
 but you can create your own widgets too. 
 It uses [Clojure2d](https://github.com/Clojure2D/clojure2d) underneath. So anything that can be drawn could potentially be a widget (like the game board in [Dame](https://github.com/MikeHardIce/Dame)).
-
-Goal: Have a little library to write simple desktop apps in Clojure.
 
 [See Changes](CHANGES.md)
 
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha15"]]
+:dependencies [[strigui "0.0.1-alpha16"]]
 ```
 [Example](https://github.com/MikeHardIce/strigui-sample)
 

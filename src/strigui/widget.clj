@@ -208,24 +208,40 @@
     (assoc widget :args args)))
 
 (defn register!
-  [canvas ^strigui.widget.Widget widget]
-  (when (draw widget canvas)
-    (draw-widget-border widget canvas)
-    (swap! state assoc-in [:widgets (:name widget)] widget)))
+  "register the widget and draw it to the canvas. Can skip redraw via ski-redraw?"
+  ([canvas ^strigui.widget.Widget widget]
+   (register! canvas widget false))
+  ([canvas ^strigui.widget.Widget widget skip-redraw?]
+   (let [border-and-swap-f (fn []
+                             (draw-widget-border widget canvas)
+                             (swap! state assoc-in [:widgets (:name widget)] widget))]
+   (if skip-redraw? 
+     (border-and-swap-f)
+     (when (draw widget canvas)
+       (border-and-swap-f))))))
 
 (defn unregister!
-  [canvas ^strigui.widget.Widget widget]
-  (when (hide! widget canvas)
-    (swap! state update :widgets dissoc (:name widget))
-    (swap! state update :widgets-to-redraw #(s/difference %1 #{widget}))))
+  "unregister the widget and hide it. "
+  ([canvas ^strigui.widget.Widget widget]
+   (unregister! canvas widget false))
+  ([canvas ^strigui.widget.Widget widget skip-hide?]
+   (let [remove-widget-f (fn []
+                           (swap! state update :widgets dissoc (:name widget))
+                           (swap! state update :widgets-to-redraw #(s/difference %1 #{widget})))]
+     (if skip-hide?
+       (remove-widget-f)
+       (when (hide! widget canvas)
+         (remove-widget-f))))))
 
 (defn replace!
   "Replaces the current widget of the given widget name with the
    new widget, if the current widget actually exists, otherwise it ignores it."
-  [canvas old-widget-name ^strigui.widget.Widget new-widget]
+  ([canvas old-widget-name ^strigui.widget.Widget new-widget]
+   (replace! canvas old-widget-name new-widget false))
+  ([canvas old-widget-name ^strigui.widget.Widget new-widget skip-redraw?]
   (when-let [old-widget (val (first (-> @state :widgets (select-keys [old-widget-name]))))]
-    (unregister! canvas old-widget)
-    (register! canvas new-widget)))
+    (unregister! canvas old-widget skip-redraw?)
+    (register! canvas new-widget skip-redraw?))))
 
 (defn trigger-custom-event
   [action ^strigui.widget.Widget widget & args]
@@ -275,11 +291,12 @@
          ;; get the first widget that is on top close to the mouse position
         widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x-pos y-pos) (->> @state :widgets vals)))))
         selected (get-with-property (->> @state :widgets vals) :selected?)
-        selected (sort-by #(-> % val :args :z) (vals (select-keys (->> @state :widgets) selected)))]
+        selected (sort-by #(-> % val :args :z) (vals (select-keys (->> @state :widgets) selected)))
+        skip-redrawing true]
     (when (seq selected)
       (loop [unselected (set-with-property selected :selected? nil)]
         (when (seq unselected)
-          (replace! canvas (-> unselected first :name) (-> unselected first))
+          (replace! canvas (-> unselected first :name) (-> unselected first) skip-redrawing)
           (recur (rest unselected)))))
     (when (seq widget)
       (when (not (-> widget :args :resizing?))
