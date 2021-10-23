@@ -1,6 +1,10 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
+### 0.0.1-alpha18
+
+* fixed find-by-group! and remove-group!
+
 ### 0.0.1-alpha17
 
 * removed unnecessary redrawing of widgets
