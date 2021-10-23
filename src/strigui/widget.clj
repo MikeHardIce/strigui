@@ -239,8 +239,8 @@
   ([canvas old-widget-name ^strigui.widget.Widget new-widget]
    (replace! canvas old-widget-name new-widget false))
   ([canvas old-widget-name ^strigui.widget.Widget new-widget skip-redraw?]
-  (when-let [old-widget (val (first (-> @state :widgets (select-keys [old-widget-name]))))]
-    (unregister! canvas old-widget skip-redraw?)
+  (when-let [old-widget (first (-> @state :widgets (select-keys [old-widget-name])))]
+    (unregister! canvas (val old-widget) skip-redraw?)
     (register! canvas new-widget skip-redraw?))))
 
 (defn trigger-custom-event
@@ -300,9 +300,9 @@
           (recur (rest unselected)))))
     (when (seq widget)
       (when (not (-> widget :args :resizing?))
+        (replace! canvas (:name widget) (assoc-in widget [:args :selected?] true))
         (widget-event :mouse-clicked canvas widget)
-        (trigger-custom-event :mouse-clicked widget)
-        (replace! canvas (:name widget) (assoc-in widget [:args :selected?] true))))))
+        (trigger-custom-event :mouse-clicked widget)))))
 
 (defn handle-mouse-moved
   [action]

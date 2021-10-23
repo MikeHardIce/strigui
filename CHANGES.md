@@ -1,6 +1,10 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
+### 0.0.1-alpha19 
+
+* fixed issue where widgets can be removed on click by the user before it can get replaced
+
 ### 0.0.1-alpha18
 
 * fixed find-by-group! and remove-group!
