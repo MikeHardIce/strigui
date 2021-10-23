@@ -1,5 +1,5 @@
 
-[back](README.md)
+[back](https://github.com/MikeHardIce/strigui)
 
 ### 0.0.1-alpha17
 
