@@ -311,16 +311,17 @@
   (let [context (:context @state)
         canvas (:canvas context)
         window (:window context)
-        ;widgets (:widgets @state)
         [x y] [(c2d/mouse-x window) (c2d/mouse-y window)]
         widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (->> @state :widgets vals)))))
-        widget-mut (atom widget)]
+        widget-mut (atom widget)
+        was-focused (and (seq widget) (= (:name widget) (-> @state :previously-selected :name)) (not= :mouse-dragged action))
+        skip-redrawing true]
     (when (seq widget)
-      (let [at-border (on-border? (coord widget canvas) x y)
-            was-focused (and (= (:name widget) (-> @state :previously-selected :name)) (not= :mouse-dragged action))]
+      (let [at-border (on-border? (coord widget canvas) x y)]
+        (when-not was-focused
           (let [neighbours (all-neighbouring-widgets canvas widget (->> @state :widgets vals) (when was-focused >))]
             (apply redraw! canvas (set neighbours))
-            (swap! state assoc :previously-selected widget))
+            (swap! state assoc :previously-selected widget)))
         (widget-event :mouse-moved canvas widget)
         (trigger-custom-event :mouse-moved widget)
         (swap! widget-mut assoc-in [:args :resizing?] (and (-> widget :args :can-resize) at-border))
@@ -351,7 +352,9 @@
             (trigger-custom-event :widget-focus-out prev-widget)
             (recur (rest prev-widgets))))))
     (when (not= @widget-mut widget)
-      (replace! canvas (:name widget) @widget-mut))))
+      (replace! canvas (:name widget) @widget-mut)
+      (let [covering-widgets (all-neighbouring-widgets canvas @widget-mut (->> @state :widgets vals) >)]
+            (apply redraw! canvas (set covering-widgets))))))
 
 (defmethod c2d/mouse-event ["main-window" :mouse-dragged] [event state]
   (handle-mouse-moved :mouse-dragged)

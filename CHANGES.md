@@ -1,6 +1,10 @@
 
 [back](README.md)
 
+### 0.0.1-alpha17
+
+* removed unnecessary redrawing of widgets
+
 ### 0.0.1-alpha16
 
 * converting strigui.widget/state :widgets to a hashmap instead of a vector
