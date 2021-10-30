@@ -291,16 +291,15 @@
          ;; get the first widget that is on top close to the mouse position
         widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x-pos y-pos) (->> @state :widgets vals)))))
         selected (get-with-property (->> @state :widgets vals) :selected?)
-        selected (sort-by #(-> % val :args :z) (vals (select-keys (->> @state :widgets) selected)))
-        skip-redrawing true]
+        selected (sort-by #(-> % val :args :z) (vals (select-keys (->> @state :widgets) selected)))]
     (when (seq selected)
       (loop [unselected (set-with-property selected :selected? nil)]
         (when (seq unselected)
-          (replace! canvas (-> unselected first :name) (-> unselected first) skip-redrawing)
+          (replace! canvas (-> unselected first :name) (-> unselected first) (-> unselected first :args :skip-redrawing :on-unselect))
           (recur (rest unselected)))))
     (when (seq widget)
       (when (not (-> widget :args :resizing?))
-        (replace! canvas (:name widget) (assoc-in widget [:args :selected?] true))
+        (replace! canvas (:name widget) (assoc-in widget [:args :selected?] true) (-> widget :args :skip-redrawing :on-click))
         (widget-event :mouse-clicked canvas widget)
         (trigger-custom-event :mouse-clicked widget)))))
 
@@ -315,12 +314,14 @@
         widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (->> @state :widgets vals)))))
         widget-mut (atom widget)
         was-focused (and (seq widget) (= (:name widget) (-> @state :previously-selected :name)) (not= :mouse-dragged action))
+        pending-redraw (atom #{})
         skip-redrawing true]
     (when (seq widget)
       (let [at-border (on-border? (coord widget canvas) x y)]
         (when-not was-focused
           (let [neighbours (all-neighbouring-widgets canvas widget (->> @state :widgets vals) (when was-focused >))]
-            (apply redraw! canvas (set neighbours))
+            (swap! pending-redraw s/union (set (map :name neighbours)))
+            ;;(apply redraw! canvas (set neighbours))
             (swap! state assoc :previously-selected widget)))
         (widget-event :mouse-moved canvas widget)
         (trigger-custom-event :mouse-moved widget)
@@ -342,19 +343,31 @@
           previous-widgets (map #(all-neighbouring-widgets canvas % (->> @state :widgets vals) >) previous-widgets)
           previous-widgets (mapcat identity previous-widgets)
           previous-widgets (sort-by #(-> % :args :z) (set previous-widgets))]
+      (let [greater (if (seq widget) 
+                           (filter #(>= (-> % :args :z) (-> widget :args :z)) previous-widgets)
+                             previous-widgets)]
+        (swap! pending-redraw s/union (set (map :name greater))))
       (loop [prev-widgets previous-widgets]
         (when (seq prev-widgets)
           (let [prev-widget (first prev-widgets)
                 prev-new-widget (assoc-in prev-widget [:args :focused?] nil)
                 prev-new-widget (assoc-in prev-new-widget [:args :resizing?] nil)]
-            (replace! canvas (:name prev-widget) prev-new-widget)
+            (replace! canvas (:name prev-widget) prev-new-widget skip-redrawing)
             (widget-event :widget-focus-out canvas prev-widget)
             (trigger-custom-event :widget-focus-out prev-widget)
             (recur (rest prev-widgets))))))
     (when (not= @widget-mut widget)
-      (replace! canvas (:name widget) @widget-mut)
-      (let [covering-widgets (all-neighbouring-widgets canvas @widget-mut (->> @state :widgets vals) >)]
-            (apply redraw! canvas (set covering-widgets))))))
+      (replace! canvas (:name widget) @widget-mut skip-redrawing)
+      (when (= :mouse-dragged action)
+        (hide! widget canvas))
+      (let [covering-widgets (all-neighbouring-widgets canvas @widget-mut (->> @state :widgets vals) >)
+            covering-widgets (filter #(not= @widget-mut %) covering-widgets)]
+        (swap! pending-redraw s/union (set (map :name covering-widgets)))))
+    (when-let [widgets (->> @pending-redraw
+                            (select-keys (:widgets @state))
+                            vals
+                            (filter #(not (-> % :args :skip-redrawing :on-hover))))] ;; (vals (select-keys (:widgets @state) @pending-redraw))
+      (apply redraw! canvas widgets))))
 
 (defmethod c2d/mouse-event ["main-window" :mouse-dragged] [event state]
   (handle-mouse-moved :mouse-dragged)

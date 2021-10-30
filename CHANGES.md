@@ -3,6 +3,8 @@
 
 ### 0.0.1-alpha19 
 
+* added skip-redraw? for widget updates
+* added :skip-redrawing option to widget
 * fixed issue where widgets can be removed on click by the user before it can get replaced
 
 ### 0.0.1-alpha18

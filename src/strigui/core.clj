@@ -40,29 +40,32 @@
     widgets))
 
 (defn- update-widget!
-  [widget key value]
+  [widget key value skip-redraw?]
   (when (seq widget)
-    (wdg/unregister! (-> @wdg/state :context :canvas) widget)
+    (wdg/unregister! (-> @wdg/state :context :canvas) widget skip-redraw?)
     (let [keys (if (seqable? key) key (vector key))]
-      (wdg/register! (-> @wdg/state :context :canvas) (assoc-in widget keys value)))))
+      (wdg/register! (-> @wdg/state :context :canvas) (assoc-in widget keys value) skip-redraw?))))
 
 (defn update! 
 "Update any property of a widget via the widget name.
  name - name of the widget
  key - either single key or vector of keys
- value - the new property value"
-  [name key value]
+ value - the new property value
+ skip-redraw? - skip redrawing of the widget"
+  ([name key value] (update! name key value false))
+  ([name key value skip-redraw?]
   (when-let [w (find-by-name name)]
-    (update-widget! w key value)))
+    (update-widget! w key value skip-redraw?))))
 
 (defn update-group!
-  [name key value]
+  ([name key value] (update-group! name key value false))
+  ([name key value skip-redraw?]
   (when-let [widgets (find-by-group name)]
     (loop [widgets widgets]
       (when (seq widgets)
-        (update-widget! (first widgets) key value)
+        (update-widget! (first widgets) key value skip-redraw?)
         (recur (rest widgets))))
-    widgets))
+    widgets)))
 
 (defn window!
   "Initializes a new window or reuses an existing one
