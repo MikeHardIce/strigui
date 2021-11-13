@@ -227,7 +227,10 @@
   ([canvas ^strigui.widget.Widget widget skip-hide?]
    (let [remove-widget-f (fn []
                            (swap! state update :widgets dissoc (:name widget))
-                           (swap! state update :widgets-to-redraw #(s/difference %1 #{widget})))]
+                           (swap! state update :widgets-to-redraw #(s/difference %1 #{widget}))
+                           (swap! state update :previously-tabbed #(s/difference % #{(:name widget)}))
+                           (when (= widget (:previously-selected @state))
+                             (swap! state assoc :previously-selected nil)))]
      (if skip-hide?
        (remove-widget-f)
        (when (hide! widget canvas)
