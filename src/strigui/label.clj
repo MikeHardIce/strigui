@@ -8,7 +8,7 @@
         alignment (if (empty? align) :left (first align))
         style (if (empty? font-style) :normal (first font-style))
         size (if (number? font-size) font-size 11)]
-    (loop [lines (str/split-lines text)
+    (loop [lines (str/split-lines (str/replace text #"  " ""))
            mlt 0]
       (when (seq lines)
           (c2d/with-canvas-> canvas
@@ -19,7 +19,7 @@
 
 (defn coord-label
   [lbl canvas]
-  (let [text (str/split-lines (:value lbl))
+  (let [text (str/split-lines (str/replace (:value lbl) #"  " ""))
         largest-line (->> text (sort-by count) reverse first)
         font-size (:font-size (:args lbl))
         size (if (number? font-size) font-size 11)
@@ -28,7 +28,7 @@
                              (c2d/text-bounding-box largest-line))]
                          [(-> lbl (:args) (:x))
                           (-> lbl (:args) (:y) (- height))
-                          (* width 1.15) (* height 1.05 (count text)) height]))
+                          (* width 1.22) (* height 1.05 (count text)) height]))
 
 (defn draw-label
   [lbl canvas]
