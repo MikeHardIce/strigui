@@ -3,6 +3,7 @@
 
 ### 0.0.1-alpha20
 
+* support multiline labels
 * fixed an issue where a tabbed widget couldn't be tabbed again when removed and then readded
 
 ### 0.0.1-alpha19 

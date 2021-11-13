@@ -1,5 +1,6 @@
 {:window [600 600 "From a edn file"]
- :strigui.label/Label [["welcome" "Welcome to Strigui" {:x 190 :y 100 :z 20
+ :strigui.label/Label [["welcome" "Welcome to Strigui
+                                   and other stuff ..." {:x 190 :y 100 :z 20
                                                       :color [:green]
                                                       :font-size 20 :font-style [:bold]
                                                       :can-move? true :group "bla"}]]
