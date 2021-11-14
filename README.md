@@ -12,7 +12,7 @@ It uses [Clojure2d](https://github.com/Clojure2D/clojure2d) underneath. So anyth
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha19"]]
+:dependencies [[strigui "0.0.1-alpha20"]]
 ```
 [Example](https://github.com/MikeHardIce/strigui-sample)
 
