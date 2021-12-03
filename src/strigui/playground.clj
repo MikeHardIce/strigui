@@ -1,5 +1,6 @@
 (ns strigui.playground
-  (:require [strigui.core :as gui]))
+  (:require [strigui.core :as gui]
+             [strigui.widget :as wdg]))
 
 (defn main []
   ;; (gui/window! 600 600 "Strigui")
@@ -21,4 +22,7 @@
                                                  (when (= code :enter)
                                                    (gui/update! "input1" [:args :selected?] nil)
                                                    (gui/update! "input" [:args :selected?] true)))))
+
+(defmethod wdg/widget-global-event :mouse-pressed [_ canvas x y]
+  (println "Mouse clicked x:" x " y:" y))
                                                 

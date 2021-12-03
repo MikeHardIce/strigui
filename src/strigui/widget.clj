@@ -305,6 +305,7 @@
       (when (not (-> widget :args :resizing?))
         (replace! canvas (:name widget) (assoc-in widget [:args :selected?] true) (-> widget :args :skip-redrawing :on-click))
         (widget-event :mouse-clicked canvas widget)
+        (widget-global-event :mouse-clicked canvas widget)
         (trigger-custom-event :mouse-clicked widget)))))
 
 (defn handle-mouse-moved
@@ -377,19 +378,27 @@
   (handle-mouse-moved :mouse-dragged)
   (let [context (:context @strigui.widget/state)
         window (:window context)]
-    (swap! strigui.widget/state assoc :previous-mouse-position [(c2d/mouse-x window) (c2d/mouse-y window)]))
+    (swap! strigui.widget/state assoc :previous-mouse-position [(c2d/mouse-x window) (c2d/mouse-y window)])
+    (widget-global-event :mouse-dragged (:canvas context) (c2d/mouse-x window) (c2d/mouse-y window)))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-moved] [event state]
   (handle-mouse-moved :mouse-moved)
+  (let [context (:context @strigui.widget/state)
+        window (:window context)]
+    (widget-global-event :mouse-moved (:canvas context) (c2d/mouse-x window) (c2d/mouse-y window)))
+  
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-pressed] [event state]
-  (let [context (:context @strigui.widget/state)]
-    (handle-clicked (c2d/mouse-x (:window context)) (c2d/mouse-y (:window context))))
+  (let [context (:context @strigui.widget/state)
+        window (:window context)]
+    (handle-clicked (c2d/mouse-x window) (c2d/mouse-y window))
+    (widget-global-event :mouse-pressed (:canvas context) (c2d/mouse-x window) (c2d/mouse-y window)))
   state)
 
 (defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
+  
   (widget-global-event :mouse-released (:canvas (:context @strigui.widget/state)))
   (swap! strigui.widget/state assoc :previous-mouse-position nil)
   state)

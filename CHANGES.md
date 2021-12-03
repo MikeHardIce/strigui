@@ -1,6 +1,11 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
+### 0.0.1-alpha21
+
+* added global events via strigui.widget namespace
+* reverted tab fix
+
 ### 0.0.1-alpha20
 
 * support multiline labels
