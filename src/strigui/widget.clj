@@ -99,7 +99,6 @@
 
 (def-action "hide" (fn [widget canvas]
                      (let [[x y w h] (coord widget canvas)]
-                       (println "hide " (:name widget) " x " x " y " y " w " w " h " h)
                        (c2d/with-canvas-> canvas
                          (c2d/set-color :white)
                          (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
@@ -227,10 +226,11 @@
    (let [border-and-swap-f (fn []
                              (draw-widget-border widget canvas)
                              (swap! state assoc-in [:widgets (:name widget)] widget))]
-   (if skip-redraw? 
-     (border-and-swap-f)
-     (when (draw widget canvas)
-       (border-and-swap-f))))))
+     (if skip-redraw?
+       (border-and-swap-f)
+       (when (draw widget canvas)
+         (border-and-swap-f))))
+   (get-in @state [:widgets (:name widget)])))
 
 (defn unregister!
   "unregister the widget and hide it. "

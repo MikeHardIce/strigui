@@ -51,7 +51,7 @@
     (let [ret (update-widget! widget key value skip-redraw?)]
       (if (and kvs (first kvs))
         (if (next kvs)
-          (recur skip-redraw? widget (first kvs) (second kvs) (nnext kvs))
+          (recur skip-redraw? ret (first kvs) (second kvs) (nnext kvs))
           (throw (IllegalArgumentException.
                   (str "update-skip-redraw! expects an even number of arguments:" \newline
                        "skip-redraw? " skip-redraw? \newline
