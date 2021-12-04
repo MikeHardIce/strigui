@@ -23,6 +23,6 @@
                                                    (gui/update! "input1" [:args :selected?] nil)
                                                    (gui/update! "input" [:args :selected?] true)))))
 
-(defmethod wdg/widget-global-event :mouse-pressed [_ canvas x y]
+(defmethod wdg/widget-global-event :mouse-clicked [_ canvas x y]
   (println "Mouse clicked x:" x " y:" y))
                                                 
