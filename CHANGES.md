@@ -3,6 +3,8 @@
 
 ### 0.0.1-alpha21
 
+* update function now are variadic (skip-redrawing moved to own function -> update-skip-redraw!,
+  update-group-skip-redraw!)
 * added global events via strigui.widget namespace
 * reverted tab fix
 
