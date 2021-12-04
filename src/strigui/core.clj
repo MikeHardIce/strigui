@@ -46,26 +46,65 @@
     (let [keys (if (seqable? key) key (vector key))]
       (wdg/register! (-> @wdg/state :context :canvas) (assoc-in widget keys value) skip-redraw?))))
 
+(defn- update-widget-multiple-keys!
+  [skip-redraw? widget key value & kvs]
+    (let [ret (update-widget! widget key value skip-redraw?)]
+      (if (and kvs (first kvs))
+        (if (next kvs)
+          (recur skip-redraw? widget (first kvs) (second kvs) (nnext kvs))
+          (throw (IllegalArgumentException.
+                  (str "update-skip-redraw! expects an even number of arguments:" \newline
+                       "skip-redraw? " skip-redraw? \newline
+                       "widget-name " (:name widget) \newline
+                       "key " key \newline
+                       "value " value \newline
+                       "kvs" kvs))))
+        ret)))
+
 (defn update! 
 "Update any property of a widget via the widget name.
  name - name of the widget
  key - either single key or vector of keys
- value - the new property value
- skip-redraw? - skip redrawing of the widget"
-  ([name key value] (update! name key value false))
-  ([name key value skip-redraw?]
+ value - the new property value"
+  ([name key value & kvs]
   (when-let [w (find-by-name name)]
-    (update-widget! w key value skip-redraw?))))
+    (let [upf (partial update-widget-multiple-keys! false w key value)]
+      (apply upf kvs)))))
+
+(defn update-skip-redraw!
+  "Update any property of a widget via the widget name but skip redrawing the widget.
+   name - name of the widget
+   key - either single key or vector of keys
+   value - the new property value"
+  [name key value & kvs]
+  (when-let [w (find-by-name name)]
+    (update-widget-multiple-keys! true w key value (when kvs @kvs))))
 
 (defn update-group!
-  ([name key value] (update-group! name key value false))
-  ([name key value skip-redraw?]
+  "Update all widgets that are part of the given group.
+   name - name of the group
+   key - either simple key or vector of keys
+   value - the new value of the key/key path"
+  [group-name key value & kvs]
+  (when-let [widgets (find-by-group group-name)]
+    (loop [widgets widgets]
+      (when (seq widgets)
+        (update-widget-multiple-keys! false (first widgets) key value (when kvs @kvs))
+        (recur (rest widgets))))
+    widgets))
+
+(defn update-group-skip-redraw!
+  "Update all widgets that are part of the given group but skip redrawing the widgets of that group.
+   name - name of the group
+   key - either simple key or vector of keys
+   value - the new value of the key/key path"
+  [name key value & kvs]
   (when-let [widgets (find-by-group name)]
     (loop [widgets widgets]
       (when (seq widgets)
-        (update-widget! (first widgets) key value skip-redraw?)
+        (update-widget-multiple-keys! true (first widgets) key value (when kvs @kvs))
         (recur (rest widgets))))
-    widgets)))
+    widgets))
 
 (defn window!
   "Initializes a new window or reuses an existing one

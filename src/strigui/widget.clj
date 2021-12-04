@@ -35,6 +35,17 @@
                   :previously-selected nil
                   :context {:canvas nil :window nil}}))
 
+(defmulti widget-event
+  (fn [action canvas widget & args]
+    [(class widget) action]))
+
+(defmethod widget-event :default [action canvas widget & args] nil)
+
+(defmulti widget-global-event
+  (fn [action canvas & args] action))
+
+(defmethod widget-global-event :default [_ canvas & args] nil)
+
 (defn on-border?
   [[x y w h] x0 y0]
   (let [bottom-start (+ y h)
@@ -88,6 +99,7 @@
 
 (def-action "hide" (fn [widget canvas]
                      (let [[x y w h] (coord widget canvas)]
+                       (println "hide " (:name widget) " x " x " y " y " w " w " h " h)
                        (c2d/with-canvas-> canvas
                          (c2d/set-color :white)
                          (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
@@ -251,17 +263,6 @@
   [action ^strigui.widget.Widget widget & args]
   (when-let [event-fn (-> widget :events action)]
     (apply event-fn widget args)))
-
-(defmulti widget-event
-  (fn [action canvas widget & args]
-    [(class widget) action]))
-
-(defmethod widget-event :default [action canvas widget & args] nil)
-
-(defmulti widget-global-event
-  (fn [action canvas & args] action))
-
-(defmethod widget-global-event :default [_ canvas & args] nil)
 
 (defn- handle-widget-dragging
   [^strigui.widget.Widget widget [x y]]
