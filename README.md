@@ -119,3 +119,5 @@ If a widget name already exists, the widget gets unregistered and replaced by th
 
 When releasing an app which uses strigui, delete the /org/bytedeco directory inside your jar file.
 This will make your jar about 960 mb smaller. I believe that is being used in clojure2d when working with images. There must be an alternative way skipping this dependency by default.
+
+This will be fixed by using [Capra](https://github.com/MikeHardIce/Capra) 
