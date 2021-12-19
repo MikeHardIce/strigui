@@ -1,7 +1,8 @@
 (ns strigui.widget
-  (:require [clojure2d.core :as c2d]
+  (:require [capra.core :as c]
             [clojure.set :as s]
-            [clojure.string]))
+            [clojure.string])
+  (:import [java.awt Color]))
 
 (def ^:private border-thickness 10)
 
@@ -84,9 +85,9 @@
 (defn- draw-border-rec
   ([canvas color strength x y w h no-fill]
    (when (> strength 0)
-     (c2d/with-canvas-> canvas
-       (c2d/set-color color)
-       (c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) no-fill))
+     (c/draw-> canvas
+       ;;(c/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) color (not no-fill)))
+        (c/rect x y w h color (not no-fill) strength)) ;;TODO: clean this up double negation
      (draw-border-rec canvas color (- strength 1) x y w h no-fill))))
 
 (defn- draw-border
@@ -99,9 +100,8 @@
 
 (def-action "hide" (fn [widget canvas]
                      (let [[x y w h] (coord widget canvas)]
-                       (c2d/with-canvas-> canvas
-                         (c2d/set-color :white)
-                         (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
+                       (c/draw-> canvas
+                         (c/rect (- x 5) (- y 5) (+ w 8) (+ h 8) Color/white true)))))
 
 (def-action "draw-resizing" (fn [widget canvas]
                               (draw-border widget canvas :orange 2)))
@@ -290,12 +290,11 @@
                                       :x x1 :y y1})))))
 
 (defn handle-clicked
-  [x-pos y-pos]
+  [x y]
   (let [context (:context @strigui.widget/state)
         canvas (:canvas context)
-        window (:window context)
          ;; get the first widget that is on top close to the mouse position
-        widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x-pos y-pos) (->> @state :widgets vals)))))
+        widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (->> @state :widgets vals)))))
         selected (get-with-property (->> @state :widgets vals) :selected?)
         selected (sort-by #(-> % val :args :z) (vals (select-keys (->> @state :widgets) selected)))]
     (when (seq selected)
@@ -307,17 +306,15 @@
       (when (not (-> widget :args :resizing?))
         (replace! canvas (:name widget) (assoc-in widget [:args :selected?] true) (-> widget :args :skip-redrawing :on-click))
         (widget-event :mouse-clicked canvas widget)
-        (widget-global-event :mouse-clicked canvas (c2d/mouse-x window) (c2d/mouse-y window))
+        (widget-global-event :mouse-clicked canvas x y)
         (trigger-custom-event :mouse-clicked widget)))))
 
 (defn handle-mouse-moved
-  [action]
+  [action x y]
   ;; this functions needs a rework, i think it can be optimized a lot.
   ;; need to find a better strategy to redraw widgets
   (let [context (:context @state)
         canvas (:canvas context)
-        window (:window context)
-        [x y] [(c2d/mouse-x window) (c2d/mouse-y window)]
         widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (->> @state :widgets vals)))))
         widget-mut (atom widget)
         was-focused (and (seq widget) (= (:name widget) (-> @state :previously-selected :name)) (not= :mouse-dragged action))
@@ -338,7 +335,7 @@
           (swap! widget-mut assoc-in [:args :focused?] true)
           (widget-event :widget-focus-in canvas widget)
           (trigger-custom-event :widget-focus-in widget))
-        (when (c2d/mouse-pressed? window)
+        (when (= action :mouse-dragged)
           (cond
             (and (-> widget :args :can-resize) at-border) (swap! widget-mut merge (handle-widget-resizing widget [x y]))
             (-> widget :args :can-move?) (do
@@ -376,39 +373,28 @@
                             (filter #(not (-> % :args :skip-redrawing :on-hover))))] ;; (vals (select-keys (:widgets @state) @pending-redraw))
       (apply redraw! canvas widgets))))
 
-(defmethod c2d/mouse-event ["main-window" :mouse-dragged] [event state]
-  (handle-mouse-moved :mouse-dragged)
-  (let [context (:context @strigui.widget/state)
-        window (:window context)]
-    (swap! strigui.widget/state assoc :previous-mouse-position [(c2d/mouse-x window) (c2d/mouse-y window)])
-    (widget-global-event :mouse-dragged (:canvas context) (c2d/mouse-x window) (c2d/mouse-y window)))
-  state)
+(defmethod c/handle-event :mouse-dragged [_ {[x y] :keys}]
+  (handle-mouse-moved :mouse-dragged x y)
+  (let [context (:context @strigui.widget/state)]
+    (swap! strigui.widget/state assoc :previous-mouse-position [x y])
+    (widget-global-event :mouse-dragged (:canvas context) x y)))
 
-(defmethod c2d/mouse-event ["main-window" :mouse-moved] [event state]
-  (handle-mouse-moved :mouse-moved)
-  (let [context (:context @strigui.widget/state)
-        window (:window context)]
-    (widget-global-event :mouse-moved (:canvas context) (c2d/mouse-x window) (c2d/mouse-y window)))
-  
-  state)
+(defmethod c/handle-event :mouse-moved [_ {[x y] :keys}]
+  (handle-mouse-moved :mouse-moved x y)
+  (let [context (:context @strigui.widget/state)]
+    (widget-global-event :mouse-moved (:canvas context) x y)))
 
-(defmethod c2d/mouse-event ["main-window" :mouse-pressed] [event state]
-  (let [context (:context @strigui.widget/state)
-        window (:window context)]
-    (handle-clicked (c2d/mouse-x window) (c2d/mouse-y window))
-    (widget-global-event :mouse-clicked (:canvas context) (c2d/mouse-x window) (c2d/mouse-y window)))
-  state)
+(defmethod c/handle-event :mouse-pressed [_ {[x y] :keys}]
+  (let [context (:context @strigui.widget/state)]
+    (handle-clicked x y)
+    (widget-global-event :mouse-clicked (:canvas context) x y)))
 
-(defmethod c2d/mouse-event ["main-window" :mouse-released] [event state]
-  
+(defmethod c/handle-event :mouse-released [_ _]
   (widget-global-event :mouse-released (:canvas (:context @strigui.widget/state)))
-  (swap! strigui.widget/state assoc :previous-mouse-position nil)
-  state)
+  (swap! strigui.widget/state assoc :previous-mouse-position nil))
 
-(defmethod c2d/key-event ["main-window" :key-pressed] [event _]
-  (let [char (c2d/key-char event)
-        code (c2d/key-code event)
-        canvas (:canvas (:context @state))
+(defmethod c/handle-event :key-pressed [_ {[char code] :keys}]
+  (let [canvas (:canvas (:context @state))
         widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets vals)))))
         previously-tabbed (:previously-tabbed @state)
         previously-tabbed (when-not (= (set (get-with-property (->> @state :widgets vals) :can-tab?))
@@ -427,5 +413,4 @@
     (widget-global-event :key-pressed canvas char code)
     (when-let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets vals)))))]
       (widget-event :key-pressed canvas widget char code)
-      (trigger-custom-event :key-pressed widget code)))
-  state)
+      (trigger-custom-event :key-pressed widget code))))
