@@ -1,7 +1,6 @@
 (ns strigui.input
   (:require [strigui.widget :as wdg]
-            [strigui.box :as b]
-            [clojure2d.core :as c2d]))
+            [strigui.box :as b]))
 
 (defonce dont-display [:shift :alt :alt_graph :left :right :up
                        :down :tab])

@@ -5,11 +5,13 @@
    [strigui.button]
    [strigui.label]
    [strigui.input :as inp]
-   [strigui.window :as wnd]
+   ;;[strigui.window :as wnd]
+   [capra.core :as c]
    [strigui.widget :as wdg])
   (:import [strigui.button Button]
            [strigui.label Label]
-           [strigui.input Input]))
+           [strigui.input Input]
+           [java.awt Color]))
 
 (defn find-by-name 
   "Find and return an widget by its name"
@@ -113,13 +115,16 @@
    height
    fps -  frames per second
    quality - rendering quality :low :mid :high :highest"
-  ([wind] 
-   (swap! wdg/state assoc :context (wnd/init-window wind)))
-  ([width height title]
-   (swap! wdg/state assoc :context (wnd/init-window width height title)))
-  ([width height title ^Integer fps quality]
-   {:pre [(> fps 0) (some #(= % quality) [:low :mid :high :highest])]}
-   (swap! wdg/state assoc :context (wnd/init-window width height title fps quality))))
+  ([context] 
+   ;;(swap! wdg/state assoc :context (wnd/init-window wind)))
+   (swap! wdg/state assoc :context context))
+  ([x y width height title]
+   ;;(swap! wdg/state assoc :context (wnd/init-window width height title)))
+   (swap! wdg/state assoc :context (c/create-window x y width height title)))
+   ([x y width height title color]
+    ;;{:pre [(> fps 0) (some #(= % quality) [:low :mid :high :highest])]}
+    ;;(swap! wdg/state assoc :context (wnd/init-window width height title fps quality))))
+    (swap! wdg/state assoc :context (c/create-window x y width height title color))))
   
 (defn create! 
   "Register and show a custom widget.
@@ -137,7 +142,7 @@
 (defn close-window
   "Closes the current active window."
   []
-  (wnd/close-window (-> @wdg/state :context :window)))
+  (c/close-window (-> @wdg/state :context :window)))
 
 (defn button!
   "Create a simple button on screen.
@@ -175,10 +180,6 @@
     min-width - the minimum width"
   [name text args]
   (create! (inp/input (-> @wdg/state :context :canvas) name text args)))
-
-(defn info 
-  [text]
-  (wnd/display-info (:context @wdg/state) text))
 
 (defn from-map
   "Initializes the window and the widgets from a map"

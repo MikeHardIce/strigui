@@ -91,7 +91,7 @@
      (draw-border-rec canvas color (- strength 1) x y w h no-fill))))
 
 (defn- draw-border
-  ([box canvas] (draw-border box canvas :black 1))
+  ([box canvas] (draw-border box canvas Color/black 1))
   ([box canvas color] (draw-border box canvas color 1))
   ([box canvas color strength] (draw-border box canvas color strength false))
   ([box canvas color strength fill]
@@ -104,13 +104,13 @@
                          (c/rect (- x 5) (- y 5) (+ w 8) (+ h 8) Color/white true)))))
 
 (def-action "draw-resizing" (fn [widget canvas]
-                              (draw-border widget canvas :orange 2)))
+                              (draw-border widget canvas Color/orange 2)))
 
 (def-action "draw-selected" (fn [widget canvas]
-                              (draw-border widget canvas :blue 2)))
+                              (draw-border widget canvas Color/blue 2)))
 
 (def-action "draw-focused" (fn [widget canvas]
-                              (draw-border widget canvas :black 2)))
+                              (draw-border widget canvas Color/black 2)))
 
 (defn draw-widget-border
   [^strigui.widget.Widget widget canvas]
@@ -119,7 +119,7 @@
       (-> widget :args :resizing?) (draw-resizing! widget canvas)
       (-> widget :args :selected?) (draw-selected! widget canvas)
       (-> widget :args :focused?) (draw-focused! widget canvas)
-      :else (draw-border widget canvas :black 1))))
+      :else (draw-border widget canvas Color/black 1))))
 
 (defn distance-x
   "Manhatten distance that is sqashed on the x-axis,
@@ -373,18 +373,18 @@
                             (filter #(not (-> % :args :skip-redrawing :on-hover))))] ;; (vals (select-keys (:widgets @state) @pending-redraw))
       (apply redraw! canvas widgets))))
 
-(defmethod c/handle-event :mouse-dragged [_ {[x y] :keys}]
+(defmethod c/handle-event :mouse-dragged [_ {:keys [x y]}]
   (handle-mouse-moved :mouse-dragged x y)
   (let [context (:context @strigui.widget/state)]
     (swap! strigui.widget/state assoc :previous-mouse-position [x y])
     (widget-global-event :mouse-dragged (:canvas context) x y)))
 
-(defmethod c/handle-event :mouse-moved [_ {[x y] :keys}]
+(defmethod c/handle-event :mouse-moved [_ {:keys [x y]}]
   (handle-mouse-moved :mouse-moved x y)
   (let [context (:context @strigui.widget/state)]
     (widget-global-event :mouse-moved (:canvas context) x y)))
 
-(defmethod c/handle-event :mouse-pressed [_ {[x y] :keys}]
+(defmethod c/handle-event :mouse-pressed [_ {:keys [x y]}]
   (let [context (:context @strigui.widget/state)]
     (handle-clicked x y)
     (widget-global-event :mouse-clicked (:canvas context) x y)))

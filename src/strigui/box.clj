@@ -28,13 +28,13 @@
         size (if (number? font-size) font-size default-font-size)
         [_ _ border-width border-heigth] (box-coord canvas text args)
         [_ text-y text-width _] (box-coord canvas text args)
-        background-color (if (> (count color) 0) (first color) Color/grey)
+        background-color (if (> (count color) 0) (first color) Color/gray)
         foreground-color (if (> (count color) 1) (nth color 1) Color/black)
         x-offset (if (and (number? width) (>= border-width width))
                    (/ (- border-width text-width) 2.0)
                    (* border-width 0.12))]
       (c/draw-> canvas
-        (c/rect x y border-width border-heigth background-color)
+        (c/rect x y border-width border-heigth background-color false)
         ;;(c2d/set-font-attributes size style)
         ;;(c2d/set-color foreground-color)
         (c/text (+ x x-offset) (- y (* text-y 1.5)) text foreground-color size))))
@@ -50,7 +50,7 @@
   ([canvas text args]
   (let [{:keys [^long x ^long y color ^long min-width]} args
         [_ _ border-width border-heigth] (box-coord canvas text {:x x :y y :min-width min-width})
-        background-color (if (> (count color) 0) (first color) :grey)]
+        background-color (if (> (count color) 0) (first color) Color/gray)]
     (c/draw-> canvas
       (c/rect x y border-width border-heigth background-color true))
     (box-draw-text canvas text args)

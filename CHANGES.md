@@ -1,6 +1,10 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
+### 0.0.1-alpha22
+
+* replaced clojure2d with capra
+
 ### 0.0.1-alpha21
 
 * update function now are variadic (skip-redrawing moved to own function -> update-skip-redraw!,
