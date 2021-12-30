@@ -5,7 +5,7 @@
 
 (set! *warn-on-reflection* true)
 
-(def ^:private default-font-size 15)
+(def ^:private default-font-size 15.0)
 
 (defn box-coord 
   "Computes the full box coordinates.
@@ -19,25 +19,19 @@
         btn-h (* text-heigth 1.8)
         border-width (if (and (number? width) (< btn-w width)) width btn-w)
         border-heigth (if (and (number? height) (< btn-h height)) height btn-h)]
-      [x y border-width border-heigth]))
+      [x y border-width border-heigth text-width text-heigth]))
 
 (defn box-draw-text 
   "Draws the text of the box"
   [canvas text {:keys [^long x ^long y color ^long width font-style font-size] :as args}]
   (let [style (if (empty? font-style) :bold (first font-style))
         size (if (number? font-size) font-size default-font-size)
-        [_ _ border-width border-heigth] (box-coord canvas text args)
-        [_ text-y text-width _] (box-coord canvas text args)
-        background-color (if (> (count color) 0) (first color) Color/gray)
+        [_ _ border-width border-heigth text-width text-heigth] (box-coord canvas text args)
         foreground-color (if (> (count color) 1) (nth color 1) Color/black)
-        x-offset (if (and (number? width) (>= border-width width))
-                   (/ (- border-width text-width) 2.0)
-                   (* border-width 0.12))]
+        x-offset (/ (- border-width text-width) 2)
+        y-offset (* (- border-heigth text-heigth) 1.4)]
       (c/draw-> canvas
-        (c/rect x y border-width border-heigth background-color false)
-        ;;(c2d/set-font-attributes size style)
-        ;;(c2d/set-color foreground-color)
-        (c/text (+ x x-offset) (- y (* text-y 1.5)) text foreground-color size))))
+        (c/text (+ x x-offset) (+ y y-offset) text foreground-color size))))
 
 (defn box-draw
   "canvas - java.awt canvas
