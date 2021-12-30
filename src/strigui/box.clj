@@ -56,10 +56,7 @@
   ([canvas color strength x y w h no-fill]
   (when (> strength 0)
       (c/draw-> canvas
-        ;;(c2d/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) no-fill))
-        (c/rect x y w h color (not no-fill) strength))
-      ;;(box-border canvas color (- strength 1) x y w h no-fill)
-    )))
+        (c/rect x y w h color (not no-fill) strength)))))
 
 (defn box-draw-border 
   ([box canvas] (box-draw-border box canvas :black 1))

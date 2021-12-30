@@ -11,6 +11,6 @@
 
 (defmethod wdg/widget-event [strigui.button.Button :key-pressed]
   [_ canvas widget char code]
-  (when (= code :enter)
+  (when (= code 10) ;;enter
     (let [[x y] (wdg/coord widget canvas)]
       (wdg/handle-clicked x y))))

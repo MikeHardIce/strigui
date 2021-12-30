@@ -2,9 +2,6 @@
   (:require [strigui.widget :as wdg]
             [strigui.box :as b]))
 
-(defonce dont-display [:shift :alt :alt_graph :left :right :up
-                       :down :tab])
-
 (defrecord Input [name value args]
   wdg/Widget
   (coord [this canvas] (apply b/box-coord [canvas (:value this) (:args this)]))
@@ -29,13 +26,13 @@
 ;;                           (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
 
 (defn adjust-text [text char code]
-  (if (and (= code :back_space) (> (count text) 0)) 
+  (if (and (= code 8) (> (count text) 0)) 
     (subs text 0 (- (count text) 1))
     (str text char)))
 
 (defn key-pressed [this char code]
-  (if (or (some #(= code %) dont-display)
-          (and (= code :back_space) (< (count (:value this)) 1)))
+  (if (or (and (<= code 28) (not= code 8))
+          (and (= code 8) (< (count (:value this)) 1)))
     this
     (assoc this :value (adjust-text (:value this) char code))))
 
@@ -56,8 +53,8 @@
   [canvas widget char code]
   (when (-> widget :args :selected?)
     (let [box-with-new-input (key-pressed widget char code)
-          box-with-new-input (assoc-in box-with-new-input [:args :selected?] (or (not= code :enter)
-                                                                                 (not= code :tab)))]
+          box-with-new-input (assoc-in box-with-new-input [:args :selected?] (or (not= code 10) ;;enter
+                                                                                 (not= code 9)))] ;; tab
       (when box-with-new-input
         (wdg/replace! canvas (:name widget) box-with-new-input)
         (b/box-draw-text canvas (:value box-with-new-input) (:args box-with-new-input))))))

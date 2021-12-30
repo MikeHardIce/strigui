@@ -393,14 +393,14 @@
   (widget-global-event :mouse-released (:canvas (:context @strigui.widget/state)))
   (swap! strigui.widget/state assoc :previous-mouse-position nil))
 
-(defmethod c/handle-event :key-pressed [_ {[char code] :keys}]
+(defmethod c/handle-event :key-pressed [_ {:keys [char code]}]
   (let [canvas (:canvas (:context @state))
         widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets vals)))))
         previously-tabbed (:previously-tabbed @state)
         previously-tabbed (when-not (= (set (get-with-property (->> @state :widgets vals) :can-tab?))
                                    (set previously-tabbed))
                             previously-tabbed)]
-    (when (= code :tab)
+    (when (= code 9) ;;tab
       (when-let [new-widget (:name (next-widget-to-tab canvas (->> @state :widgets) previously-tabbed widget))]
         (swap! state assoc-in [:widgets new-widget :args :selected?] true)
         (loop [prev (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (->> @state :widgets vals)))]
