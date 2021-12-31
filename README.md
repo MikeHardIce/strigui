@@ -5,14 +5,14 @@
 A small straightforward GUI library that can be extended with new Widgets. At the moment, it only contains widgets for a button, input and a label plus the window component itself.
 The goal is to provide an easy to use library to create small desktop apps with Clojure. It should provide a few simple widgets to start with,
 but you can create your own widgets too. 
-It uses [Clojure2d](https://github.com/Clojure2D/clojure2d) underneath. So anything that can be drawn could potentially be a widget (like the game board in [Dame](https://github.com/MikeHardIce/Dame)).
+It uses [Capra](https://github.com/MikeHardIce/Capra) underneath (it was using [Clojure2d](https://github.com/Clojure2D/clojure2d) before). So anything that can be drawn could potentially be a widget (like the game board in [Dame](https://github.com/MikeHardIce/Dame)).
 
 [See Changes](CHANGES.md)
 
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha21"]]
+:dependencies [[strigui "0.0.1-alpha22"]]
 ```
 [Example](https://github.com/MikeHardIce/strigui-sample)
 
@@ -20,7 +20,8 @@ You need the core namespace.
 
 ```Clojure
 (ns example.core
-  (:require [strigui.core :as gui]))
+  (:require [strigui.core :as gui])
+  (:import [java.awt Color]))
 
 ```
 Create the main window via
@@ -33,10 +34,10 @@ Basic widgets like buttons, input boxes and labels can be created via
 
 ```Clojure
 (gui/label! "welcome" "Welcome to Strigui" {:x 190 :y 100
-                                             :color [:green]
+                                             :color [Color/green]
                                              :font-size 20 :font-style [:bold]})
-(gui/button! "click" "Click me" {:x 400 :y 200 :color [:white :black]})
-(gui/input! "input" "" {:x 100 :y 150 :color [:white :red] :min-width 420})
+(gui/button! "click" "Click me" {:x 400 :y 200 :color [Color/white Color/black]})
+(gui/input! "input" "" {:x 100 :y 150 :color [Color/white Color/red] :min-width 420})
 ```
 The parameters are the name of the widget, the value and a map for the position and optional settings like color, selected?, focused?, can-tab?, can-move? etc. ...
 The name is used when widgets are modified.
@@ -95,12 +96,12 @@ gui-test.edn
 ```Clojure
 {:window [600 600 "From a edn file"]
  :strigui.label/Label [["welcome" "Welcome to Strigui" {:x 190 :y 100
-                                                      :color [:green]
+                                                      :color [Color/green]
                                                       :font-size 20 :font-style [:bold]
                                                       :can-move? true}]]
- :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 :color [:white :black] :can-tab? true}]]
- :strigui.input/Input [["input" "" {:x 100 :y 150 :color [:white :red] :min-width 420 :selected? true :can-tab? true}]
-                       ["input1" "" {:x 100 :y 200 :color [:white :red] :min-width 420 :can-tab? true}]]}
+ :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 :color [Color/white Color/black] :can-tab? true}]]
+ :strigui.input/Input [["input" "" {:x 100 :y 150 :color [Color/white Color/red] :min-width 420 :selected? true :can-tab? true}]
+                       ["input1" "" {:x 100 :y 200 :color [Color/white Color/red] :min-width 420 :can-tab? true}]]}
 ```
 
 And load it in your clj file via
@@ -114,10 +115,3 @@ And load it in your clj file via
 ```
 
 If a widget name already exists, the widget gets unregistered and replaced by the new widget.
-
-## Releasing standalone apps:
-
-When releasing an app which uses strigui, delete the /org/bytedeco directory inside your jar file.
-This will make your jar about 960 mb smaller. I believe that is being used in clojure2d when working with images. There must be an alternative way skipping this dependency by default.
-
-This will be fixed by using [Capra](https://github.com/MikeHardIce/Capra) 
