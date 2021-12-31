@@ -86,7 +86,6 @@
   ([canvas color strength x y w h no-fill]
    (when (> strength 0)
      (c/draw-> canvas
-       ;;(c/rect (- x strength) (- y strength) (+ w (* 2 strength)) (+ h (* 2 strength)) color (not no-fill)))
         (c/rect x y w h color (not no-fill) strength)) ;;TODO: clean this up double negation
      (draw-border-rec canvas color (- strength 1) x y w h no-fill))))
 

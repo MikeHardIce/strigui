@@ -31,7 +31,7 @@
         x-offset (/ (- border-width text-width) 2)
         y-offset (* (- border-heigth text-heigth) 1.4)]
       (c/draw-> canvas
-        (c/text (+ x x-offset) (+ y y-offset) text foreground-color size))))
+        (c/text (+ x x-offset) (+ y y-offset) text foreground-color size style))))
 
 (defn box-draw
   "canvas - java.awt canvas
