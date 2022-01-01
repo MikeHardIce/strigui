@@ -1,6 +1,10 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
+### 0.0.1-alpha23
+
+* expose mouse position in mouse related widget-events 
+
 ### 0.0.1-alpha22
 
 * replaced clojure2d with capra

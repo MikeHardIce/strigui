@@ -304,7 +304,7 @@
     (when (seq widget)
       (when (not (-> widget :args :resizing?))
         (replace! canvas (:name widget) (assoc-in widget [:args :selected?] true) (-> widget :args :skip-redrawing :on-click))
-        (widget-event :mouse-clicked canvas widget)
+        (widget-event :mouse-clicked canvas widget x y)
         (widget-global-event :mouse-clicked canvas x y)
         (trigger-custom-event :mouse-clicked widget)))))
 
@@ -326,21 +326,21 @@
             (swap! pending-redraw s/union (set (map :name neighbours)))
             ;;(apply redraw! canvas (set neighbours))
             (swap! state assoc :previously-selected widget)))
-        (widget-event :mouse-moved canvas widget)
-        (trigger-custom-event :mouse-moved widget)
+        (widget-event :mouse-moved canvas widget x y)
+        (trigger-custom-event :mouse-moved widget x y)
         (swap! widget-mut assoc-in [:args :resizing?] (and (-> widget :args :can-resize) at-border))
       ;; handle widget focusing
         (when (not (-> widget :args :focused?))
           (swap! widget-mut assoc-in [:args :focused?] true)
-          (widget-event :widget-focus-in canvas widget)
-          (trigger-custom-event :widget-focus-in widget))
+          (widget-event :widget-focus-in canvas widget x y)
+          (trigger-custom-event :widget-focus-in widget x y))
         (when (= action :mouse-dragged)
           (cond
             (and (-> widget :args :can-resize) at-border) (swap! widget-mut merge (handle-widget-resizing widget [x y]))
             (-> widget :args :can-move?) (do
                                            (swap! widget-mut merge (handle-widget-dragging widget [x y]))
-                                           (widget-event :widget-moved canvas widget)
-                                           (trigger-custom-event :widget-moved widget))))))
+                                           (widget-event :widget-moved canvas widget x y)
+                                           (trigger-custom-event :widget-moved widget x y))))))
     ;; reset all previously focused widgets
     (let [previous-widgets (filter #(and (-> % :args :focused?) (not= widget %)) (->> @state :widgets vals))
           previous-widgets (map #(all-neighbouring-widgets canvas % (->> @state :widgets vals) >) previous-widgets)
@@ -356,8 +356,8 @@
                 prev-new-widget (assoc-in prev-widget [:args :focused?] nil)
                 prev-new-widget (assoc-in prev-new-widget [:args :resizing?] nil)]
             (replace! canvas (:name prev-widget) prev-new-widget skip-redrawing)
-            (widget-event :widget-focus-out canvas prev-widget)
-            (trigger-custom-event :widget-focus-out prev-widget)
+            (widget-event :widget-focus-out canvas prev-widget x y)
+            (trigger-custom-event :widget-focus-out prev-widget x y)
             (recur (rest prev-widgets))))))
     (when (not= @widget-mut widget)
       (replace! canvas (:name widget) @widget-mut skip-redrawing)
@@ -388,8 +388,8 @@
     (handle-clicked x y)
     (widget-global-event :mouse-clicked (:canvas context) x y)))
 
-(defmethod c/handle-event :mouse-released [_ _]
-  (widget-global-event :mouse-released (:canvas (:context @strigui.widget/state)))
+(defmethod c/handle-event :mouse-released [_ {:keys [x y]}]
+  (widget-global-event :mouse-released (:canvas (:context @strigui.widget/state)) x y)
   (swap! strigui.widget/state assoc :previous-mouse-position nil))
 
 (defmethod c/handle-event :key-pressed [_ {:keys [char code]}]
