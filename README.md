@@ -27,7 +27,7 @@ You need the core namespace.
 Create the main window via
 
 ```Clojure
-(gui/window! 600 600)
+(gui/window! 400 400 600 600 "My Window")
 ```
 
 Basic widgets like buttons, input boxes and labels can be created via
@@ -94,14 +94,16 @@ Widgets can now be loaded from a edn file too.
 Example:
 gui-test.edn
 ```Clojure
-{:window [600 600 "From a edn file"]
- :strigui.label/Label [["welcome" "Welcome to Strigui" {:x 190 :y 100
-                                                      :color [Color/green]
+{:window [200 300 600 600 "From a edn file"]
+ :strigui.label/Label [["welcome" "Welcome to Strigui
+                                   and other stuff ..." {:x 190 :y 100 :z 20
+                                                      :color [java.awt.Color/green]
                                                       :font-size 20 :font-style [:bold]
-                                                      :can-move? true}]]
- :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 :color [Color/white Color/black] :can-tab? true}]]
- :strigui.input/Input [["input" "" {:x 100 :y 150 :color [Color/white Color/red] :min-width 420 :selected? true :can-tab? true}]
-                       ["input1" "" {:x 100 :y 200 :color [Color/white Color/red] :min-width 420 :can-tab? true}]]}
+                                                      :can-move? true :group "bla"}]]
+ :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 :color [java.awt.Color/gray java.awt.Color/black] :can-tab? true :group "bla"}]]
+ :strigui.input/Input [["input" "" {:x 100 :y 150 :z -20 :width 420 :height 300 :color [java.awt.Color/white java.awt.Color/red] :selected? true :can-tab? true 
+                                    :can-resize true :can-move? true :group ["inputs" "bla"]}]
+                       ["input1" "" {:x 100 :y 200 :color [java.awt.Color/gray java.awt.Color/red] :width 420 :can-tab? true :group "inputs"}]]}
 ```
 
 And load it in your clj file via
