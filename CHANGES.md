@@ -1,6 +1,10 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
+### 0.0.1-alpha24
+
+* fixed removing of widgets
+
 ### 0.0.1-alpha23
 
 * expose mouse position in mouse related widget-events 

@@ -14,6 +14,7 @@
   (gui/from-file "gui-test.edn")
   (gui/update! "click" [:events :mouse-clicked] (fn [wdg]
                                                   (gui/close-window)))
+  
   (gui/update! "input" [:events :key-pressed] (fn [wdg code]
                                                 (when (= code :enter)
                                                   (gui/update! "input" [:args :selected?] nil)
@@ -22,6 +23,9 @@
                                                  (when (= code :enter)
                                                    (gui/update! "input1" [:args :selected?] nil)
                                                    (gui/update! "input" [:args :selected?] true))))
+  
+  (gui/update! "input1" [:events :mouse-clicked] (fn [wdg]
+                                                   (gui/remove! "input1")))
   
   (gui/update! "click" [:args :x] 100 [:args :y] 400))
 
