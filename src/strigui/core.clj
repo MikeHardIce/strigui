@@ -120,11 +120,9 @@
    (swap! wdg/state assoc :context context))
   ([x y width height title]
    ;;(swap! wdg/state assoc :context (wnd/init-window width height title)))
-   (swap! wdg/state assoc :context (c/create-window x y width height title)))
+   (window! x y width height title Color/white))
    ([x y width height title color]
-    ;;{:pre [(> fps 0) (some #(= % quality) [:low :mid :high :highest])]}
-    ;;(swap! wdg/state assoc :context (wnd/init-window width height title fps quality))))
-    (swap! wdg/state assoc :context (c/create-window x y width height title color))))
+      (swap! wdg/state assoc :context (c/create-window x y width height title color))))
   
 (defn create! 
   "Register and show a custom widget.
@@ -205,10 +203,8 @@
 (defn to-map
   "converts the current state to a map that could be stored in a file"
   []
-  (let [window (select-keys (-> @wdg/state :context :window) [:w :h :fps :frame])
-        window-name (-> window :frame .getTitle)
-        {:keys [w h name fps]} (assoc (select-keys window [:w :h :fps]) :name window-name)
-        strigui-map {:window [w h name fps]}
+  (let [{:keys [x y width height name color]} (c/properties (-> @wdg/state :context))
+        strigui-map {:window [x y width height name color]}
         widgets-grouped (group-by #(class %) (-> @wdg/state :widgets))
         widget-types (keys widgets-grouped)
         widget-map (loop [w-types widget-types

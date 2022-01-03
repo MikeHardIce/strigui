@@ -100,7 +100,8 @@
 (def-action "hide" (fn [widget canvas]
                      (let [[x y w h] (coord widget canvas)]
                        (c/draw-> canvas
-                         (c/rect (- x 5) (- y 5) (+ w 8) (+ h 8) Color/white true)))))
+                         ;;(c/rect (- x 5) (- y 5) (+ w 8) (+ h 8) Color/white true)
+                           (c/clear-rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
 
 (def-action "draw-resizing" (fn [widget canvas]
                               (draw-border widget canvas Color/orange 2)))

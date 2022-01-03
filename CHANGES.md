@@ -1,6 +1,11 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
+### 0.0.1-alpha25
+
+* fixed the export/import of the current state to/from an edn file (in progress)
+* hiding based on background color by using capra/clear-rect
+
 ### 0.0.1-alpha24
 
 * fixed removing of widgets
