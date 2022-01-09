@@ -122,7 +122,7 @@
    ;;(swap! wdg/state assoc :context (wnd/init-window width height title)))
    (window! x y width height title Color/white))
    ([x y width height title color]
-      (swap! wdg/state assoc :context (c/create-window x y width height title color))))
+      (swap! wdg/state assoc :context (c/create-window x y width height title (eval color)))))
   
 (defn create! 
   "Register and show a custom widget.
@@ -186,6 +186,7 @@
     (apply window! window-args))
   (let [exprs (for [widget-key (filter #(not= % :window) (keys strigui-map))]
                 (for [widgets-args (map identity (widget-key strigui-map))]
+                  ;; TODO: Invalid token: /->strigui.label.Label
                   (str "(strigui.core/create! (apply " (namespace widget-key) "/->" (name widget-key) " " widgets-args "))")))]
     (loop [exp (mapcat identity exprs)]
       (when (seq exp)
