@@ -100,7 +100,6 @@
 (def-action "hide" (fn [widget canvas]
                      (let [[x y w h] (coord widget canvas)]
                        (c/draw-> canvas
-                         ;;(c/rect (- x 5) (- y 5) (+ w 8) (+ h 8) Color/white true)
                            (c/clear-rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
 
 (def-action "draw-resizing" (fn [widget canvas]
@@ -238,12 +237,7 @@
    (unregister! canvas widget false))
   ([canvas ^strigui.widget.Widget widget skip-hide?]
    (let [remove-widget-f (fn []
-                           (swap! state update :widgets dissoc (:name widget))
-                           ;;(swap! state update :widgets-to-redraw #(s/difference %1 #{(:name widget)}))
-                          ;;  (swap! state update :previously-tabbed #(s/difference % #{(:name widget)}))
-                          ;;  (when (= widget (:previously-selected @state))
-                          ;;    (swap! state assoc :previously-selected nil))
-                           )]
+                           (swap! state update :widgets dissoc (:name widget)))]
      (if skip-hide?
        (remove-widget-f)
        (do 

@@ -200,18 +200,30 @@
          edn/read-string
          from-map)))
 
+(defn extract-rgb-constructors
+  [rgb-string]
+  (when (seq rgb-string)
+    (let [colors (re-seq #"r=\d{1,3},g=\d{1,3},b=\d{1,3}" rgb-string)
+          colors (map #(re-seq #"\d{1,3}" %) colors)]
+      (vec (map (fn [[r g b]]
+                  `(java.awt.Color. ~(Integer/parseInt r) ~(Integer/parseInt g) ~(Integer/parseInt b)))
+                colors)))))
+
 (defn to-map
   "converts the current state to a map that could be stored in a file"
   []
   (let [{:keys [x y width height name color]} (c/properties (-> @wdg/state :context))
-        strigui-map {:window [x y width height name color]}
-        widgets-grouped (group-by #(class %) (-> @wdg/state :widgets))
+        strigui-map {:window [x y width height name (first (extract-rgb-constructors (str color)))]}
+        widgets-grouped (group-by #(class %) (vals (-> @wdg/state :widgets)))
         widget-types (keys widgets-grouped)
         widget-map (loop [w-types widget-types
                     w-map {}]
                (if (seq w-types)
-                 (recur (rest w-types) (merge w-map {(keyword (clojure.string/replace-first (str (first w-types)) #"class " ""))
-                                              (mapv #(vec (vals (select-keys % (filter (fn [k] (not= k :events)) (keys %))))) (get widgets-grouped (first w-types)))}))
+                 (let [cur-key (first w-types)
+                       current-widgets (get widgets-grouped cur-key)
+                       current-widgets (map #(assoc-in % [:args :color] (extract-rgb-constructors (str (-> % :args :color)))) current-widgets)]
+                   (recur (rest w-types) (merge w-map {(keyword (clojure.string/replace-first (str cur-key) #"class " ""))
+                                                       (mapv #(vec (vals (select-keys % (filter (fn [k] (not= k :events)) (keys %))))) current-widgets)})))
                  w-map))
         strigui-map (merge strigui-map widget-map)]
     strigui-map))
