@@ -185,9 +185,8 @@
   (when-let [window-args (:window strigui-map)]
     (apply window! window-args))
   (let [exprs (for [widget-key (filter #(not= % :window) (keys strigui-map))]
-                (for [widgets-args (map identity (widget-key strigui-map))]
-                  ;; TODO: Invalid token: /->strigui.label.Label
-                  (str "(strigui.core/create! (apply " (namespace widget-key) "/->" (name widget-key) " " widgets-args "))")))]
+                (for [widget-args (map identity (widget-key strigui-map))]
+                  (str "(strigui.core/create! (apply " (namespace widget-key) "/->" (name widget-key) " " (vec widget-args) "))")))]
     (loop [exp (mapcat identity exprs)]
       (when (seq exp)
         (eval (read-string (first exp)))

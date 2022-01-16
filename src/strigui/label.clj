@@ -14,10 +14,6 @@
       (when (seq lines)
         (c/draw-> canvas
           (c/text x (+ y (* mlt line-size)) (first lines) font-color size))
-          ;; (c2d/with-canvas-> canvas
-          ;;   (c2d/set-font-attributes size style)
-          ;;   (c2d/set-color font-color)
-          ;;   (c2d/text (first lines) x (+ y (* mlt line-size)) alignment))
           (recur (rest lines) (inc mlt))))))
 
 (defn coord-label

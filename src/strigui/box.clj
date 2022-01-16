@@ -44,7 +44,7 @@
   ([canvas text args]
   (let [{:keys [^long x ^long y color ^long min-width]} args
         [_ _ border-width border-heigth] (box-coord canvas text {:x x :y y :min-width min-width})
-        background-color (if (> (count color) 0) (first color) Color/gray)]
+        background-color (if (> (count color) 0) (first color) Color/black)]
     (c/draw-> canvas
       (c/rect x y border-width border-heigth background-color true))
     (box-draw-text canvas text args)

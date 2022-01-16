@@ -1,4 +1,4 @@
-{:window [200 300 600 600 "From a edn file" (java.awt.Color. 255 31 0)]
+{:window [200 300 600 600 "From a edn file" (java.awt.Color. 255 31 133)]
  :strigui.label/Label [["welcome" "Welcome to Strigui
                                    and other stuff ..." {:x 190 :y 100 :z 20
                                                       :color [java.awt.Color/green]
