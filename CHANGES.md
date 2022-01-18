@@ -3,7 +3,7 @@
 
 ### 0.0.1-alpha25
 
-* fixed the export/import of the current state to/from an edn file (in progress)
+* fixed the export/import of the current state to/from an edn file
 * hiding based on background color by using capra/clear-rect
 
 ### 0.0.1-alpha24

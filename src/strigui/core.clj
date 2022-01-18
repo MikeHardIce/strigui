@@ -2,10 +2,10 @@
   (:require
    [clojure.edn :as edn]
    [clojure.java.io :as io]
+   [clojure.string]
    [strigui.button]
    [strigui.label]
    [strigui.input :as inp]
-   ;;[strigui.window :as wnd]
    [capra.core :as c]
    [strigui.widget :as wdg])
   (:import [strigui.button Button]
@@ -216,13 +216,17 @@
         strigui-map {:window [x y width height name (first (extract-rgb-constructors (str color)))]}
         widgets-grouped (group-by #(class %) (vals (-> @wdg/state :widgets)))
         widget-types (keys widgets-grouped)
+        widget-types (map #(let [parts (clojure.string/split (clojure.string/replace-first (str %) #"class " "") #"\.")
+                                 cl (last parts)
+                                 n-space (filter (fn [part] (not= part cl)) parts)]
+                             [% (keyword (str (clojure.string/join "." n-space) "/" cl))]) widget-types)
         widget-map (loop [w-types widget-types
                     w-map {}]
                (if (seq w-types)
                  (let [cur-key (first w-types)
-                       current-widgets (get widgets-grouped cur-key)
+                       current-widgets (get widgets-grouped (first cur-key))
                        current-widgets (map #(assoc-in % [:args :color] (extract-rgb-constructors (str (-> % :args :color)))) current-widgets)]
-                   (recur (rest w-types) (merge w-map {(keyword (clojure.string/replace-first (str cur-key) #"class " ""))
+                   (recur (rest w-types) (merge w-map {(second cur-key)
                                                        (mapv #(vec (vals (select-keys % (filter (fn [k] (not= k :events)) (keys %))))) current-widgets)})))
                  w-map))
         strigui-map (merge strigui-map widget-map)]
