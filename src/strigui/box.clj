@@ -19,6 +19,7 @@
         btn-h (* text-heigth 1.8)
         border-width (if (and (number? width) (< btn-w width)) width btn-w)
         border-heigth (if (and (number? height) (< btn-h height)) height btn-h)]
+    (println "box-coord: " [x y border-width border-heigth text-width text-heigth] " text: " text)
       [x y border-width border-heigth text-width text-heigth]))
 
 (defn box-draw-text 
@@ -29,9 +30,9 @@
         [_ _ border-width border-heigth text-width text-heigth] (box-coord canvas text args)
         foreground-color (if (> (count color) 1) (nth color 1) Color/black)
         x-offset (/ (- border-width text-width) 2)
-        y-offset (* (- border-heigth text-heigth) 1.4)]
+        y-offset (/ (- border-heigth text-heigth) 2)]
       (c/draw-> canvas
-        (c/text (+ x x-offset) (+ y y-offset) text foreground-color size style))))
+        (c/text (+ x x-offset) (+ y y-offset (* 0.8 text-heigth)) text foreground-color size style))))
 
 (defn box-draw
   "canvas - java.awt canvas
@@ -43,7 +44,7 @@
   ([args] (apply box-draw args))
   ([canvas text args]
   (let [{:keys [^long x ^long y color ^long min-width]} args
-        [_ _ border-width border-heigth] (box-coord canvas text {:x x :y y :min-width min-width})
+        [_ _ border-width border-heigth] (box-coord canvas text args)
         background-color (if (> (count color) 0) (first color) Color/black)]
     (c/draw-> canvas
       (c/rect x y border-width border-heigth background-color true))
