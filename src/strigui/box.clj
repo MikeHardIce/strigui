@@ -19,7 +19,6 @@
         btn-h (* text-heigth 1.8)
         border-width (if (and (number? width) (< btn-w width)) width btn-w)
         border-heigth (if (and (number? height) (< btn-h height)) height btn-h)]
-    (println "box-coord: " [x y border-width border-heigth text-width text-heigth] " text: " text)
       [x y border-width border-heigth text-width text-heigth]))
 
 (defn box-draw-text 
