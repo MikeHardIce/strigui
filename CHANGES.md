@@ -5,6 +5,7 @@
 
 * fixed the export/import of the current state to/from an edn file
 * hiding based on background color by using capra/clear-rect
+* fixed text appearing outside the widgets
 
 ### 0.0.1-alpha24
 
