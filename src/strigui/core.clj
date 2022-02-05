@@ -5,11 +5,13 @@
    [clojure.string]
    [strigui.button]
    [strigui.label]
+   [strigui.list]
    [strigui.input :as inp]
    [capra.core :as c]
    [strigui.widget :as wdg])
   (:import [strigui.button Button]
            [strigui.label Label]
+           [strigui.list List]
            [strigui.input Input]
            [java.awt Color]))
 
@@ -179,6 +181,15 @@
   [name text args]
   (create! (inp/input (-> @wdg/state :context :canvas) name text args)))
 
+(defn list! 
+  "Create a simple list of items
+   name - name of the list
+   items - vector of items [{:value bla} {:value bla} ...]
+           items can be maps and should at least contain a :value"
+  [name items args]
+  (println "items: " items)
+  (create! (List. name items args)))
+
 (defn from-map
   "Initializes the window and the widgets from a map"
   [strigui-map]
@@ -189,6 +200,7 @@
                   (str "(strigui.core/create! (apply " (namespace widget-key) "/->" (name widget-key) " " (vec widget-args) "))")))]
     (loop [exp (mapcat identity exprs)]
       (when (seq exp)
+        (println "expr: " (first exp))
         (eval (read-string (first exp)))
         (recur (rest exp))))))
 
