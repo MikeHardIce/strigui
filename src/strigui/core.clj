@@ -187,7 +187,6 @@
    items - vector of items [{:value bla} {:value bla} ...]
            items can be maps and should at least contain a :value"
   [name items args]
-  (println "items: " items)
   (create! (List. name items args)))
 
 (defn from-map
@@ -200,7 +199,6 @@
                   (str "(strigui.core/create! (apply " (namespace widget-key) "/->" (name widget-key) " " (vec widget-args) "))")))]
     (loop [exp (mapcat identity exprs)]
       (when (seq exp)
-        (println "expr: " (first exp))
         (eval (read-string (first exp)))
         (recur (rest exp))))))
 

@@ -7,7 +7,6 @@
 
 (defn draw-list
   [canvas items args]
-  (println "draw-list: " items)
     (loop [items items
            ind 0]
       (when (seq items)
@@ -19,7 +18,6 @@
   (coord [this canvas] (let [{:keys [x y width height]} (:args this)]
                          [x y width height]))
   (defaults [this]
-    (println "defaults: " this)
     (when (not (instance? clojure.lang.Atom (:items this)))
       (let [ref-value (atom (:items this))]
         (assoc this :items ref-value))))
