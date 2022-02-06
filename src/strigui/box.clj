@@ -10,7 +10,7 @@
 (defn box-coord 
   "Computes the full box coordinates.
   Returns the vector [x y border-width border-heigth]"
-  [canvas text {:keys [^long x ^long y ^long height ^long width font-size]}]
+  [canvas text {:keys [^long x ^long y ^long height ^long width font-size ^long max-width]}]
   (let [size (if (number? font-size) font-size default-font-size)
         text-box (c/get-text-dimensions canvas text size)
         text-width (first text-box)
@@ -18,7 +18,8 @@
         btn-w (* text-width 1.8)
         btn-h (* text-heigth 1.8)
         border-width (if (and (number? width) (< btn-w width)) width btn-w)
-        border-heigth (if (and (number? height) (< btn-h height)) height btn-h)]
+        border-heigth (if (and (number? height) (< btn-h height)) height btn-h)
+        border-width (if (and (number? max-width) (> border-width max-width)) max-width border-width)]
       [x y border-width border-heigth text-width text-heigth]))
 
 (defn box-draw-text 
@@ -39,7 +40,8 @@
   x - x coordinate of top left corner
   y - y coordinate of top left corner
   color - vector consisting of [background-color font-color]
-  min-width - the minimum width"
+  min-width - the minimum width
+   max-width - the maximum width"
   ([args] (apply box-draw args))
   ([canvas text args]
   (let [{:keys [^long x ^long y color ^long min-width]} args
