@@ -5,19 +5,25 @@
 
 (defonce item-height 25)
 
-(defn get-item-at 
+(defn make-darker-or-brighter
+  [^java.awt.Color color]
+  (let [hsl (java.awt.Color/RGBtoHSB (.getRed color) (.getGreen color) (.getBlue color) nil)]
+    (if (> (get hsl 2) 0.8) (.darker color) (-> color (.brighter) (.brighter) (.brighter) (.brighter) (.brighter)))))
+
+(defn get-index-at 
   [widget y]
-  (let [items @(:items widget)
-        index (int (/ (- y (-> widget :args :y)) item-height))]
-    (get items index)))
+  (let [index (int (/ (- y (-> widget :args :y)) item-height))]
+    index))
 
 (defn draw-list
   [canvas items args]
     (loop [items items
            ind 0]
       (when (seq items)
-        (b/box-draw canvas (-> items first :value) (merge {:y (+ (* ind item-height) (:y args)) :max-width (:width args)} 
-                                                          (select-keys args [:width :x :color])))
+        (let [color (:color args)
+              color (if (:hovered? (first items)) (update color 0 make-darker-or-brighter) color)]
+          (b/box-draw canvas (-> items first :value) (merge {:y (+ (* ind item-height) (:y args)) :max-width (:width args) :color color}
+                                                            (select-keys args [:width :x]))))
         (recur (rest items) (inc ind)))))
 
 (defrecord List [name items args ]
@@ -35,11 +41,18 @@
           (draw-list canvas @(:items this) args))
         this))
 
+(defn clear-out 
+  [items state]
+  (let [cleared-items (mapv #(merge % {state false}) items)]
+    cleared-items))
+
 (defmethod wdg/widget-event [strigui.list.List :mouse-clicked]
  [_ canvas widget x y]
  (println ":mouse-clicked  Widget: " (:name widget) " clicked at [" x " " y "]"))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-moved]
   [_ canvas widget x y]
-  (println ":mouse-moved  Widget: " (:name widget) " clicked at [" x " " y "]")
-  (println "item hovered: " (get-item-at widget y)))
+  (let [index (get-index-at widget y)]
+    (when-let [item (get @(:items widget) index)]
+      (swap! (:items widget) clear-out :hovered?)
+      (swap! (:items widget) assoc index (assoc item :hovered? true)))))
