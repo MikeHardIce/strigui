@@ -23,8 +23,14 @@
         (let [color (:color args)
               item (first items)
               color (if (or (:hovered? item) (:selected? item)) (update color 0 make-darker-or-brighter) color)]
-          (b/box-draw canvas (-> items first :value) (merge {:y (+ (* index item-height) (:y args)) :max-width (:width args) :color color}
-                                                            (select-keys args [:width :x]))))
+          (b/box-draw canvas (-> items first :value) (merge 
+                                                      {:y (+ (* index item-height) (:y args)) :max-width (:width args) :color color}
+                                                      (select-keys args [:width :x])))
+          (when (:selected? item)
+            (c/draw-> canvas
+                      (c/line (inc (:x args)) (+ (* index item-height) (:y args)) 
+                              (inc (:x args)) (+ (* (inc index) item-height) (:y args)) 
+                              (get color 1 java.awt.Color/green) 3))))
         (recur (rest items) (inc index)))))
 
 (defrecord List [name items args ]
