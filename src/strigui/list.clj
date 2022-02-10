@@ -18,17 +18,18 @@
 (defn draw-list
   [canvas items args]
     (loop [items items
-           ind 0]
+           index 0]
       (when (seq items)
         (let [color (:color args)
-              color (if (:hovered? (first items)) (update color 0 make-darker-or-brighter) color)]
-          (b/box-draw canvas (-> items first :value) (merge {:y (+ (* ind item-height) (:y args)) :max-width (:width args) :color color}
+              item (first items)
+              color (if (or (:hovered? item) (:selected? item)) (update color 0 make-darker-or-brighter) color)]
+          (b/box-draw canvas (-> items first :value) (merge {:y (+ (* index item-height) (:y args)) :max-width (:width args) :color color}
                                                             (select-keys args [:width :x]))))
-        (recur (rest items) (inc ind)))))
+        (recur (rest items) (inc index)))))
 
 (defrecord List [name items args ]
   wdg/Widget
-  (coord [this canvas] (let [{:keys [x y width height]} (:args this)]
+  (coord [this _] (let [{:keys [x y width height]} (:args this)]
                          [x y width height]))
   (defaults [this]
       (when (not (instance? clojure.lang.Atom (:items this)))
@@ -46,13 +47,20 @@
   (let [cleared-items (mapv #(merge % {state false}) items)]
     cleared-items))
 
+(defn activate!
+  [canvas widget y property]
+  (let [index (get-index-at widget y)
+        items @(:items widget)]
+    (when (seq (get items index))
+      (swap! (:items widget) clear-out property)
+      (swap! (:items widget) assoc-in [index property] true)
+      (when (not= items @(:items widget))
+        (wdg/redraw! canvas widget)))))
+
 (defmethod wdg/widget-event [strigui.list.List :mouse-clicked]
- [_ canvas widget x y]
- (println ":mouse-clicked  Widget: " (:name widget) " clicked at [" x " " y "]"))
+ [_ canvas widget _ y]
+ (activate! canvas widget y :selected?))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-moved]
-  [_ canvas widget x y]
-  (let [index (get-index-at widget y)]
-    (when-let [item (get @(:items widget) index)]
-      (swap! (:items widget) clear-out :hovered?)
-      (swap! (:items widget) assoc index (assoc item :hovered? true)))))
+  [_ canvas widget _ y]
+  (activate! canvas widget y :hovered?))
