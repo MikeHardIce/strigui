@@ -222,7 +222,8 @@
   after)
 
 (defn determine-old-widgets-to-hide
-  [before after])
+  [before after]
+  before)
 
 (defn swap-widgets!
   "Swaps out the widgets using the given function.
@@ -232,6 +233,8 @@
     (let [canvas (-> @state :context :canvas)
           before (:widgets @state)
           after (:widgets (swap! state update-in [:widgets] f))]
+      (doseq [to-hide (vals (determine-old-widgets-to-hide before after))]
+        (hide! to-hide canvas))
       (apply redraw! canvas (vals (determine-widgets-to-redraw before after))))
     (catch Exception e (str "Failed to update widgets, perhaps the given function" \newline
                            "doesn't take or doesn't return a widgets map." \newline
