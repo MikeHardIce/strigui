@@ -7,8 +7,18 @@
 
   (gui/swap-widgets! (fn [wdgs]
                        (-> wdgs
-                           (gui/attach-event "click" :mouse-clicked (fn [wdg]
+                           (gui/attach-event "click" :mouse-clicked (fn [_ _]
                                                                       (gui/close-window)))
+                           (gui/attach-event "input" :key-pressed (fn [widgets name code]
+                                                                    (when (= code :enter)
+                                                                      (-> widgets
+                                                                          (assoc-in [name :args :selected?] nil)
+                                                                          (assoc-in ["input1" :args :selected?] true)))))
+                           (gui/attach-event "input" :key-pressed (fn [widgets name code]
+                                                                    (when (= code :enter)
+                                                                      (-> widgets
+                                                                          (assoc-in [name :args :selected?] nil)
+                                                                          (assoc-in ["input" :args :selected?] true)))))
                            (assoc-in ["click" :args :x] 100)
                            (assoc-in ["click" :args :y] 400))))
   
