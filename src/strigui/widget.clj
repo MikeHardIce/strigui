@@ -217,6 +217,26 @@
         args (assoc args :width width :height height :x x :y y :z z)]
     (assoc widget :args args)))
 
+(defn determine-widgets-to-redraw
+  [before after]
+  after)
+
+(defn determine-old-widgets-to-hide
+  [before after])
+
+(defn swap-widgets!
+  "Swaps out the widgets using the given function.
+   f - function that takes a widgets map and returns a new widgets map"
+  [f]
+  (try
+    (let [canvas (-> @state :context :canvas)
+          before (:widgets @state)
+          after (:widgets (swap! state update-in [:widgets] f))]
+      (apply redraw! canvas (vals (determine-widgets-to-redraw before after))))
+    (catch Exception e (str "Failed to update widgets, perhaps the given function" \newline
+                           "doesn't take or doesn't return a widgets map." \newline
+                           "Exception: " (.getMessage e)))))
+
 (defn register!
   "register the widget and draw it to the canvas. Can skip redraw via ski-redraw?"
   ([canvas ^strigui.widget.Widget widget]
