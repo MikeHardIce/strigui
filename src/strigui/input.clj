@@ -37,15 +37,14 @@
     (assoc this :value (adjust-text (:value this) char code))))
 
 (defn input
-  "canvas - clojure2d canvas
-    name - name of the input element
+  " name - name of the input element
     text - text displayed inside the input element
     args - map of properties:
       x - x coordinate of top left corner
       y - y coordinate of top left corner
       color - vector consisting of [background-color font-color]
       min-width - the minimum width"
-  [canvas name text args]
+  [name text args]
     (let [input (->Input name text args)]
       input))
 

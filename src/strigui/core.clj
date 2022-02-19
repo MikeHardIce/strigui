@@ -78,6 +78,36 @@
    ([x y width height title color]
       (swap! wdg/state assoc :context (c/create-window x y width height title (eval color)))))
   
+(defn add 
+  "Adds the given widget to the widgets map and runs defaults and dimension adjusting function"
+  [widgets ^strigui.widget.Widget widget]
+  (let [canvas (-> @wdg/state :context :canvas)
+        widget (->> widget
+                    (wdg/adjust-dimensions canvas)
+                    (wdg/defaults))]
+    (assoc widgets (:name widget) widget)))
+
+(defn close-window
+  "Closes the current active window."
+  []
+  (c/close-window (-> @wdg/state :context :window)))
+
+(defn add-button
+  [widgets name text args]
+  (add widgets (Button. name text args)))
+
+(defn add-label
+  [widgets name text args]
+  (add widgets (Label. name text args)))
+
+(defn add-input
+  [widgets name text args]
+  (add widgets (inp/Input. name text args)))
+
+(defn add-list
+  [widgets name items args]
+  (add widgets (List. name items args)))
+
 (defn create! 
   "Register and show a custom widget.
    Registering a component with the same name will replace the existing component with the new one."
@@ -90,11 +120,6 @@
         neighbours (sort-by #(-> % :args :z) neighbours)]
     (apply wdg/redraw! canvas neighbours)
     (wdg/register! canvas widget)))
-
-(defn close-window
-  "Closes the current active window."
-  []
-  (c/close-window (-> @wdg/state :context :window)))
 
 (defn button!
   "Create a simple button on screen.
@@ -131,7 +156,7 @@
     color - vector consisting of [background-color font-color]
     min-width - the minimum width"
   [name text args]
-  (create! (inp/input (-> @wdg/state :context :canvas) name text args)))
+  (create! (inp/input name text args)))
 
 (defn list! 
   "Create a simple list of items
