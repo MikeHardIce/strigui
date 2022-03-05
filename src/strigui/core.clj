@@ -166,26 +166,33 @@
   [name items args]
   (create! (List. name items args)))
 
-(defn from-map
+(defn from-map!
   "Initializes the window and the widgets from a map"
   [strigui-map]
   (when-let [window-args (:window strigui-map)]
     (apply window! window-args))
   (let [exprs (for [widget-key (filter #(not= % :window) (keys strigui-map))]
                 (for [widget-args (map identity (widget-key strigui-map))]
-                  (str "(strigui.core/create! (apply " (namespace widget-key) "/->" (name widget-key) " " (vec widget-args) "))")))]
-    (loop [exp (mapcat identity exprs)]
-      (when (seq exp)
-        (eval (read-string (first exp)))
-        (recur (rest exp))))))
+                  (str "(apply " (namespace widget-key) "/->" (name widget-key) " " (vec widget-args) ")")))
+        widgets (->> exprs
+                     (mapcat identity)
+                     (map #(-> %
+                               read-string
+                               eval)))]
+    (swap-widgets! (fn [wdgs]
+                     (loop [to-be widgets
+                            wdgs wdgs]
+                       (if (seq to-be)
+                         (recur (rest to-be) (add wdgs (first to-be)))
+                         wdgs))))))
 
-(defn from-file
+(defn from-file!
   "Initializes the window and the widgets from a edn file"
   [file-name]
   (when (.exists (io/file file-name))
     (->> (slurp file-name)
          edn/read-string
-         from-map)))
+         from-map!)))
 
 (defn extract-rgb-constructors
   [rgb-string]
