@@ -53,7 +53,7 @@
       (swap! wdg/state assoc :context (c/create-window x y width height title (eval color)))))
   
 (defn add 
-  "Adds the given widget to the widgets map and runs defaults and dimension adjusting function"
+  "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"
   [widgets ^strigui.widget.Widget widget]
   (let [canvas (-> @wdg/state :context :canvas)
         widget (->> widget
@@ -67,8 +67,8 @@
   (c/close-window (-> @wdg/state :context :window)))
 
 (defn add-button
-  "Adds a button widget to the given widget map.
-   widgets - widget map
+  "Adds a button widget to the given map of widgets.
+   widgets - map of widgets
    name - name of the element
    text - text displayed inside the button
    args - map of:
@@ -80,8 +80,8 @@
   (add widgets (Button. name text args)))
 
 (defn add-label
-  "Adds a label widget to the given widget map.
-    widgets - widget map
+  "Adds a label widget to the given map of widgets.
+    widgets - map of widgets
     name - name of the element
     text - text displayed inside the button
     args - map of:
@@ -94,8 +94,8 @@
   (add widgets (Label. name text args)))
 
 (defn add-input
-  "Adds a imput widget to the widget map.
-   widgets - widget map
+  "Adds a imput widget to the map of widgets.
+   widgets - map of widgets
    name - name of the element
    text - text displayed inside the button
    args - map of:
@@ -107,8 +107,8 @@
   (add widgets (inp/Input. name text args)))
 
 (defn add-list
-  "Adds a list widget holding on a vector of items to the widget map.
-   widgets - widget map
+  "Adds a list widget holding on a vector of items to the map of widgets.
+   widgets - map of widgets
    name - name of the list
    items - vector of items [{:value bla} {:value bla} ...]
            items can be maps and should at least contain a :value"

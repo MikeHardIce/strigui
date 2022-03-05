@@ -1,13 +1,21 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
-### 0.0.1-alpha25
+### 0.0.1-alpha25 (in the making)
 
 * fixed the export/import of the current state to/from an edn file
 * hiding based on background color by using capra/clear-rect
 * fixed text appearing outside the widgets
+* almost all previous stateful interactions are replaced by functions taking a
+  widget map and returning a widget map -> changed button! to add-button, input! -> add-input.
+  Removed functions like update! etc. ...
+  From now on swap-widgets! should be used, which takes a function where the argument is the map of widgets.
+  Basically its a function that is expected to transform the current map of widgets to a new map of widgets.
+  Events can now be attached with attach-event, this function as the above, expects a map of widgets and
+  returns a map of widgets.
+  
 
-### 0.0.1-alpha24
+### 0.0.1-alpha24 (latest)
 
 * fixed removing of widgets
 
