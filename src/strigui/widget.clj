@@ -175,6 +175,15 @@
         (draw-widget-border widget canvas)
         (recur (rest widgets))))))
 
+(defn draw-widgets! 
+  [canvas widgets]
+  (loop [widgets (sort-by #(-> % :args :z) widgets)]
+    (when (seq widgets)
+      (let [^strigui.widget.Widget widget (first widgets)]
+        (draw widget canvas)
+        (draw-widget-border widget canvas)
+        (recur (rest widgets))))))
+
 (defn neighbouring-widgets
   "get all neighbours of the given widget. Neighbours are sorted by their :z coordinate
    in ascending order"
@@ -217,13 +226,27 @@
         args (assoc args :width width :height height :x x :y y :z z)]
     (assoc widget :args args)))
 
-(defn determine-widgets-to-redraw
+(defn determine-updated-keys
   [before after]
-  after)
+  (let [keys-before (-> before keys set)
+        keys-after (-> after keys set)
+        added-keys (s/difference keys-after keys-before)
+        remaining-keys (s/difference keys-after added-keys)
+        keys-with-updates (map :name (filter #(not= % (get before (:name %))) (vals (select-keys after remaining-keys))))]
+    keys-with-updates))
+
+(defn determine-widgets-to-redraw
+  [before after updated-keys]
+  (let [keys-before (-> before keys set)
+        keys-after (-> after keys set)
+        added-keys (s/difference keys-after keys-before)
+        widgets-newly-added (select-keys after added-keys)
+        widgets-with-updates (select-keys after updated-keys)]
+    (merge widgets-with-updates widgets-newly-added)))
 
 (defn determine-old-widgets-to-hide
-  [before after]
-  before)
+  [before after updated-keys]
+  (select-keys before (s/union (s/difference (set (keys before)) (set (keys after))) updated-keys)))
 
 (defn swap-widgets!
   "Swaps out the widgets using the given function.
@@ -232,10 +255,11 @@
   (try
     (let [canvas (-> @state :context :canvas)
           before (:widgets @state)
-          after (:widgets (swap! state update-in [:widgets] f))]
-      (doseq [to-hide (vals (determine-old-widgets-to-hide before after))]
+          after (:widgets (swap! state update-in [:widgets] f))
+          updated-keys (determine-updated-keys before after)]
+      (doseq [to-hide (vals (determine-old-widgets-to-hide before after updated-keys))]
         (hide! to-hide canvas))
-      (apply redraw! canvas (vals (determine-widgets-to-redraw before after))))
+      (draw-widgets! canvas (vals (determine-widgets-to-redraw before after updated-keys))))
     (catch Exception e (str "Failed to update widgets, perhaps the given function" \newline
                            "doesn't take or doesn't return a widgets map." \newline
                            "Exception: " (.getMessage e)))))
