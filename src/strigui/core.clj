@@ -36,32 +36,6 @@
   [widgets name event f]
   (assoc-in widgets [name :events event] f))
 
-;; (defn update-group!
-;;   "Update all widgets that are part of the given group.
-;;    name - name of the group
-;;    key - either simple key or vector of keys
-;;    value - the new value of the key/key path"
-;;   [group-name key value & kvs]
-;;   (when-let [widgets (find-by-group group-name)]
-;;     (loop [widgets widgets]
-;;       (when (seq widgets)
-;;         (update-widget-multiple-keys! false (first widgets) key value (when kvs @kvs))
-;;         (recur (rest widgets))))
-;;     widgets))
-
-;; (defn update-group-skip-redraw!
-;;   "Update all widgets that are part of the given group but skip redrawing the widgets of that group.
-;;    name - name of the group
-;;    key - either simple key or vector of keys
-;;    value - the new value of the key/key path"
-;;   [name key value & kvs]
-;;   (when-let [widgets (find-by-group name)]
-;;     (loop [widgets widgets]
-;;       (when (seq widgets)
-;;         (update-widget-multiple-keys! true (first widgets) key value (when kvs @kvs))
-;;         (recur (rest widgets))))
-;;     widgets))
-
 (defn window!
   "Initializes a new window or reuses an existing one
    wind - an already existing windows instance (experimental)
@@ -87,42 +61,14 @@
                     (wdg/defaults))]
     (assoc widgets (:name widget) widget)))
 
-(defn close-window
+(defn close-window!
   "Closes the current active window."
   []
   (c/close-window (-> @wdg/state :context :window)))
 
 (defn add-button
-  [widgets name text args]
-  (add widgets (Button. name text args)))
-
-(defn add-label
-  [widgets name text args]
-  (add widgets (Label. name text args)))
-
-(defn add-input
-  [widgets name text args]
-  (add widgets (inp/Input. name text args)))
-
-(defn add-list
-  [widgets name items args]
-  (add widgets (List. name items args)))
-
-(defn create! 
-  "Register and show a custom widget.
-   Registering a component with the same name will replace the existing component with the new one."
-  [^strigui.widget.Widget widget]
-  ;;(remove! (:name widget))
-  (let [canvas (-> @wdg/state :context :canvas)
-        widget (wdg/adjust-dimensions canvas widget)
-        widget (wdg/defaults widget)
-        neighbours (wdg/all-neighbouring-widgets canvas widget (->> @wdg/state :widgets vals) >)
-        neighbours (sort-by #(-> % :args :z) neighbours)]
-    (apply wdg/redraw! canvas neighbours)
-    (wdg/register! canvas widget)))
-
-(defn button!
-  "Create a simple button on screen.
+  "Adds a button widget to the given widget map.
+   widgets - widget map
    name - name of the element
    text - text displayed inside the button
    args - map of:
@@ -130,11 +76,12 @@
      y - y coordinate of top left corner
      color - vector consisting of [background-color font-color]
      min-width - the minimum width"
-  [name text args]
-  (create! (Button. name text args)))
+  [widgets name text args]
+  (add widgets (Button. name text args)))
 
-(defn label!
-   "Create a simple label on screen.
+(defn add-label
+  "Adds a label widget to the given widget map.
+    widgets - widget map
     name - name of the element
     text - text displayed inside the button
     args - map of:
@@ -143,11 +90,12 @@
      color - vector consisting of [font-color]
      font-style - vector consisting of either :bold :italic :italic-bold
      font-size - number"
-  [name text args]
-  (create! (Label. name text args)))
+  [widgets name text args]
+  (add widgets (Label. name text args)))
 
-(defn input!
-  "Create a simple imput field on screen.
+(defn add-input
+  "Adds a imput widget to the widget map.
+   widgets - widget map
    name - name of the element
    text - text displayed inside the button
    args - map of:
@@ -155,16 +103,17 @@
     y - y coordinate of top left corner
     color - vector consisting of [background-color font-color]
     min-width - the minimum width"
-  [name text args]
-  (create! (inp/input name text args)))
+  [widgets name text args]
+  (add widgets (inp/Input. name text args)))
 
-(defn list! 
-  "Create a simple list of items
+(defn add-list
+  "Adds a list widget holding on a vector of items to the widget map.
+   widgets - widget map
    name - name of the list
    items - vector of items [{:value bla} {:value bla} ...]
            items can be maps and should at least contain a :value"
-  [name items args]
-  (create! (List. name items args)))
+  [widgets name items args]
+  (add widgets (List. name items args)))
 
 (defn from-map!
   "Initializes the window and the widgets from a map"

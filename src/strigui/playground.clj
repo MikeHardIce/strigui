@@ -8,7 +8,7 @@
   (gui/swap-widgets! (fn [wdgs]
                        (-> wdgs
                            (gui/attach-event "click" :mouse-clicked (fn [_ _]
-                                                                      (gui/close-window)))
+                                                                      (gui/close-window!)))
                            (gui/attach-event "input" :key-pressed (fn [widgets name code]
                                                                     (when (= code :enter)
                                                                       (-> widgets
