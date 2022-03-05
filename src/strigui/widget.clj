@@ -215,6 +215,16 @@
          (recur (s/union neighbours (set new-neighbours)) (s/union visited #{next-widget})))
        neighbours))))
 
+(defn determine-all-neighbours
+  [canvas widgets-to-determine widgets]
+  (loop [widget (vals widgets-to-determine)
+         keys-not-considered (-> widgets keys set)
+         neighbour-keys #{}]
+    (if (and (seq widget) (seq keys-not-considered))
+      (let [neighb (set (map :name (all-neighbouring-widgets canvas (first widget) (vals (select-keys widgets keys-not-considered)))))]
+        (recur (rest widget) (s/difference keys-not-considered neighb) (s/union neighbour-keys neighb)))
+      (select-keys widgets neighbour-keys))))
+
 (defn adjust-dimensions 
   [canvas ^strigui.widget.Widget widget]
   (let [[_ _ w h] (coord widget canvas)
@@ -256,10 +266,12 @@
     (let [canvas (-> @state :context :canvas)
           before (:widgets @state)
           after (:widgets (swap! state update-in [:widgets] f))
-          updated-keys (determine-updated-keys before after)]
+          updated-keys (determine-updated-keys before after)
+          to-redraw (determine-widgets-to-redraw before after updated-keys)
+          neighbours (determine-all-neighbours canvas to-redraw after)]
       (doseq [to-hide (vals (determine-old-widgets-to-hide before after updated-keys))]
         (hide! to-hide canvas))
-      (draw-widgets! canvas (vals (determine-widgets-to-redraw before after updated-keys))))
+      (draw-widgets! canvas (vals (merge to-redraw neighbours))))
     (catch Exception e (str "Failed to update widgets, perhaps the given function" \newline
                            "doesn't take or doesn't return a widgets map." \newline
                            "Exception: " (.getMessage e)))))
