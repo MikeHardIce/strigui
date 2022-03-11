@@ -22,6 +22,7 @@
                            (assoc-in ["click" :args :x] 100)
                            (assoc-in ["click" :args :y] 400)))))
 
-(defmethod wdg/widget-global-event :mouse-clicked [_ canvas x y]
-  (println "Mouse clicked x:" x " y:" y))
+(defmethod wdg/widget-global-event :mouse-clicked [_ canvas widgets x y]
+  (println "Mouse clicked x:" x " y:" y)
+  widgets)
                                                 

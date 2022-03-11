@@ -40,12 +40,12 @@
   (fn [action canvas widget & args]
     [(class widget) action]))
 
-(defmethod widget-event :default [action canvas widget & args] nil)
+(defmethod widget-event :default [action canvas widget & args] widget)
 
 (defmulti widget-global-event
-  (fn [action canvas & args] action))
+  (fn [action canvas widgets & args] action))
 
-(defmethod widget-global-event :default [_ canvas & args] nil)
+(defmethod widget-global-event :default [_ canvas widgets & args] widgets)
 
 (defn on-border?
   [[x y w h] x0 y0]
@@ -148,6 +148,10 @@
   [widgets key value]
   (for [widget widgets]
     (assoc-in widget [:args key] value)))
+
+(defn assoc-arg-for-all
+  [widgets key value]
+  (reduce merge {} (map #(merge {} {(:name %) %}) (for [w (vals widgets)] (assoc-in w [:args key] value)))))
 
 (defn next-widget-to-tab
   [canvas widgets previously-tabbed ^strigui.widget.Widget selected-widget]
@@ -344,7 +348,7 @@
       (update widget :args #(merge % {:width w1 :height h1
                                       :x x1 :y y1})))))
 
-(defn handle-clicked
+(defn handle-clicked-old
   [x y]
   (let [context (:context @strigui.widget/state)
         canvas (:canvas context)
@@ -364,6 +368,19 @@
         (widget-event :mouse-clicked canvas widget x y)
         (widget-global-event :mouse-clicked canvas x y)
         (trigger-custom-event :mouse-clicked widgets widget)))))
+
+(defn handle-clicked
+  [canvas widgets x y]
+  (let [;; get the first widget that is on top close to the mouse position
+        widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))
+        clicked (when (seq widget) (:name widget))
+        widgets (assoc-arg-for-all widgets :selected? nil)]
+    (if (and clicked (not (-> (get widgets clicked) :args :resizing?)))
+        (let [widgets (assoc-in widgets [clicked :args :selected?] true)
+              widgets (assoc widgets clicked (widget-event :mouse-clicked canvas (get widgets clicked) x y))
+              widgets (trigger-custom-event :mouse-clicked widgets (get widgets clicked))]
+          widgets)
+      (widget-global-event :mouse-clicked canvas widgets x y))))
 
 (defn handle-mouse-moved
   [action x y]
@@ -442,9 +459,10 @@
     (widget-global-event :mouse-moved (:canvas context) x y)))
 
 (defmethod c/handle-event :mouse-pressed [_ {:keys [x y]}]
-  (let [context (:context @strigui.widget/state)]
-    (handle-clicked x y)
-    (widget-global-event :mouse-clicked (:canvas context) x y)))
+  (let [canvas (-> @strigui.widget/state :context :canvas)]
+    (swap-widgets! #(handle-clicked canvas % x y))
+    ;(widget-global-event :mouse-clicked (:canvas context) x y)
+    ))
 
 (defmethod c/handle-event :mouse-released [_ {:keys [x y]}]
   (widget-global-event :mouse-released (:canvas (:context @strigui.widget/state)) x y)
