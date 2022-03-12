@@ -269,9 +269,9 @@
   (try
     (let [canvas (-> @state :context :canvas)
           before (:widgets @state)
-          bla (println "Before: " before)
+          bla (println "before: " before)
           after (:widgets (swap! state update-in [:widgets] f))
-          bla (println "After: " after)
+          bla (println "after: " after)
           updated-keys (determine-updated-keys before after)
           to-redraw (determine-widgets-to-redraw before after updated-keys)
           neighbours (determine-all-neighbours canvas to-redraw after)]
@@ -455,7 +455,9 @@
             widget (widget-event :key-pressed canvas (get widgets (:name widget)) char code)
             widgets (assoc widgets (:name widget) widget)]
         (trigger-custom-event :key-pressed widgets (get widgets (:name widget)) code))
-      widgets)))
+      (if-let [tabable (first (get-with-property widgets :can-tab? true))]
+        (handle-tabbing-f widgets (get widgets tabable))
+        widgets))))
 
 (defmethod c/handle-event :key-pressed [_ {:keys [char code]}]
   (let [canvas (:canvas (:context @state))
