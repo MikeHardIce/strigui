@@ -50,13 +50,15 @@
 
 (defn handle-key-pressed
   [canvas widget char code]
-  (when (-> widget :args :selected?)
     (let [box-with-new-input (key-pressed widget char code)
           box-with-new-input (assoc-in box-with-new-input [:args :selected?] (or (not= code 10) ;;enter
                                                                                  (not= code 9)))] ;; tab
-      (when box-with-new-input
-        (wdg/replace! canvas (:name widget) box-with-new-input)
-        (b/box-draw-text canvas (:value box-with-new-input) (:args box-with-new-input))))))
+      (if (and (-> widget :args :selected?) box-with-new-input)
+        (do
+          ;;(wdg/replace! canvas (:name widget) box-with-new-input)
+          (b/box-draw-text canvas (:value box-with-new-input) (:args box-with-new-input))
+          box-with-new-input)
+        widget)))
 
 (defmethod wdg/widget-event [strigui.input.Input :key-pressed]
   [_ canvas widget char code]

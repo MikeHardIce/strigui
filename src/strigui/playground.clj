@@ -10,15 +10,17 @@
                            (gui/attach-event "click" :mouse-clicked (fn [_ _]
                                                                       (gui/close-window!)))
                            (gui/attach-event "input" :key-pressed (fn [widgets name code]
-                                                                    (when (= code :enter)
+                                                                    (if (= code :enter)
                                                                       (-> widgets
                                                                           (assoc-in [name :args :selected?] nil)
-                                                                          (assoc-in ["input1" :args :selected?] true)))))
+                                                                          (assoc-in ["input1" :args :selected?] true))
+                                                                      widgets)))
                            (gui/attach-event "input" :key-pressed (fn [widgets name code]
-                                                                    (when (= code :enter)
+                                                                    (if (= code :enter)
                                                                       (-> widgets
                                                                           (assoc-in [name :args :selected?] nil)
-                                                                          (assoc-in ["input" :args :selected?] true)))))
+                                                                          (assoc-in ["input" :args :selected?] true))
+                                                                      widgets)))
                            (assoc-in ["click" :args :x] 100)
                            (assoc-in ["click" :args :y] 400)))))
 
