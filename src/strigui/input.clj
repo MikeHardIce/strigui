@@ -50,9 +50,9 @@
 
 (defn handle-key-pressed
   [widget char code]
-    (let [box-with-new-input (key-pressed widget char code)
-          box-with-new-input (assoc-in box-with-new-input [:args :selected?] (or (not= code 10) ;;enter
-                                                                                 (not= code 9)))] ;; tab
+    (let [box-with-new-input (key-pressed widget char code)]
+          ;box-with-new-input (assoc-in box-with-new-input [:args :selected?] (or (not= code 10) ;;enter
+          ;                                                                       (not= code 9)))] ;; tab
       box-with-new-input))
 
 (defmethod wdg/widget-event [strigui.input.Input :key-pressed]
