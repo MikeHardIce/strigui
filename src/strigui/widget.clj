@@ -40,10 +40,10 @@
                   :context {:canvas nil :window nil}}))
 
 (defmulti widget-event
-  (fn [action canvas widget & args]
+  (fn [action canvas widgets widget & args]
     [(class widget) action]))
 
-(defmethod widget-event :default [action canvas widget & args] widget)
+(defmethod widget-event :default [action canvas widgets widget & args] widgets)
 
 (defmulti widget-global-event
   (fn [action canvas widgets & args] action))
@@ -361,7 +361,7 @@
         widgets (assoc-arg-for-all widgets :selected? nil)]
     (if (and clicked (not (-> (get widgets clicked) :args :resizing?)))
         (let [widgets (assoc-in widgets [clicked :args :selected?] true)
-              widgets (assoc widgets clicked (widget-event :mouse-clicked canvas (get widgets clicked) x y))
+              widgets (widget-event :mouse-clicked canvas widgets (get widgets clicked) x y)
               widgets (trigger-custom-event :mouse-clicked widgets (get widgets clicked))]
           widgets)
       (widget-global-event :mouse-clicked canvas widgets x y))))
@@ -471,8 +471,7 @@
   (let [widgets (widget-global-event :key-pressed canvas widgets char code)]
     (if-let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (vals widgets)))))]
       (let [widgets (handle-tabbing canvas widgets widget code)
-            widget (widget-event :key-pressed canvas (get widgets (:name widget)) char code)
-            widgets (assoc widgets (:name widget) widget)]
+            widgets (widget-event :key-pressed canvas widgets (get widgets (:name widget)) char code)]
         (trigger-custom-event :key-pressed widgets (get widgets (:name widget)) code))
       (if-let [tabable (first (get-with-property widgets :can-tab? true))]
         (handle-tabbing canvas widgets (get widgets tabable) code)

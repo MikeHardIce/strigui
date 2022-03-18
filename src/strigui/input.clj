@@ -56,5 +56,5 @@
       box-with-new-input))
 
 (defmethod wdg/widget-event [strigui.input.Input :key-pressed]
-  [_ canvas widget char code]
-  (handle-key-pressed widget char code))
+  [_ canvas widgets widget char code]
+  (assoc widgets (:name widget) (handle-key-pressed widget char code)))

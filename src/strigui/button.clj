@@ -1,7 +1,6 @@
 (ns strigui.button
   (:require [strigui.box :as b]
-            [strigui.widget :as wdg]
-            [capra.core :as c]))
+            [strigui.widget :as wdg]))
 
 (defrecord Button [name value args]
   wdg/Widget
@@ -11,8 +10,8 @@
         (b/box-draw canvas (:value this) (:args this))))
 
 (defmethod wdg/widget-event [strigui.button.Button :key-pressed]
-  [_ canvas widget char code]
-  (when (= code 10) ;;enter
+  [_ canvas widgets widget char code]
+  (if (= code 10) ;;enter
     (let [[x y] (wdg/coord widget canvas)]
-      (c/handle-event :mouse-pressed nil {:x x :y y})))
-  widget)
+      (wdg/handle-clicked canvas widgets x y))
+    widgets))
