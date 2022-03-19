@@ -15,6 +15,7 @@
   returns a map of widgets.
 * removed register! unregister! replace!
 * reworked internal event functions to use swap-widgets!
+* removed canvas from widget-global-event
   
 
 ### 0.0.1-alpha24 (latest)
