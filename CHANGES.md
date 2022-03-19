@@ -13,6 +13,8 @@
   Basically its a function that is expected to transform the current map of widgets to a new map of widgets.
   Events can now be attached with attach-event, this function as the above, expects a map of widgets and
   returns a map of widgets.
+* removed register! unregister! replace!
+* reworked internal event functions to use swap-widgets!
   
 
 ### 0.0.1-alpha24 (latest)
