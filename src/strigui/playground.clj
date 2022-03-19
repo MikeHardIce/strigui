@@ -22,7 +22,8 @@
                                                                           (assoc-in ["input" :args :selected?] true))
                                                                       widgets)))
                            (assoc-in ["click" :args :x] 100)
-                           (assoc-in ["click" :args :y] 400)))))
+                           (assoc-in ["click" :args :y] 400)
+                           (gui/add-button "btnBla" "Don't Click Me" {:x 100 :y 300 :color [java.awt.Color/green java.awt.Color/red]})))))
 
 (defmethod wdg/widget-global-event :mouse-clicked [_ widgets x y]
   (println "Mouse clicked x:" x " y:" y)
