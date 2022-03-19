@@ -293,17 +293,15 @@
 
 (defn- handle-widget-dragging
   [^strigui.widget.Widget widget x y x-prev y-prev]
-  (when-let [old-position [x-prev y-prev]]
-    (let [dx (- x (first old-position))
-          dy (- y (second old-position))
+    (let [dx (- x x-prev)
+          dy (- y y-prev)
           new-x (+ (-> widget :args :x) dx)
           new-y (+ (-> widget :args :y) dy)]
-      (update widget :args #(merge % {:x new-x :y new-y})))))
+      (update widget :args #(merge % {:x new-x :y new-y}))))
 
 (defn- handle-widget-resizing
   [^strigui.widget.Widget widget x y x-prev y-prev]
-  (when-let [old-position [x-prev y-prev]]
-    (let [[dx dy] [(- x (first old-position)) (- y (second old-position))]
+    (let [[dx dy] [(- x x-prev) (- y y-prev)]
           [x0 y0 w h] [(-> widget :args :x) (-> widget :args :y) (-> widget :args :width) (-> widget :args :height)]
           position-f (fn [m0 m] (<= (- m0 border-thickness) m (+ m0 border-thickness)))
           [left? top? right? bottom?] [(position-f x0 x) (position-f y0 y) (position-f (+ x0 w) x) (position-f (+ y0 h) y)]
@@ -314,7 +312,7 @@
                           bottom? [x0 y0 w (+ h dy)]
                           :else [x0 y0 w h])]
       (update widget :args #(merge % {:width w1 :height h1
-                                      :x x1 :y y1})))))
+                                      :x x1 :y y1}))))
 
 (defn handle-clicked
   [canvas widgets x y]
@@ -333,8 +331,10 @@
   [canvas widgets x y x-prev y-prev]
   (if-let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))]
     (if (-> widget :args :resizing?)
-      (assoc widgets (:name widget) (handle-widget-dragging widget x y x-prev y-prev))
-      (assoc widgets (:name widget) (handle-widget-resizing widget x y x-prev y-prev)))
+      (assoc widgets (:name widget) (handle-widget-resizing widget x y x-prev y-prev))
+      (if (-> widget :args :can-move?)
+        (assoc widgets (:name widget) (handle-widget-dragging widget x y x-prev y-prev))
+        widgets))
     widgets))
 
 (defn handle-mouse-moved 
@@ -344,7 +344,6 @@
       ;; if the mouse is on a widget, focus it and trigger events in case it wasn't focused before, check if it should resize
       (let [widgets (widget-event :mouse-moved canvas widgets widget x y)
             widgets (trigger-custom-event :mouse-moved widgets (get widgets (:name widget)) x y)
-            at-border (on-border? (coord (get widgets (:name widget)) canvas) x y)
             widget (get widgets (:name widget))
             widgets (if (-> widget :args :focused?) 
                       widgets
@@ -352,7 +351,8 @@
                             widgets (widget-event :widget-focus-in canvas widgets (get widgets name) x y)]
                         (trigger-custom-event :widget-focus-in widgets (get widgets name) x y)))
             widgets (assoc-in widgets [(:name widget) :args :focused?] true)]
-        (assoc-in widgets [(:name widget) :args:resizing?] (and (-> widget :args :can-resize?) at-border)))
+        (assoc-in widgets [(:name widget) :args :resizing?] (and (-> widget :args :can-resize?) 
+                                                                 (on-border? (coord (get widgets (:name widget)) canvas) x y))))
       ;; if the mouse is not on a widget, check previously focused widgets, trigger events and unfocus them
       (if-let [focused-widgets (get-with-property (vals widgets) :focused?)]
         (loop [remaining-focused focused-widgets
@@ -368,8 +368,7 @@
 
 (defmethod c/handle-event :mouse-dragged [_ {:keys [x y]}]
   (let [canvas (-> @state :context :canvas)
-        prev (-> @previously :mouse-position)
-        [x-prev y-prev] (if prev prev [x y])]
+        [x-prev y-prev] (-> @previously :mouse-position)]
     (swap-widgets! #(let [widgets (handle-mouse-dragged canvas % x y x-prev y-prev)]
                       (widget-global-event :mouse-dragged canvas widgets x y x-prev y-prev)))
     (swap! previously assoc :mouse-position [x y])))
@@ -377,7 +376,8 @@
 (defmethod c/handle-event :mouse-moved [_ {:keys [x y]}]
   (let [canvas (-> @state :context :canvas)]
     (swap-widgets! #(let [widgets (handle-mouse-moved canvas % x y)]
-                      (widget-global-event :mouse-moved canvas widgets x y)))))
+                      (widget-global-event :mouse-moved canvas widgets x y)))
+    (swap! previously assoc :mouse-position [x y])))
 
 (defmethod c/handle-event :mouse-pressed [_ {:keys [x y]}]
   (let [canvas (-> @strigui.widget/state :context :canvas)]
