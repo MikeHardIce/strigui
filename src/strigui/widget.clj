@@ -33,10 +33,6 @@
                        :mouse-position nil}))
 
 (def state (atom {:widgets {}
-                  :widgets-to-redraw #{}
-                  :previous-mouse-position nil
-                  :previously-tabbed #{}
-                  :previously-selected nil
                   :context {:canvas nil :window nil}}))
 
 (defmulti widget-event

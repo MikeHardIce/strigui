@@ -37,15 +37,12 @@
   wdg/Widget
   (coord [this _] (let [{:keys [x y width height]} (:args this)]
                          [x y width height]))
-  (defaults [this]
-      (when (not (instance? clojure.lang.Atom (:items this)))
-        (let [ref-value (atom (:items this))]
-          (assoc this :items ref-value))))
+  (defaults [this] this)
   (draw [this canvas]
         (let [{:keys [x y width height color] :as args} (:args this)]
           (c/draw-> canvas
                     (c/rect x y width height (first color) false))
-          (draw-list canvas @(:items this) args))
+          (draw-list canvas (:items this) args))
         this))
 
 (defn clear-out 
@@ -54,19 +51,19 @@
     cleared-items))
 
 (defn activate!
-  [canvas widget y property]
+  [widget y property]
   (let [index (get-index-at widget y)
-        items @(:items widget)]
-    (when (seq (get items index))
-      (swap! (:items widget) clear-out property)
-      (swap! (:items widget) assoc-in [index property] true)
-      (when (not= items @(:items widget))
-        (wdg/redraw! canvas widget)))))
+        items (:items widget)]
+    (if (seq (get items index))
+      (-> widget
+          (update :items clear-out property)
+          (assoc-in [:items index property] true))
+      widget)))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-clicked]
- [_ canvas widget _ y]
- (activate! canvas widget y :selected?))
+ [_ canvas widgets widget _ y]
+ (update widgets (:name widget) activate! y :selected?))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-moved]
-  [_ canvas widget _ y]
-  (activate! canvas widget y :hovered?))
+  [_ canvas widgets widget _ y]
+  (update widgets (:name widget) activate! y :hovered?))
