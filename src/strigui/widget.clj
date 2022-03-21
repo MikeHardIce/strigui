@@ -9,7 +9,8 @@
 (defprotocol Widget
   "collection of functions around redrawing widgets, managing the border etc. ..."
   (coord [this canvas] "gets the coordinates of the widget")
-  (defaults [this] "attach default values")
+  (defaults [this] "attach default values once the widget gets created")
+  (before-drawing [this] "modify the widget each time before it gets drawn")
   (draw [this canvas] "draw the widget, returns the widget on success"))
 
 (defmacro def-action
@@ -167,17 +168,6 @@
         new-selected (:widget (first dist))]
     new-selected))
 
-(defn redraw!
-  "redraws the given sequence of widgets"
-  [canvas & widgets]
-  (loop [widgets (sort-by #(-> % :args :z) widgets)]
-    (when (seq widgets)
-      (let [^strigui.widget.Widget widget (first widgets)]
-        (hide! widget canvas)
-        (draw widget canvas)
-        (draw-widget-border widget canvas)
-        (recur (rest widgets))))))
-
 (defn draw-widgets! 
   [canvas widgets]
   (loop [widgets (sort-by #(-> % :args :z) widgets)]
@@ -268,15 +258,17 @@
   (try
     (let [canvas (-> @state :context :canvas)
           before (:widgets @state)
-          ;bla (println "before: " before)
-          after (:widgets (swap! state update-in [:widgets] f))
-          ;bla (println "after: " after)
+          after (f before)
           updated-keys (determine-updated-keys before after)
           to-redraw (determine-widgets-to-redraw before after updated-keys)
           neighbours (determine-all-neighbours canvas to-redraw after)]
       (doseq [to-hide (vals (determine-old-widgets-to-hide before after updated-keys))]
         (hide! to-hide canvas))
-      (draw-widgets! canvas (vals (merge to-redraw neighbours))))
+      (when-let [widgets-to-draw (vals (merge to-redraw neighbours))]
+        (let [widgets-to-draw (map before-drawing widgets-to-draw)
+              after (merge-with into after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
+          (swap! state assoc :widgets after)
+          (draw-widgets! canvas widgets-to-draw))))
     (catch Exception e (str "Failed to update widgets, perhaps the given function" \newline
                            "doesn't take or doesn't return a widgets map." \newline
                            "Exception: " (.getMessage e)))))

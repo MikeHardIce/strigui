@@ -6,6 +6,7 @@
   wdg/Widget
   (coord [this canvas] (apply b/box-coord [canvas (:value this) (:args this)]))
   (defaults [this] (assoc-in this [:args :has-border?] true))
+  (before-drawing [this] this)
   (draw [this canvas]
         (b/box-draw canvas (:value this) (:args this))))
 

@@ -17,6 +17,7 @@
 * reworked internal event functions to use swap-widgets!
 * removed canvas from widget-global-event
 * input fields can now be marked as password fields via args :password?
+* added before-drawing function to the widget protocol, which is called each time before a widget is drawn
   
 
 ### 0.0.1-alpha24 (latest)
