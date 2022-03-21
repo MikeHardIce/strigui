@@ -356,6 +356,7 @@
           (if (seq remaining-focused)
             (recur (rest remaining-focused) (let [name (first remaining-focused)
                                                   widgets (assoc-in widgets [name :args :focused?] nil)
+                                                  widgets (assoc-in widgets [name :args :resizing?] nil)
                                                   widgets (widget-event :widget-focus-out canvas widgets (get widgets name) x y)
                                                   widgets (trigger-custom-event :widget-focus-out widgets (get widgets name) x y)]
                                               widgets))
