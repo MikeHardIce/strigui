@@ -327,9 +327,9 @@
   [canvas widgets x y x-prev y-prev]
   (if-let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))]
     (if (-> widget :args :resizing?)
-      (assoc widgets (:name widget) (handle-widget-resizing widget x y x-prev y-prev))
+      (update widgets (:name widget) handle-widget-resizing x y x-prev y-prev)
       (if (-> widget :args :can-move?)
-        (assoc widgets (:name widget) (handle-widget-dragging widget x y x-prev y-prev))
+        (update widgets (:name widget) handle-widget-dragging x y x-prev y-prev)
         widgets))
     widgets))
 
