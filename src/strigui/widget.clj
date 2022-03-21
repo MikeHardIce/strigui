@@ -196,8 +196,8 @@
    in ascending order"
   [canvas ^strigui.widget.Widget widget widgets]
   (let [widget-coords (coord widget canvas)
-              neighbours (set (filter #(and (intersect? widget-coords (coord % canvas))
-                                                      ) widgets)) ;;(not= widget %)  
+              neighbours (set (filter #(intersect? widget-coords (coord % canvas))
+                                      widgets)) ;;(not= widget %)  
               neighbours (sort-by #(-> % :args :z) neighbours)]
     neighbours))
 
@@ -385,9 +385,8 @@
                       (widget-global-event :mouse-clicked widgets x y)))))
 
 (defmethod c/handle-event :mouse-released [_ {:keys [x y]}]
-  (let [canvas (-> @strigui.widget/state :context :canvas)]
-    (swap-widgets! #(let [widgets (widget-global-event :mouse-released % x y)]
-                       (widget-global-event :mouse-released widgets x y)))))
+  (swap-widgets! #(let [widgets (widget-global-event :mouse-released % x y)]
+                    (widget-global-event :mouse-released widgets x y))))
 
 (defn handle-tabbing
   [canvas widgets widget code]
