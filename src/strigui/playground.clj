@@ -23,7 +23,8 @@
                                                                       widgets)))
                            (assoc-in ["click" :args :x] 100)
                            (assoc-in ["click" :args :y] 400)
-                           (gui/add-button "btnBla" "Don't Click Me" {:x 100 :y 300 :color [java.awt.Color/green java.awt.Color/red] :can-tab? true})))))
+                           (gui/add-button "btnBla" "Don't Click Me" {:x 100 :y 300 :color [java.awt.Color/green java.awt.Color/red] :can-tab? true})
+                           (update-in ["test-list" :items] conj {:value "item4"} {:value "item5"} {:value "item6"} {:value "item7"} {:value "item8"} {:value "item9"})))))
 
 (defmethod wdg/widget-global-event :mouse-clicked [_ widgets x y]
   (println "Mouse clicked x:" x " y:" y)

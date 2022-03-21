@@ -16,6 +16,7 @@
 * removed register! unregister! replace!
 * reworked internal event functions to use swap-widgets!
 * removed canvas from widget-global-event
+* input fields can now be marked as password fields via args :password?
   
 
 ### 0.0.1-alpha24 (latest)

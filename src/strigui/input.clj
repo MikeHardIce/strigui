@@ -7,7 +7,9 @@
   (coord [this canvas] (apply b/box-coord [canvas (:value this) (:args this)]))
   (defaults [this] (assoc-in this [:args :has-border?] true))
   (draw [this canvas]
-        (b/box-draw canvas (:value this) (:args this))
+        (b/box-draw canvas (if (-> this :args :password?)
+                             (apply str (repeat (count (:value this)) "*"))
+                             (:value this)) (:args this))
         this))
 
 ;; (extend-protocol wdg/Draw-resizing
