@@ -47,10 +47,10 @@
         widgets-not-visible (take-last (- (count items) max-visible-items) items)]
     (assoc widget :items (apply conj widgets-visible widgets-not-visible))))
   ([widget y]
-   (let [max-visible-items (Math/floor (/ (-> widget :args :height) item-height))
+   (let [max-visible-items (int (/ (-> widget :args :height) item-height))
          items (:items widget)
          cnt-items (count items)
-         index (* item-height (Math/floor (- y (-> widget :args :y))))
+         index (int (/ (int (- y (-> widget :args :y))) item-height))
          until (+ index max-visible-items)
          diff (if (> until cnt-items) (- until cnt-items) 0)
          index (int (if (< (- index diff) 0) 0 (- index diff)))
@@ -61,7 +61,6 @@
                      (recur (assoc-in items [(+ index ind) :visible?] true)
                             (inc ind))
                    items))]
-     (println items)
      (assoc widget :items items))))
 
 
