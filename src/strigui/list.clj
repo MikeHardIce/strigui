@@ -40,19 +40,40 @@
     cleared-items))
 
 (defn make-visible 
-  [widget]
+  ([widget]
   (let [max-visible-items (Math/floor (/ (-> widget :args :height) item-height))
         items (:items widget)
         widgets-visible (mapv #(merge % {:visible? true}) (take max-visible-items items))
         widgets-not-visible (take-last (- (count items) max-visible-items) items)]
     (assoc widget :items (apply conj widgets-visible widgets-not-visible))))
+  ([widget y]
+   (let [max-visible-items (Math/floor (/ (-> widget :args :height) item-height))
+         items (:items widget)
+         cnt-items (count items)
+         index (* item-height (Math/floor (- y (-> widget :args :y))))
+         until (+ index max-visible-items)
+         diff (if (> until cnt-items) (- until cnt-items) 0)
+         index (int (if (< (- index diff) 0) 0 (- index diff)))
+         widget (update widget :items (fn [items] (mapv #(merge % {:visible? false}) items)))
+         items (loop [items (:items widget)
+                      ind 0]
+                 (if (< ind max-visible-items)
+                     (recur (assoc-in items [(+ index ind) :visible?] true)
+                            (inc ind))
+                   items))]
+     (println items)
+     (assoc widget :items items))))
+
 
 (defrecord List [name items args]
   wdg/Widget
   (coord [this _] (let [{:keys [x y width height]} (:args this)]
                          [x y width height]))
   (defaults [this] (make-visible this))
-  (before-drawing [this] (make-visible this))
+  (before-drawing [this] (if (< (count (filter :visible? (:items this)))
+                                (Math/floor (/ (-> this :args :height) item-height)))
+                           (make-visible this)
+                           this))
   (draw [this canvas]
         (let [{:keys [x y width height color] :as args} (:args this)
               bar-x (+ x (- width item-width-right-margin))
@@ -85,7 +106,7 @@
  [_ canvas widgets widget x y]
   (let [item-border-x (+ (-> widget :args :x) (- (-> widget :args :width) item-width-right-margin))]
     (if (< item-border-x x)
-      widgets
+      (update widgets (:name widget) make-visible y)
       (update widgets (:name widget) activate! y :selected?))))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-moved]
