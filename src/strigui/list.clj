@@ -111,3 +111,10 @@
 (defmethod wdg/widget-event [strigui.list.List :mouse-moved]
   [_ canvas widgets widget _ y]
   (update widgets (:name widget) activate! y :hovered?))
+
+(defmethod wdg/widget-event [strigui.list.List :mouse-dragged]
+  [_ canvas widgets widget x y _ _]
+  (let [item-border-x (+ (-> widget :args :x) (- (-> widget :args :width) item-width-right-margin))]
+    (if (< item-border-x x)
+      (update widgets (:name widget) make-visible y)
+      widgets)))

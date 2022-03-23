@@ -318,11 +318,12 @@
 (defn handle-mouse-dragged
   [canvas widgets x y x-prev y-prev]
   (if-let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))]
-    (if (-> widget :args :resizing?)
-      (update widgets (:name widget) handle-widget-resizing x y x-prev y-prev)
-      (if (-> widget :args :can-move?)
-        (update widgets (:name widget) handle-widget-dragging x y x-prev y-prev)
-        widgets))
+    (let [widgets (if (-> widget :args :resizing?)
+                    (update widgets (:name widget) handle-widget-resizing x y x-prev y-prev)
+                    (if (-> widget :args :can-move?)
+                      (update widgets (:name widget) handle-widget-dragging x y x-prev y-prev)
+                      widgets))]
+      (widget-event :mouse-dragged canvas widgets (get widgets (:name widget)) x y x-prev y-prev))
     widgets))
 
 (defn handle-mouse-moved 

@@ -11,13 +11,15 @@
   Removed functions like update! etc. ...
   From now on swap-widgets! should be used, which takes a function where the argument is the map of widgets.
   Basically its a function that is expected to transform the current map of widgets to a new map of widgets.
-  Events can now be attached with attach-event, this function as the above, expects a map of widgets and
+  Events can now be attached with attach-event, this function (as the above) expects a map of widgets and
   returns a map of widgets.
 * removed register! unregister! replace!
 * reworked internal event functions to use swap-widgets!
 * removed canvas from widget-global-event
 * input fields can now be marked as password fields via args :password?
 * added before-drawing function to the widget protocol, which is called each time before a widget is drawn
+* mouse-dragging now supported as widget-event
+* new widget: list
   
 
 ### 0.0.1-alpha24 (latest)
