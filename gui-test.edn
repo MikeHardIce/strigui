@@ -5,7 +5,8 @@
                                                       :font-size 20 :font-style [:bold]
                                                       :can-move? true :group "bla"}]]
  :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 :color [java.awt.Color/white (java.awt.Color. 255 31 0)] :can-tab? true :group "bla"}]]
- :strigui.list/List [["test-list" [{:value "First Item"} {:value "Second Item"} {:value "Third Item"}] {:x 350 :y 300 :width 150
+ :strigui.list/List [["test-list" [{:value "First Item"} {:value "Second Item"} {:value "Third Item"}
+                                   {:value "4"} {:value "5"} {:value "6"} {:value "7"} {:value "8"} {:value "9"}] {:x 350 :y 300 :width 150
                                                                                                         :height 200
                                                                                                         :color [java.awt.Color/black java.awt.Color/red]}]]
  :strigui.input/Input [["input" "abc" {:x 100 :y 150 :z -20 :width 420 :color [java.awt.Color/white java.awt.Color/red] :selected? true :can-tab? true 
