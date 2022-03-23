@@ -51,8 +51,8 @@ Events can be attached by using the chosen widget name.
                        (gui/attach-event wdgs "click" :mouse-clicked (fn [_ _] 
                                                                        (gui/close-window!)))))
 ```
-Event functions normally should always return the entire widget map (which is always the first parameter),
-but since the window will closed (which will end the program), it can be skipped.
+Event functions should usually always return the entire widget map (which is normally the first parameter),
+but since the window will close and end the program, it can be skipped.
 
 ![](resources/basic.png)
 
