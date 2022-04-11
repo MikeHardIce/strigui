@@ -17,6 +17,7 @@
 
 (defn swap-widgets!
   [f]
+  "Used to add or modify widgets"
   ;; TODO: Some checks
   (wdg/swap-widgets! f))
 
@@ -30,7 +31,7 @@
 (defn remove-widget-group
   "Removes all widgets assigned to the given group"
   [widgets name]
-  (apply dissoc widgets (find-widgets-by-group-name widgets name)))
+  (apply dissoc widgets (map :name (find-widgets-by-group-name widgets name))))
 
 (defn attach-event 
   [widgets name event f]
