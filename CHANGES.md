@@ -1,10 +1,12 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
-### 0.0.1-alpha26 (work in progress)
+### 0.0.1-alpha27 (in progress)
+
+### 0.0.1-alpha26 (latest)
 * fixed remove-widget-group
 
-### 0.0.1-alpha25 (latest)
+### 0.0.1-alpha25
 
 * fixed the export/import of the current state to/from an edn file
 * hiding based on background color by using capra/clear-rect
