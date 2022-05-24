@@ -13,7 +13,7 @@
            [strigui.label Label]
            [strigui.list List]
            [strigui.input Input]
-           [java.awt Color]))
+           [java.awt Color RenderingHints]))
 
 (defn swap-widgets!
   [f]
@@ -41,17 +41,15 @@
   "Initializes a new window or reuses an existing one
    wind - an already existing windows instance (experimental)
    width
-   height
-   fps -  frames per second
-   quality - rendering quality :low :mid :high :highest"
+   height"
   ([context] 
-   ;;(swap! wdg/state assoc :context (wnd/init-window wind)))
    (swap! wdg/state assoc :context context))
   ([x y width height title]
-   ;;(swap! wdg/state assoc :context (wnd/init-window width height title)))
-   (window! x y width height title Color/white))
-   ([x y width height title color]
-      (swap! wdg/state assoc :context (c/create-window x y width height title (eval color)))))
+   (window! x y width height title Color/white {}))
+  ([x y width height title color]
+   (window! x y width height title color {}))
+   ([x y width height title color rendering-hints]
+    (swap! wdg/state assoc :context (c/create-window x y width height title (eval color)) :rendering rendering-hints)))
   
 (defn add 
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"

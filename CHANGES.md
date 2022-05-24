@@ -3,6 +3,8 @@
 
 ### 0.0.1-alpha27 (in progress)
 
+* support rendering hints
+
 ### 0.0.1-alpha26 (latest)
 * fixed remove-widget-group
 
