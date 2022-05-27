@@ -328,7 +328,20 @@
 
 (defn handle-mouse-moved 
   [canvas widgets x y]
-  (let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))]
+  (let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))
+        ;; if the mouse is not on a widget, check previously focused widgets, trigger events and unfocus them
+        widgets (if-let [focused-widgets (get-with-property (vals widgets) :focused?)]
+                  (loop [remaining-focused focused-widgets
+                         widgets widgets]
+                    (if (seq remaining-focused)
+                      (recur (rest remaining-focused) (let [name (first remaining-focused)
+                                                            widgets (assoc-in widgets [name :args :focused?] nil)
+                                                            widgets (assoc-in widgets [name :args :resizing?] nil)
+                                                            widgets (widget-event :widget-focus-out canvas widgets (get widgets name) x y)
+                                                            widgets (trigger-custom-event :widget-focus-out widgets (get widgets name) x y)]
+                                                        widgets))
+                      widgets))
+                  widgets)]
     (if (seq widget)
       ;; if the mouse is on a widget, focus it and trigger events in case it wasn't focused before, check if it should resize
       (let [widgets (widget-event :mouse-moved canvas widgets widget x y)
@@ -342,19 +355,7 @@
             widgets (assoc-in widgets [(:name widget) :args :focused?] true)]
         (assoc-in widgets [(:name widget) :args :resizing?] (and (-> widget :args :can-resize?) 
                                                                  (on-border? (coord (get widgets (:name widget)) canvas) x y))))
-      ;; if the mouse is not on a widget, check previously focused widgets, trigger events and unfocus them
-      (if-let [focused-widgets (get-with-property (vals widgets) :focused?)]
-        (loop [remaining-focused focused-widgets
-               widgets widgets]
-          (if (seq remaining-focused)
-            (recur (rest remaining-focused) (let [name (first remaining-focused)
-                                                  widgets (assoc-in widgets [name :args :focused?] nil)
-                                                  widgets (assoc-in widgets [name :args :resizing?] nil)
-                                                  widgets (widget-event :widget-focus-out canvas widgets (get widgets name) x y)
-                                                  widgets (trigger-custom-event :widget-focus-out widgets (get widgets name) x y)]
-                                              widgets))
-            widgets))
-        widgets))))
+      widgets)))
 
 (defmethod c/handle-event :mouse-dragged [_ {:keys [x y]}]
   (let [canvas (-> @state :context :canvas)

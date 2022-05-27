@@ -4,6 +4,7 @@
 ### 0.0.1-alpha27 (in progress)
 
 * support rendering hints
+* fixed a bug where widgets on top of widgets wouldn't lose their focus
 
 ### 0.0.1-alpha26 (latest)
 * fixed remove-widget-group
