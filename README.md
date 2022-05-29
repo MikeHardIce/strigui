@@ -12,7 +12,7 @@ It uses [Capra](https://github.com/MikeHardIce/Capra) underneath (it was using [
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha26"]]
+:dependencies [[strigui "0.0.1-alpha27"]]
 ```
 [Example](https://github.com/MikeHardIce/strigui-sample)
 
@@ -29,6 +29,12 @@ Create the main window via
 ```Clojure
 (gui/window! 200 300 600 600 "My Window" (java.awt.Color. 255 200 133))
 ```
+or
+
+```Clojure
+(gui/window! 200 300 600 600 "My Window" (java.awt.Color. 255 200 133) {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON})
+```
+to pass a map consiting of RenderingHint Keys and values to be applied when drawing widgets.
 
 Basic widgets like buttons, input boxes and labels can be created via
 
