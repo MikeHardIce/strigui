@@ -5,6 +5,8 @@
 
 * support rendering hints
 * fixed a bug where widgets on top of widgets wouldn't lose their focus
+* reduced flickering: widgets now only hide when they change their size or position before being drawn again
+* fixed widget borders slightly to leave no trace when widgets are drawn over
 
 ### 0.0.1-alpha26 (latest)
 * fixed remove-widget-group

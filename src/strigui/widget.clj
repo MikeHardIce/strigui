@@ -86,7 +86,7 @@
   ([canvas color strength x y w h no-fill]
    (when (> strength 0)
      (c/draw-> canvas
-        (c/rect x y w h color (not no-fill) strength)) ;;TODO: clean this up double negation
+        (c/rect (+ x strength) (+ y strength) (- w strength) (- h strength) color (not no-fill) strength)) ;;TODO: clean this up double negation
      (draw-border-rec canvas color (- strength 1) x y w h no-fill))))
 
 (defn- draw-border
@@ -249,7 +249,17 @@
 
 (defn determine-old-widgets-to-hide
   [before after updated-keys]
-  (select-keys before (s/union (s/difference (set (keys before)) (set (keys after))) updated-keys)))
+  (let [bef (for [widget (vals (select-keys before updated-keys))]
+              {(:name widget) (select-keys (:args widget) [:x :y :width :height])})
+        aft (for [widget (vals (select-keys after updated-keys))]
+              {(:name widget) (select-keys (:args widget) [:x :y :width :height])})
+        bef (apply merge-with into bef)
+        aft (apply merge-with into aft)
+        diff (for [b bef]
+               (when-let [a (get aft (key b))]
+                 (when (some #(not= 0.0 %) (map (comp double -) (->> b val vals) (vals a)))
+                   (key b))))]
+    (select-keys before (filterv seq diff))))
 
 (defn swap-widgets!
   "Swaps out the widgets using the given function.
