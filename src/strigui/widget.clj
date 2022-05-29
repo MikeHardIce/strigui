@@ -99,7 +99,7 @@
 
 (def-action "hide" (fn [widget canvas]
                      (let [[x y w h] (coord widget canvas)]
-                       (c/draw-> canvas
+                       (c/draw-> (dissoc canvas :rendering)
                            (c/clear-rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
 
 (def-action "draw-resizing" (fn [widget canvas]

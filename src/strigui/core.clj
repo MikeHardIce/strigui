@@ -49,7 +49,9 @@
   ([x y width height title color]
    (window! x y width height title color {}))
    ([x y width height title color rendering-hints]
-    (swap! wdg/state assoc :context (c/create-window x y width height title (eval color)) :rendering rendering-hints)))
+    (swap! wdg/state assoc :context (c/create-window x y width height title (eval color)))
+    (swap! wdg/state assoc-in [:context :canvas :rendering] rendering-hints)
+    (:context @wdg/state)))
   
 (defn add 
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"

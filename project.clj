@@ -1,4 +1,4 @@
-(defproject strigui "0.0.1-alpha27"
+(defproject strigui "0.0.1-alpha28"
   :description "A small GUI library."
   :url "https://github.com/MikeHardIce/strigui"
   :license {:name "MIT License"

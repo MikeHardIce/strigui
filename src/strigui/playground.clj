@@ -3,6 +3,7 @@
             [strigui.widget :as wdg]))
 
 (defn main []
+  (gui/window! 200 300 600 600 "My Window" (java.awt.Color. 255 200 133) {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON})
   (gui/from-file! "gui-test.edn")
 
   ;; (gui/window! 200 300 600 600 "My Window" (java.awt.Color. 255 200 133))

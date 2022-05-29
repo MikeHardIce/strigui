@@ -1,7 +1,12 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
-### 0.0.1-alpha27 (in progress)
+### 0.0.1-alpha28
+
+* bugfix: rendering hints not applying
+* remove rendering hints on hide for performance
+
+### 0.0.1-alpha27
 
 * support rendering hints
 * fixed a bug where widgets on top of widgets wouldn't lose their focus
