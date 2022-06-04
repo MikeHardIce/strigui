@@ -177,7 +177,7 @@
         (draw-widget-border widget canvas)
         (recur (rest widgets))))))
 
-(defn neighbouring-widgets
+(defn widget->neighbour
   "get all neighbours of the given widget. Neighbours are sorted by their :z coordinate
    in ascending order"
   [canvas ^strigui.widget.Widget widget widgets]
@@ -187,13 +187,13 @@
               neighbours (sort-by #(-> % :args :z) neighbours)]
     neighbours))
 
-(defn all-neighbouring-widgets
+(defn widget->neighbours
   "Get all neighbouring widgets by following the neighouring chain.
    operator-f is a optional order with truthy return (fn [neighbour current-widget] ....) that will be used in a filter , 
     > - all widgets that are covering the current widget
     < - all widgets that are covered by the current widget
    If no order function is given, then take all widgets that touch the current widget."
-  ([canvas ^strigui.widget.Widget widget widgets] (all-neighbouring-widgets canvas widget widgets nil))
+  ([canvas ^strigui.widget.Widget widget widgets] (widget->neighbours canvas widget widgets nil))
   ([canvas ^strigui.widget.Widget widget widgets operator-f]
    (loop [neighbours #{widget}
           visited #{}]
@@ -201,20 +201,20 @@
        (let [not-visited (s/difference neighbours visited)
              next-widget (first not-visited)
              z-of-next (-> next-widget :args :z)
-             new-neighbours (neighbouring-widgets canvas next-widget widgets)
+             new-neighbours (widget->neighbour canvas next-widget widgets)
              new-neighbours (if operator-f 
                               (filter #(operator-f (-> % :args :z) z-of-next) new-neighbours)
                               new-neighbours)]
          (recur (s/union neighbours (set new-neighbours)) (s/union visited #{next-widget})))
        neighbours))))
 
-(defn determine-all-neighbours
+(defn widgets->neighbours
   [canvas widgets-to-determine widgets]
   (loop [widget (vals widgets-to-determine)
          keys-not-considered (-> widgets keys set)
          neighbour-keys #{}]
     (if (and (seq widget) (seq keys-not-considered))
-      (let [neighb (set (map :name (all-neighbouring-widgets canvas (first widget) (vals (select-keys widgets keys-not-considered)))))]
+      (let [neighb (set (map :name (widget->neighbours canvas (first widget) (vals (select-keys widgets keys-not-considered)))))]
         (recur (rest widget) (s/difference keys-not-considered neighb) (s/union neighbour-keys neighb)))
       (select-keys widgets neighbour-keys))))
 
@@ -271,8 +271,10 @@
           after (f before)
           updated-keys (determine-updated-keys before after)
           to-redraw (determine-widgets-to-redraw before after updated-keys)
-          neighbours (determine-all-neighbours canvas to-redraw after)]
-      (doseq [to-hide (vals (determine-old-widgets-to-hide before after updated-keys))]
+          to-hide (determine-old-widgets-to-hide before after updated-keys) 
+          ;; maybe only use the neighbouts of widgets whois size or position has changed
+          neighbours (widgets->neighbours canvas to-redraw after)]
+      (doseq [to-hide (vals to-hide)]
         (hide! to-hide canvas))
       (when-let [widgets-to-draw (vals (merge to-redraw neighbours))]
         (let [widgets-to-draw (map before-drawing widgets-to-draw)
