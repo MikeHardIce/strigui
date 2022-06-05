@@ -190,8 +190,8 @@
 (defn widget->neighbours
   "Get all neighbouring widgets by following the neighouring chain.
    operator-f is a optional order with truthy return (fn [neighbour current-widget] ....) that will be used in a filter , 
-    > - all widgets that are covering the current widget
-    < - all widgets that are covered by the current widget
+    - > all widgets that are covering the current widget
+    - < all widgets that are covered by the current widget
    If no order function is given, then take all widgets that touch the current widget."
   ([canvas ^strigui.widget.Widget widget widgets] (widget->neighbours canvas widget widgets nil))
   ([canvas ^strigui.widget.Widget widget widgets operator-f]
@@ -209,12 +209,12 @@
        neighbours))))
 
 (defn widgets->neighbours
-  [canvas widgets-to-determine widgets]
+  [canvas widgets-to-determine widgets fn-operation]
   (loop [widget (vals widgets-to-determine)
          keys-not-considered (-> widgets keys set)
          neighbour-keys #{}]
     (if (and (seq widget) (seq keys-not-considered))
-      (let [neighb (set (map :name (widget->neighbours canvas (first widget) (vals (select-keys widgets keys-not-considered)))))]
+      (let [neighb (set (map :name (widget->neighbours canvas (first widget) (vals (select-keys widgets keys-not-considered)) fn-operation)))]
         (recur (rest widget) (s/difference keys-not-considered neighb) (s/union neighbour-keys neighb)))
       (select-keys widgets neighbour-keys))))
 
@@ -273,7 +273,7 @@
           to-redraw (determine-widgets-to-redraw before after updated-keys)
           to-hide (determine-old-widgets-to-hide before after updated-keys) 
           ;; maybe only use the neighbouts of widgets whois size or position has changed
-          neighbours (widgets->neighbours canvas to-redraw after)]
+          neighbours (merge (widgets->neighbours canvas to-redraw after >) (widgets->neighbours canvas to-hide after <))]
       (doseq [to-hide (vals to-hide)]
         (hide! to-hide canvas))
       (when-let [widgets-to-draw (vals (merge to-redraw neighbours))]
