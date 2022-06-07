@@ -11,7 +11,8 @@
   (coord [this canvas] "gets the coordinates of the widget")
   (defaults [this] "attach default values once the widget gets created")
   (before-drawing [this] "modify the widget each time before it gets drawn")
-  (draw [this canvas] "draw the widget, returns the widget on success"))
+  (draw [this canvas] "draw the widget, returns the widget on success")
+  (after-drawing [this] "modify the widget each time after it got drawn"))
 
 (defmacro def-action
   [name default-fn]
@@ -277,10 +278,11 @@
       (doseq [to-hide (vals to-hide)]
         (hide! to-hide canvas))
       (when-let [widgets-to-draw (vals (merge to-redraw neighbours))]
-        (let [widgets-to-draw (map before-drawing widgets-to-draw)
-              after (merge-with into after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
-          (swap! state assoc :widgets after)
-          (draw-widgets! canvas widgets-to-draw))))
+        (let [widgets-to-draw (map before-drawing widgets-to-draw)]
+          (draw-widgets! canvas widgets-to-draw)
+          (let [widgets-to-draw (map after-drawing widgets-to-draw)
+                after (merge-with into after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
+            (swap! state assoc :widgets after)))))
     (catch Exception e (str "Failed to update widgets, perhaps the given function" \newline
                            "doesn't take or doesn't return a widgets map." \newline
                            "Exception: " (.getMessage e)))))

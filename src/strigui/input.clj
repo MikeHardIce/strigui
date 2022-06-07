@@ -11,7 +11,8 @@
         (b/box-draw canvas (if (-> this :args :password?)
                              (apply str (repeat (count (:value this)) "*"))
                              (:value this)) (:args this))
-        this))
+        this)
+  (after-drawing [this] this))
 
 ;; (extend-protocol wdg/Draw-resizing
 ;;   Input

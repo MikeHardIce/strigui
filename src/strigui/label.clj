@@ -38,4 +38,5 @@
   (coord [this canvas] (coord-label this canvas))
   (defaults [this] this)
   (before-drawing [this] this)
-  (draw [this canvas] (draw-label this canvas)))
+  (draw [this canvas] (draw-label this canvas))
+  (after-drawing [this] this))

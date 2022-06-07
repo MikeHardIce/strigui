@@ -1,6 +1,10 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
+### 0.0.1-alpha29 (in progress)
+
+* added after-drawing function to widget protocol
+
 ### 0.0.1-alpha28
 
 * bugfix: rendering hints not applying

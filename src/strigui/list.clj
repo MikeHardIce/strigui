@@ -87,7 +87,8 @@
                     (c/rect bar-x y item-width-right-margin height (make-darker-or-brighter (first color)) true)
                     (c/rect bar-x bar-y item-width-right-margin bar-scroll-height (make-darker-or-brighter (second color)) true))
           (draw-list canvas items args)
-          this)))
+          this))
+  (after-drawing [this] this))
 
 (defn activate!
   [widget y property]

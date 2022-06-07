@@ -8,7 +8,8 @@
   (defaults [this] (assoc-in this [:args :has-border?] true))
   (before-drawing [this] this)
   (draw [this canvas]
-        (b/box-draw canvas (:value this) (:args this))))
+        (b/box-draw canvas (:value this) (:args this)))
+  (after-drawing [this] this))
 
 (defmethod wdg/widget-event [strigui.button.Button :key-pressed]
   [_ canvas widgets widget char code]
