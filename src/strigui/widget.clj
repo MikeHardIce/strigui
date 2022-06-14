@@ -273,12 +273,9 @@
           after (f before)
           updated-keys (determine-updated-keys before after)
           to-redraw (determine-widgets-to-redraw before after updated-keys)
-          with-position-changes (determine-old-widgets-to-hide to-redraw before updated-keys)
+          ;;with-position-changes (determine-old-widgets-to-hide to-redraw before updated-keys)
           to-hide (determine-old-widgets-to-hide before after updated-keys) 
-          ;; maybe only use the neighbouts of widgets whois size or position has changed
-          neighbours (merge (widgets->neighbours canvas with-position-changes after)
-                            (widgets->neighbours canvas to-redraw after >)
-                            (widgets->neighbours canvas to-hide after <))]
+          neighbours (widgets->neighbours canvas to-redraw after)]
       (c/use-buffer-> canvas
                       (doseq [to-hide (vals to-hide)]
                         (hide! to-hide canvas))
@@ -287,8 +284,7 @@
                           (draw-widgets! canvas widgets-to-draw)
                           (let [widgets-to-draw (map after-drawing widgets-to-draw)
                                 after (merge-with into after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
-                            (swap! state assoc :widgets after)))))
-                      )
+                            (swap! state assoc :widgets after))))))
     (catch Exception e (str "Failed to update widgets, perhaps the given function" \newline
                            "doesn't take or doesn't return a widgets map." \newline
                            "Exception: " (.getMessage e)))))
