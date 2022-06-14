@@ -34,7 +34,7 @@ or
 ```Clojure
 (gui/window! 200 300 600 600 "My Window" (java.awt.Color. 255 200 133) {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON})
 ```
-to pass a map consiting of RenderingHint Keys and values to be applied when drawing widgets.
+to pass a map consisting of RenderingHint Keys and values that is applied when drawing widgets.
 
 Basic widgets like buttons, input boxes and labels can be created via
 
