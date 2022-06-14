@@ -210,14 +210,15 @@
        neighbours))))
 
 (defn widgets->neighbours
-  [canvas widgets-to-determine widgets fn-operation]
+  ([canvas widgets-to-determine widgets] (widgets->neighbours canvas widgets-to-determine widgets nil))
+  ([canvas widgets-to-determine widgets fn-operation]
   (loop [widget (vals widgets-to-determine)
          keys-not-considered (-> widgets keys set)
          neighbour-keys #{}]
     (if (and (seq widget) (seq keys-not-considered))
       (let [neighb (set (map :name (widget->neighbours canvas (first widget) (vals (select-keys widgets keys-not-considered)) fn-operation)))]
         (recur (rest widget) (s/difference keys-not-considered neighb) (s/union neighbour-keys neighb)))
-      (select-keys widgets neighbour-keys))))
+      (select-keys widgets neighbour-keys)))))
 
 (defn adjust-dimensions 
   [canvas ^strigui.widget.Widget widget]
@@ -272,17 +273,22 @@
           after (f before)
           updated-keys (determine-updated-keys before after)
           to-redraw (determine-widgets-to-redraw before after updated-keys)
+          with-position-changes (determine-old-widgets-to-hide to-redraw before updated-keys)
           to-hide (determine-old-widgets-to-hide before after updated-keys) 
           ;; maybe only use the neighbouts of widgets whois size or position has changed
-          neighbours (merge (widgets->neighbours canvas to-redraw after >) (widgets->neighbours canvas to-hide after <))]
-      (doseq [to-hide (vals to-hide)]
-        (hide! to-hide canvas))
-      (when-let [widgets-to-draw (vals (merge to-redraw neighbours))]
-        (let [widgets-to-draw (map before-drawing widgets-to-draw)]
-          (draw-widgets! canvas widgets-to-draw)
-          (let [widgets-to-draw (map after-drawing widgets-to-draw)
-                after (merge-with into after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
-            (swap! state assoc :widgets after)))))
+          neighbours (merge (widgets->neighbours canvas with-position-changes after)
+                            (widgets->neighbours canvas to-redraw after >)
+                            (widgets->neighbours canvas to-hide after <))]
+      (c/use-buffer-> canvas
+                      (doseq [to-hide (vals to-hide)]
+                        (hide! to-hide canvas))
+                      (when-let [widgets-to-draw (set (vals (merge to-redraw neighbours)))]
+                        (let [widgets-to-draw (map before-drawing widgets-to-draw)]
+                          (draw-widgets! canvas widgets-to-draw)
+                          (let [widgets-to-draw (map after-drawing widgets-to-draw)
+                                after (merge-with into after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
+                            (swap! state assoc :widgets after)))))
+                      )
     (catch Exception e (str "Failed to update widgets, perhaps the given function" \newline
                            "doesn't take or doesn't return a widgets map." \newline
                            "Exception: " (.getMessage e)))))

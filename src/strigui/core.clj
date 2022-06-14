@@ -51,6 +51,7 @@
    ([x y width height title color rendering-hints]
     (swap! wdg/state assoc :context (c/create-window x y width height title (eval color)))
     (swap! wdg/state assoc-in [:context :canvas :rendering] rendering-hints)
+    (swap! wdg/state update-in [:context :canvas] c/attach-buffered-strategy 2)
     (:context @wdg/state)))
   
 (defn add 

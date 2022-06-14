@@ -4,6 +4,8 @@
 ### 0.0.1-alpha29 (in progress)
 
 * added after-drawing function to widget protocol
+* enabled double buffering via Capra, which flips at the end of the swap-widgets!, removing basically
+  all flickering (who ever invented double buffering and who ever made it so easy usable in awt should get a noble prize)
 
 ### 0.0.1-alpha28
 
