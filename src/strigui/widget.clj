@@ -251,15 +251,11 @@
 
 (defn determine-old-widgets-to-hide
   [before after updated-keys]
-  (let [bef (for [widget (vals (select-keys before updated-keys))]
-              {(:name widget) (select-keys (:args widget) [:x :y :width :height])})
-        aft (for [widget (vals (select-keys after updated-keys))]
-              {(:name widget) (select-keys (:args widget) [:x :y :width :height])})
-        bef (apply merge-with into bef)
-        aft (apply merge-with into aft)
+  (let [bef (select-keys before updated-keys)
+        aft (select-keys after updated-keys)
         diff (for [b bef]
                (when-let [a (get aft (key b))]
-                 (when (some #(not= 0.0 %) (map (comp double -) (->> b val vals) (vals a)))
+                 (when (not= a b)
                    (key b))))]
     (select-keys before (filterv seq diff))))
 
