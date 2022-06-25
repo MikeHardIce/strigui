@@ -12,7 +12,7 @@ It uses [Capra](https://github.com/MikeHardIce/Capra) underneath (it was using [
 In project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha29"]]
+:dependencies [[strigui "0.0.1-alpha30"]]
 ```
 [Example](https://github.com/MikeHardIce/strigui-sample)
 

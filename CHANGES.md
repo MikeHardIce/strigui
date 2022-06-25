@@ -5,8 +5,9 @@
 
 * reworked when to hide widgets, now that double buffering is enabled and no flickering occurs,
   I can go less specific. Therefore widgets simply hide when they have changed (immutability is great!)
+  this fixes a bug where widgets are updated and need to redraw completly 
 
-### 0.0.1-alpha29 (in progress)
+### 0.0.1-alpha29
 
 * added after-drawing function to widget protocol
 * enabled double buffering via Capra, which flips at the end of the swap-widgets!, removing basically
