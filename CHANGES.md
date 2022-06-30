@@ -1,7 +1,11 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
-### 0.0.1-alpha30 (in progress)
+### 0.0.1-alpha31 (in progress)
+
+* fixed severe bug when hiding, forgot to hide items which got removed
+
+### 0.0.1-alpha30
 
 * reworked when to hide widgets, now that double buffering is enabled and no flickering occurs,
   I can go less specific. Therefore widgets simply hide when they have changed (immutability is great!)

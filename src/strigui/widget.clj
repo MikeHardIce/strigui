@@ -256,7 +256,8 @@
         diff (for [b bef]
                (when-let [a (get aft (key b))]
                  (when (not= a b)
-                   (key b))))]
+                   (key b))))
+        diff (concat diff (s/difference (set (keys before)) (set (keys after))))]
     (select-keys before (filterv seq diff))))
 
 (defn swap-widgets!
