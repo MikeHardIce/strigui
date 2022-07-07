@@ -4,6 +4,8 @@
 ### 0.0.1-alpha32 (in progress)
 
 * fixed tabbing when no widget was selected previously
+* better documentation
+* arrange function to automatically adjust size and position of selected widgets
 
 ### 0.0.1-alpha31
 

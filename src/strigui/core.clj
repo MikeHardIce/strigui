@@ -34,14 +34,47 @@
   (apply dissoc widgets (map :name (find-widgets-by-group-name widgets name))))
 
 (defn attach-event 
+  "Attach an event to a widget by widget name
+   widgets - current collection of widgets
+   name - name of the widget to attach the event
+   event - one of :mouse-clicked :mouse-moved :key-pressed :widget-focus-in :widget-focus-out
+   f - fn to handle the event with the following args: 
+   :mouse-clicked -> widgets widget
+   :mouse-moved -> widgets widget x y
+   :key-pressed -> widgets widget key-code
+   :widget-focus-in -> widgets widget x y
+   :widget-focus-out -> widgets widget x y"
   [widgets name event f]
   (assoc-in widgets [name :events event] f))
 
+(defn arrange
+  "Arrange size and position of selected widgets 
+   via their name using a options map consisting of
+   {:from [x y]
+   :to [x y]
+   :align with :left :right or :center}
+   Example: 
+   (-> wdgs
+   ...
+   (arrange {:from [100 50]} \"label1\" \"button1\" \"button2\"))
+   "
+  ([widgets options] (apply arrange widgets options (keys widgets)))
+  ([widgets {:keys [from to align] :or {from [0 0]
+                                           to [0 0]
+                                           align :left} :as options} & names]
+  widgets))
+
 (defn window!
   "Initializes a new window or reuses an existing one
-   wind - an already existing windows instance (experimental)
-   width
-   height"
+   context - an already existing context (experimental)
+   x - x position on the screen
+   y - y position on the screen
+   width - width of the window
+   height - height of the window
+   title - name displayed in the title bar of the window
+   color - java.awt.Color of the windows background color
+   rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
+   of any widget drawn within the window"
   ([context] 
    (swap! wdg/state assoc :context context))
   ([x y width height title]
