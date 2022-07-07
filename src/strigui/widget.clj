@@ -141,8 +141,7 @@
         (map :name)))
   ([widgets key]
    (->> widgets
-        (filter #(let [bla (println %)]
-                   (-> % :args key)))
+        (filter #(-> % :args key))
         (map :name))))
 
 (defn set-with-property
@@ -385,6 +384,7 @@
     (swap! previously assoc :mouse-position [x y])))
 
 (defmethod c/handle-event :mouse-pressed [_ {:keys [x y]}]
+  (let [canvas (-> @state :context :canvas)]
     (swap-widgets! #(let [widgets (handle-clicked canvas % x y)]
                       (widget-global-event :mouse-clicked widgets x y)))))
 
@@ -405,7 +405,7 @@
       (when new-widget
         (let [previously-tabbed (s/union previously-tabbed #{new-widget})]
           (swap! previously assoc :tabbed previously-tabbed)))
-      (assoc-in widgets [new-widget :args :selected?] (seq new-widget)))
+        (assoc-in widgets [new-widget :args :selected?] (seq new-widget)))
     widgets))
 
 (defn handle-key-pressed
@@ -416,7 +416,7 @@
             widgets (widget-event :key-pressed canvas widgets (get widgets (:name widget)) char code)]
         (trigger-custom-event :key-pressed widgets (get widgets (:name widget)) code))
       (if-let [tabable (first (get-with-property (vals widgets) :can-tab? true))]
-        (handle-tabbing canvas widgets (get widgets tabable) code)
+          (handle-tabbing canvas widgets (get widgets tabable) code)
         widgets))))
 
 (defmethod c/handle-event :key-pressed [_ {:keys [char code]}]

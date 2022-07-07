@@ -45,9 +45,9 @@
   ([context] 
    (swap! wdg/state assoc :context context))
   ([x y width height title]
-   (window! x y width height title Color/white {}))
+   (window! x y width height title Color/white {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}))
   ([x y width height title color]
-   (window! x y width height title color {}))
+   (window! x y width height title color {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}))
    ([x y width height title color rendering-hints]
     (swap! wdg/state assoc :context (c/create-window x y width height title (eval color)))
     (swap! wdg/state assoc-in [:context :canvas :rendering] rendering-hints)
