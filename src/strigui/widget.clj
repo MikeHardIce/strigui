@@ -141,7 +141,8 @@
         (map :name)))
   ([widgets key]
    (->> widgets
-        (filter #(-> % :args key))
+        (filter #(let [bla (println %)]
+                   (-> % :args key)))
         (map :name))))
 
 (defn set-with-property
@@ -384,7 +385,6 @@
     (swap! previously assoc :mouse-position [x y])))
 
 (defmethod c/handle-event :mouse-pressed [_ {:keys [x y]}]
-  (let [canvas (-> @strigui.widget/state :context :canvas)]
     (swap-widgets! #(let [widgets (handle-clicked canvas % x y)]
                       (widget-global-event :mouse-clicked widgets x y)))))
 
@@ -415,7 +415,7 @@
       (let [widgets (handle-tabbing canvas widgets widget code)
             widgets (widget-event :key-pressed canvas widgets (get widgets (:name widget)) char code)]
         (trigger-custom-event :key-pressed widgets (get widgets (:name widget)) code))
-      (if-let [tabable (first (get-with-property widgets :can-tab? true))]
+      (if-let [tabable (first (get-with-property (vals widgets) :can-tab? true))]
         (handle-tabbing canvas widgets (get widgets tabable) code)
         widgets))))
 

@@ -1,7 +1,11 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
-### 0.0.1-alpha31 (in progress)
+### 0.0.1-alpha32 (in progress)
+
+* fixed tabbing when no widget was selected previously
+
+### 0.0.1-alpha31
 
 * fixed severe bug when hiding, forgot to hide items which got removed
 
