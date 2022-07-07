@@ -64,6 +64,7 @@
                                            align :left} :as options} & names]
   widgets))
 
+
 (defn window!
   "Initializes a new window or reuses an existing one
    context - an already existing context (experimental)
@@ -95,6 +96,11 @@
                     (wdg/adjust-dimensions canvas)
                     (wdg/defaults))]
     (assoc widgets (:name widget) widget)))
+
+(defn add-multiple
+  "Add multiple widgets of a given type"
+  [widgets type & names]
+  widgets)
 
 (defn close-window!
   "Closes the current active window."

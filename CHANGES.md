@@ -6,6 +6,7 @@
 * fixed tabbing when no widget was selected previously
 * better documentation
 * arrange function to automatically adjust size and position of selected widgets
+* add-multiple function to add a bulk of widgets of a given type by providing just their names
 
 ### 0.0.1-alpha31
 
