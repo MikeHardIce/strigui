@@ -23,7 +23,7 @@
       (when (seq items)
         (let [color (:color args)
               item (first items)
-              color (if (or (:hovered? item) (:selected? item)) (update color 0 make-darker-or-brighter) color)]
+              color (if (or (:hovered? item) (:selected? item)) (update color :background make-darker-or-brighter) color)]
           (b/box-draw canvas (-> items first :value) (merge 
                                                       {:y (+ (* index item-height) (:y args)) :max-width (- (:width args) item-width-right-margin) :color color}
                                                       (select-keys args [:width :x])))
@@ -31,7 +31,7 @@
             (c/draw-> canvas
                       (c/line (inc (:x args)) (+ (* index item-height) (:y args)) 
                               (inc (:x args)) (+ (* (inc index) item-height) (:y args)) 
-                              (get color 1 java.awt.Color/green) 3))))
+                              (get color :text java.awt.Color/green) 3))))
         (recur (rest items) (inc index)))))
 
 (defn clear-out
@@ -83,9 +83,9 @@
               bar-scroll-height (* bar-ratio height)
               bar-y (+ y (/ (* bar-scroll-height (count first-items-hidden)) (if (seq items-visible) (count items-visible) 1)))]
           (c/draw-> canvas
-                    (c/rect x y width height (first color) false)
-                    (c/rect bar-x y item-width-right-margin height (make-darker-or-brighter (first color)) true)
-                    (c/rect bar-x bar-y item-width-right-margin bar-scroll-height (make-darker-or-brighter (second color)) true))
+                    (c/rect x y width height (:background color) false)
+                    (c/rect bar-x y item-width-right-margin height (make-darker-or-brighter (:background color)) true)
+                    (c/rect bar-x bar-y item-width-right-margin bar-scroll-height (make-darker-or-brighter (:text color)) true))
           (draw-list canvas items args)
           this))
   (after-drawing [this] this))

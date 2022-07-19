@@ -28,11 +28,11 @@
   (let [style (if (empty? font-style) :bold (first font-style))
         size (if (number? font-size) font-size default-font-size)
         [_ _ border-width border-heigth text-width text-heigth] (box-coord canvas text args)
-        foreground-color (if (> (count color) 1) (nth color 1) Color/black)
+        text-color (get color :text Color/black)
         x-offset (/ (- border-width text-width) 2)
         y-offset (/ (- border-heigth text-heigth) 2)]
       (c/draw-> canvas
-        (c/text (+ x x-offset) (+ y y-offset (* 0.8 text-heigth)) text foreground-color size style))))
+        (c/text (+ x x-offset) (+ y y-offset (* 0.8 text-heigth)) text text-color size style))))
 
 (defn box-draw
   "canvas - java.awt canvas
@@ -46,7 +46,7 @@
   ([canvas text args]
   (let [{:keys [^long x ^long y color ^long min-width]} args
         [_ _ border-width border-heigth] (box-coord canvas text args)
-        background-color (if (> (count color) 0) (first color) Color/black)]
+        background-color (get color :background Color/black)]
       (c/draw-> canvas 
                 (c/rect x y border-width border-heigth background-color true)) 
     (box-draw-text canvas text args)

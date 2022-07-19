@@ -1,14 +1,21 @@
 {;;:window [200 300 600 600 "From a edn file" (java.awt.Color. 255 200 133)]
  :strigui.label/Label [["welcome" "Welcome to Strigui
                                    and other stuff ..." {:x 190 :y 100 :z 20
-                                                      :color [(java.awt.Color. 255 31 0)]
+                                                      :color {:text (java.awt.Color. 255 31 0)}
                                                       :font-size 20 :font-style [:bold]
                                                       :can-move? true :group "bla"}]]
- :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 :color [java.awt.Color/white (java.awt.Color. 255 31 0)] :can-tab? true :group "bla"}]]
+ :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 :color {:background java.awt.Color/white 
+                                                                          :text (java.awt.Color. 255 31 0)} :can-tab? true :group "bla"}]]
  :strigui.list/List [["test-list" [{:value "First Item"} {:value "Second Item"} {:value "Third Item"}
                                    {:value "4"} {:value "5"} {:value "6"} {:value "7"} {:value "8"} {:value "9"}] {:x 350 :y 300 :width 150
                                                                                                         :height 200
-                                                                                                        :color [java.awt.Color/black java.awt.Color/red]}]]
- :strigui.input/Input [["input" "abc" {:x 100 :y 150 :z -20 :width 420 :color [java.awt.Color/white java.awt.Color/red] :selected? false :can-tab? true 
+                                                                                                        :color {:background java.awt.Color/black 
+                                                                                                                :text java.awt.Color/red}}]]
+ :strigui.input/Input [["input" "abc" {:x 100 :y 150 :z -20 :width 420 :color {:background java.awt.Color/white 
+                                                                               :text java.awt.Color/red
+                                                                               :focus java.awt.Color/green
+                                                                               :select java.awt.Color/yellow
+                                                                               :resize java.awt.Color/red} :selected? false :can-tab? true 
                                     :can-resize? true :can-move? true :group ["inputs" "bla"]}]
-                       ["input1" "" {:x 100 :y 200 :color [java.awt.Color/white java.awt.Color/red] :width 420 :can-tab? true :group "inputs" :password? true}]]}
+                       ["input1" "" {:x 100 :y 200 :color {:background java.awt.Color/white 
+                                                           :text java.awt.Color/red} :width 420 :can-tab? true :group "inputs" :password? true}]]}

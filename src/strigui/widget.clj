@@ -104,13 +104,13 @@
                            (c/clear-rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
 
 (def-action "draw-resizing" (fn [widget canvas]
-                              (draw-border widget canvas Color/orange 2)))
+                              (draw-border widget canvas (get (-> widget :args :color) :resize Color/orange) 2)))
 
 (def-action "draw-selected" (fn [widget canvas]
-                              (draw-border widget canvas Color/blue 2)))
+                              (draw-border widget canvas (get (-> widget :args :color) :select Color/blue) 2)))
 
 (def-action "draw-focused" (fn [widget canvas]
-                              (draw-border widget canvas Color/black 2)))
+                              (draw-border widget canvas (get (-> widget :args :color) :focus Color/black) 2)))
 
 (defn draw-widget-border
   [^strigui.widget.Widget widget canvas]
