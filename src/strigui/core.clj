@@ -92,15 +92,23 @@
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"
   [widgets ^strigui.widget.Widget widget]
   (let [canvas (-> @wdg/state :context :canvas)
-        widget (->> widget
-                    (wdg/adjust-dimensions canvas)
-                    (wdg/defaults))]
+        widget (update widget :args merge wdg/widget-default-args (->> widget
+                                                                       (wdg/adjust-dimensions canvas)
+                                                                       (wdg/defaults)
+                                                                       :args))]
     (assoc widgets (:name widget) widget)))
 
-(defn add-multiple
-  "Add multiple widgets of a given type"
+(defmacro add-multiple
   [widgets type & names]
-  widgets)
+  `(~@(for [pair# (partition 2 names)]
+           `(add ~widgets (clojure.lang.Reflector/invokeConstructor ~type (into-array Object [(first ~pair#) (second ~pair#) wdg/widget-default-args]))))))
+
+;; (defn add-multiple
+;;   "Add multiple widgets of a given type"
+;;   [widgets type & names]
+;;   (when (seq names)
+;;     (recur (add widgets (type (first names) (second names) wdg/widget-default-args)) type (-> names rest rest)))
+;;   widgets)
 
 (defn close-window!
   "Closes the current active window."

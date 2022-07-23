@@ -31,6 +31,13 @@
            [this# canvas#]
            (~default-fn this# canvas#)))))
 
+(defonce widget-default-args {:width 100 :height 42
+                              :z 0 :color {:background Color/white
+                                           :text Color/black
+                                           :focus Color/black
+                                           :select Color/blue
+                                           :resize Color/orange}})
+
 (def previously (atom {:tabbed #{}
                        :mouse-position nil}))
 
