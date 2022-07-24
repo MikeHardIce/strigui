@@ -6,7 +6,7 @@
 * fixed tabbing when no widget was selected previously
 * better documentation
 * TODO: arrange function to automatically adjust size and position of selected widgets
-* TODO: add-multiple function to add a bulk of widgets of a given type by providing just their names
+* add-multiple function to add a bulk of widgets of a given type by providing just their names and values
 * TODO: rework color property (pass a map with keys :background :text :focus :select :resize)
 * TODO: add optional header and support multi columns for list widgets
 

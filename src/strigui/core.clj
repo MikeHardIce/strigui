@@ -98,17 +98,18 @@
                                                                        :args))]
     (assoc widgets (:name widget) widget)))
 
-(defmacro add-multiple
-  [widgets type & names]
-  `(~@(for [pair# (partition 2 names)]
-           `(add ~widgets (clojure.lang.Reflector/invokeConstructor ~type (into-array Object [(first ~pair#) (second ~pair#) wdg/widget-default-args]))))))
+;; (defmacro add-multiple
+;;   [type & names]
+;;   `(fn [wdgs#]
+;;     (-> wdgs#
+;;         ~@(for [pair (partition 2 names)]
+;;             `(add (clojure.lang.Reflector/invokeConstructor ~type (into-array Object [(first '~pair) (second '~pair) {:x 0 :y 0}])))))))
 
-;; (defn add-multiple
-;;   "Add multiple widgets of a given type"
-;;   [widgets type & names]
-;;   (when (seq names)
-;;     (recur (add widgets (type (first names) (second names) wdg/widget-default-args)) type (-> names rest rest)))
-;;   widgets)
+(defmacro add-multiple
+  [wdgs type & names]
+  `(-> ~wdgs
+         ~@(for [pair (partition 2 names)]
+             `(add (clojure.lang.Reflector/invokeConstructor ~type (into-array Object [(first '~pair) (second '~pair) {:x 0 :y 0}]))))))
 
 (defn close-window!
   "Closes the current active window."
