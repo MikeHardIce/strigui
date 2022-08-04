@@ -12,7 +12,7 @@
 
 ### 0.0.1-alpha31
 
-* fixed severe bug when hiding, forgot to hide items which got removed
+* fixed severe bug when hiding, forgot to hide items which were removed
 
 ### 0.0.1-alpha30
 

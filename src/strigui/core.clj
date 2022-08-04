@@ -48,22 +48,35 @@
   (assoc-in widgets [name :events event] f))
 
 (defn arrange
-  "Arrange size and position of selected widgets 
-   via their name using a options map consisting of
+  "Arranges the widgets given via widget names 
+   by the given grid
+   skip-after - indicates how many items should be displayed per row
    {:from [x y]
-   :to [x y]
-   :align with :left :right or :center}
-   Example: 
+   :space [between-space-horizontal between-space-vertical]
+   Example: 2 by 3 grid that starts at x: 100 y: 50
    (-> wdgs
    ...
-   (arrange {:from [100 50]} \"label1\" \"button1\" \"button2\"))
-   "
-  ([widgets options] (apply arrange widgets options (keys widgets)))
-  ([widgets {:keys [from to align] :or {from [0 0]
-                                           to [0 0]
-                                           align :left} :as options} & names]
-  widgets))
-
+   (arrange 2 {:from [100 50]} \"label1\" \"button1\" \"label2\" \"button2\" \"label3\" \"button3\"))"
+  ([widgets names] (apply arrange widgets (count names) {} names))
+  (^{:pre [#(> % 0)]} 
+   [widgets skip-after {:keys [from space] :or {from [0 0]
+                                                     space [35 15]}} & names] 
+     (loop [name-groups (partition-all skip-after (->> (select-keys widgets names)
+                                                       vals
+                                                       (map (fn [widget]
+                                                              (vec (cons (:name widget) (vals (select-keys (:args widget) [:x :y :width :height]))))))))
+            widgets widgets
+            height (second from)]
+       (if-not (seq name-groups)
+         widgets
+         (let [coords (reduce (fn [[_ x0 y0 w0 _ :as prev] [name _ _ w h]]
+                                (cons prev [[name (+ x0 w0 (first space))
+                                            y0 w h]]))
+                              (let [[name _ _ w h] (-> name-groups first first)]
+                                [name (first from) height w h])
+                              (-> name-groups first rest))
+               max-height (apply max (map last coords))]
+           (recur (rest name-groups) widgets (+ max-height (last space))))))))
 
 (defn window!
   "Initializes a new window or reuses an existing one
