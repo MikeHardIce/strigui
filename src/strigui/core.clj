@@ -76,7 +76,7 @@
                                 [name (first from) height w h])
                               (-> name-groups first rest))
                max-height (apply max (map last coords))]
-           (recur (rest name-groups) widgets (+ max-height (last space))))))))
+           (recur (rest name-groups) widgets (+ height max-height (last space))))))))
 
 (defn window!
   "Initializes a new window or reuses an existing one
