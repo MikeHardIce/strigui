@@ -76,7 +76,19 @@
                                 [name (first from) height w h])
                               (-> name-groups first rest))
                max-height (apply max (map last coords))]
-           (recur (rest name-groups) widgets (+ height max-height (last space))))))))
+           (recur (rest name-groups) 
+                  (loop [gr coords
+                         wdgs widgets]
+                    (if-not (seq gr)
+                      wdgs
+                      (let [[name x y w h] (first gr)]
+                        (recur (rest gr)
+                               (-> wdgs
+                                   (assoc-in [name :args :x] x)
+                                   (assoc-in [name :args :y] y)
+                                   (assoc-in [name :args :width] w)
+                                   (assoc-in [name :args :height] h))))))
+                  (+ height max-height (last space))))))))
 
 (defn window!
   "Initializes a new window or reuses an existing one
