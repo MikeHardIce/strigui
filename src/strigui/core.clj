@@ -75,6 +75,9 @@
                               (let [[name _ _ w h] (-> name-groups first first)]
                                 [name (first from) height w h])
                               (-> name-groups first rest))
+               coords (if (vector? coords) 
+                        (list coords)
+                        coords)
                max-height (apply max (map last coords))]
            (recur (rest name-groups) 
                   (loop [gr coords
