@@ -7,7 +7,8 @@
 * better documentation
 * TODO: arrange function to automatically adjust size and position of selected widgets
 * add-multiple function to add a bulk of widgets of a given type by providing just their names and values
-* TODO: rework color property (pass a map with keys :background :text :focus :select :resize)
+* rework color property (pass a map with keys :background :text :focus :select :resize)
+* TODO: enable updating properties of multiple widgets at the same time (currently one can only do this via the group name)
 * TODO: add optional header and support multi columns for list widgets
 
 ### 0.0.1-alpha31
