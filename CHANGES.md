@@ -8,6 +8,7 @@
 * add-multiple function to add a bulk of widgets of a given type by providing just their names and values
 * rework color property (pass a map with keys :background :text :focus :select :resize)
 * enable updating properties of multiple widgets at the same time
+* changed widgets :args key to :props key (properties of a widget)
 * TODO: add optional header and support multi columns for list widgets
 * TODO: better documentation
 
@@ -57,7 +58,7 @@
 * removed register! unregister! replace!
 * reworked internal event functions to use swap-widgets!
 * removed canvas from widget-global-event
-* input fields can now be marked as password fields via args :password?
+* input fields can now be marked as password fields via props :password?
 * added before-drawing function to the widget protocol, which is called each time before a widget is drawn
 * mouse-dragging now supported as widget-event
 * new widget: list
@@ -122,7 +123,7 @@
 ### 0.0.1-alpha13
 
 * the entire gui can now be stored into an edn file
-* widgets can now be resized with the mouse (args :can-resize?)
+* widgets can now be resized with the mouse (props :can-resize?)
 * widget can have one or more groups assigned
 * groups can be updated/removed, which in turn will update all widgets assigned to that group
 * widgets are now initialized with a width and height, depending on their displayed content

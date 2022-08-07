@@ -20,20 +20,20 @@
   [lbl canvas]
   (let [text (str/split-lines (str/replace (:value lbl) #"  " ""))
         largest-line (->> text (sort-by count) reverse first)
-        font-size (:font-size (:args lbl))
+        font-size (:font-size (:props lbl))
         size (if (number? font-size) font-size 11)
         [width height] (c/get-text-dimensions canvas largest-line size)] 
-    [(-> lbl (:args) (:x))                                                                      
-     (-> lbl (:args) (:y) (- height))
+    [(-> lbl (:props) (:x))                                                                      
+     (-> lbl (:props) (:y) (- height))
      (* width 1.22) (* height 1.05 (count text)) height]))
 
 (defn draw-label
   [lbl canvas]
   (let [[x y _ _ line-height] (coord-label lbl canvas)]
-    (create-label canvas (:value lbl) (:args lbl) line-height)
+    (create-label canvas (:value lbl) (:props lbl) line-height)
     lbl))
 
-(defrecord Label [name value args]
+(defrecord Label [name value props]
   wdg/Widget
   (coord [this canvas] (coord-label this canvas))
   (defaults [this] this)

@@ -25,7 +25,7 @@
   "Retuns a vector of widgets by group name"
   [widgets name]
   (let [get-seq (fn [x] (if (string? x) (vector x) x))
-        filter-crit (fn [x] (some #(= name %) (-> x val :args :group get-seq)))]
+        filter-crit (fn [x] (some #(= name %) (-> x val :props :group get-seq)))]
     (vals (filter filter-crit widgets))))
 
 (defn remove-widget-group
@@ -41,14 +41,14 @@
     (if-not (seq names)
       widgets
       (recur (rest names)
-             (assoc-in widgets [(first names) :args property-key] property-value)))))
+             (assoc-in widgets [(first names) :props property-key] property-value)))))
 
 (defn attach-event 
   "Attach an event to a widget by widget name
    widgets - current collection of widgets
    name - name of the widget to attach the event
    event - one of :mouse-clicked :mouse-moved :key-pressed :widget-focus-in :widget-focus-out
-   f - fn to handle the event with the following args: 
+   f - fn to handle the event with the following props: 
    :mouse-clicked -> widgets widget
    :mouse-moved -> widgets widget x y
    :key-pressed -> widgets widget key-code
@@ -76,7 +76,7 @@
    (let [name-groups (partition-all skip-after (->> (select-keys widgets names)
                                                     vals
                                                     (map (fn [widget]
-                                                           (vec (cons (:name widget) (vals (select-keys (:args widget) [:x :y :width :height]))))))))
+                                                           (vec (cons (:name widget) (vals (select-keys (:props widget) [:x :y :width :height]))))))))
          max-width (apply max (flatten (for [group name-groups]
                                          (+ (apply + (map (comp second reverse) group)) (* (count group) (first space))))))]
      (loop [name-groups name-groups
@@ -105,10 +105,10 @@
                       (let [[name x y w h] (first gr)]
                         (recur (rest gr)
                                (-> wdgs
-                                   (assoc-in [name :args :x] x)
-                                   (assoc-in [name :args :y] y)
-                                   (assoc-in [name :args :width] w)
-                                   (assoc-in [name :args :height] h))))))
+                                   (assoc-in [name :props :x] x)
+                                   (assoc-in [name :props :y] y)
+                                   (assoc-in [name :props :width] w)
+                                   (assoc-in [name :props :height] h))))))
                   (+ height max-height (last space)))))))))
 
 (defn window!
@@ -138,10 +138,10 @@
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"
   [widgets ^strigui.widget.Widget widget]
   (let [canvas (-> @wdg/state :context :canvas)
-        widget (update widget :args merge wdg/widget-default-args (->> widget
+        widget (update widget :props merge wdg/widget-default-props (->> widget
                                                                        (wdg/adjust-dimensions canvas)
                                                                        (wdg/defaults)
-                                                                       :args))]
+                                                                       :props))]
     (assoc widgets (:name widget) widget)))
 
 ;; (defmacro add-multiple
@@ -167,40 +167,40 @@
    widgets - map of widgets
    name - name of the element
    text - text displayed inside the button
-   args - map of:
+   props - map of:
      x - x coordinate of top left corner
      y - y coordinate of top left corner
      color - vector consisting of [background-color font-color]
      min-width - the minimum width"
-  [widgets name text args]
-  (add widgets (Button. name text args)))
+  [widgets name text props]
+  (add widgets (Button. name text props)))
 
 (defn add-label
   "Adds a label widget to the given map of widgets.
     widgets - map of widgets
     name - name of the element
     text - text displayed inside the button
-    args - map of:
+    props - map of:
      x - x coordinate of top left corner
      y - y coordinate of top left corner
      color - vector consisting of [font-color]
      font-style - vector consisting of either :bold :italic :italic-bold
      font-size - number"
-  [widgets name text args]
-  (add widgets (Label. name text args)))
+  [widgets name text props]
+  (add widgets (Label. name text props)))
 
 (defn add-input
   "Adds a imput widget to the map of widgets.
    widgets - map of widgets
    name - name of the element
    text - text displayed inside the button
-   args - map of:
+   props - map of:
     x - x coordinate of top left corner
     y - y coordinate of top left corner
     color - vector consisting of [background-color font-color]
     min-width - the minimum width"
-  [widgets name text args]
-  (add widgets (inp/Input. name text args)))
+  [widgets name text props]
+  (add widgets (inp/Input. name text props)))
 
 (defn add-list
   "Adds a list widget holding on a vector of items to the map of widgets.
@@ -208,17 +208,17 @@
    name - name of the list
    items - vector of items [{:value bla} {:value bla} ...]
            items can be maps and should at least contain a :value"
-  [widgets name items args]
-  (add widgets (List. name items args)))
+  [widgets name items props]
+  (add widgets (List. name items props)))
 
 (defn from-map!
   "Initializes the window and the widgets from a map"
   [strigui-map]
-  (when-let [window-args (:window strigui-map)]
-    (apply window! window-args))
+  (when-let [window-props (:window strigui-map)]
+    (apply window! window-props))
   (let [exprs (for [widget-key (filter #(not= % :window) (keys strigui-map))]
-                (for [widget-args (map identity (widget-key strigui-map))]
-                  (str "(apply " (namespace widget-key) "/->" (name widget-key) " " (vec widget-args) ")")))
+                (for [widget-props (map identity (widget-key strigui-map))]
+                  (str "(apply " (namespace widget-key) "/->" (name widget-key) " " (vec widget-props) ")")))
         widgets (->> exprs
                      (mapcat identity)
                      (map #(-> %
@@ -264,7 +264,7 @@
                (if (seq w-types)
                  (let [cur-key (first w-types)
                        current-widgets (get widgets-grouped (first cur-key))
-                       current-widgets (map #(assoc-in % [:args :color] (extract-rgb-constructors (str (-> % :args :color)))) current-widgets)]
+                       current-widgets (map #(assoc-in % [:props :color] (extract-rgb-constructors (str (-> % :props :color)))) current-widgets)]
                    (recur (rest w-types) (merge w-map {(second cur-key)
                                                        (mapv #(vec (vals (select-keys % (filter (fn [k] (not= k :events)) (keys %))))) current-widgets)})))
                  w-map))

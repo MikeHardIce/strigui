@@ -29,17 +29,17 @@
                            (gui/attach-event "input" :key-pressed (fn [widgets name code]
                                                                     (if (= code 10)
                                                                       (-> widgets
-                                                                          (assoc-in [name :args :selected?] nil)
-                                                                          (assoc-in ["input1" :args :selected?] true))
+                                                                          (assoc-in [name :props :selected?] nil)
+                                                                          (assoc-in ["input1" :props :selected?] true))
                                                                       widgets)))
                            (gui/attach-event "input1" :key-pressed (fn [widgets name code]
                                                                     (if (= code 10)
                                                                       (-> widgets
-                                                                          (assoc-in [name :args :selected?] nil)
-                                                                          (assoc-in ["input" :args :selected?] true))
+                                                                          (assoc-in [name :props :selected?] nil)
+                                                                          (assoc-in ["input" :props :selected?] true))
                                                                       widgets)))
-                           (assoc-in ["click" :args :x] 100)
-                           (assoc-in ["click" :args :y] 400)
+                           (assoc-in ["click" :props :x] 100)
+                           (assoc-in ["click" :props :y] 400)
                            (gui/add-button "btnBla" "Don't Click Me" {:x 100 :y 300 :color {:background java.awt.Color/green 
                                                                                             :text java.awt.Color/red} :can-tab? true})
                            (update-in ["test-list" :items] conj {:value "10"} {:value "11"} {:value "12"} {:value "13"} {:value "14"} {:value "15"})))))

@@ -31,7 +31,7 @@
            [this# canvas#]
            (~default-fn this# canvas#)))))
 
-(defonce widget-default-args {:width 150 :height 42
+(defonce widget-default-props {:width 150 :height 42
                               :z 0 :color {:background Color/white
                                            :text Color/black
                                            :focus Color/black
@@ -45,15 +45,15 @@
                   :context {:canvas nil :window nil}}))
 
 (defmulti widget-event
-  (fn [action canvas widgets widget & args]
+  (fn [action canvas widgets widget & props]
     [(class widget) action]))
 
-(defmethod widget-event :default [action canvas widgets widget & args] widgets)
+(defmethod widget-event :default [action canvas widgets widget & props] widgets)
 
 (defmulti widget-global-event
-  (fn [action widgets & args] action))
+  (fn [action widgets & props] action))
 
-(defmethod widget-global-event :default [_ widgets & args] widgets)
+(defmethod widget-global-event :default [_ widgets & props] widgets)
 
 (defn on-border?
   [[x y w h] x0 y0]
@@ -111,21 +111,21 @@
                            (c/clear-rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
 
 (def-action "draw-resizing" (fn [widget canvas]
-                              (draw-border widget canvas (get (-> widget :args :color) :resize Color/orange) 2)))
+                              (draw-border widget canvas (get (-> widget :props :color) :resize Color/orange) 2)))
 
 (def-action "draw-selected" (fn [widget canvas]
-                              (draw-border widget canvas (get (-> widget :args :color) :select Color/blue) 2)))
+                              (draw-border widget canvas (get (-> widget :props :color) :select Color/blue) 2)))
 
 (def-action "draw-focused" (fn [widget canvas]
-                              (draw-border widget canvas (get (-> widget :args :color) :focus Color/black) 2)))
+                              (draw-border widget canvas (get (-> widget :props :color) :focus Color/black) 2)))
 
 (defn draw-widget-border
   [^strigui.widget.Widget widget canvas]
-  (when (-> widget :args :has-border?)
+  (when (-> widget :props :has-border?)
     (cond
-      (-> widget :args :resizing?) (draw-resizing! widget canvas)
-      (-> widget :args :selected?) (draw-selected! widget canvas)
-      (-> widget :args :focused?) (draw-focused! widget canvas)
+      (-> widget :props :resizing?) (draw-resizing! widget canvas)
+      (-> widget :props :selected?) (draw-selected! widget canvas)
+      (-> widget :props :focused?) (draw-focused! widget canvas)
       :else (draw-border widget canvas Color/black 1))))
 
 (defn distance-x
@@ -144,22 +144,22 @@
    or a truthy value for the specific key from a sequence of widgets."
   ([widgets key value]
    (->> widgets
-        (filter #(= (-> % :args key) value))
+        (filter #(= (-> % :props key) value))
         (map :name)))
   ([widgets key]
    (->> widgets
-        (filter #(-> % :args key))
+        (filter #(-> % :props key))
         (map :name))))
 
 (defn set-with-property
   ""
   [widgets key value]
   (for [widget widgets]
-    (assoc-in widget [:args key] value)))
+    (assoc-in widget [:props key] value)))
 
 (defn assoc-arg-for-all
   [widgets key value]
-  (reduce merge {} (map #(merge {} {(:name %) %}) (for [w (vals widgets)] (assoc-in w [:args key] value)))))
+  (reduce merge {} (map #(merge {} {(:name %) %}) (for [w (vals widgets)] (assoc-in w [:props key] value)))))
 
 (defn next-widget-to-tab
   [canvas widgets previously-tabbed ^strigui.widget.Widget selected-widget]
@@ -178,7 +178,7 @@
 
 (defn draw-widgets! 
   [canvas widgets]
-  (loop [widgets (sort-by #(-> % :args :z) widgets)]
+  (loop [widgets (sort-by #(-> % :props :z) widgets)]
     (when (seq widgets)
       (let [^strigui.widget.Widget widget (first widgets)]
         (draw widget canvas)
@@ -192,7 +192,7 @@
   (let [widget-coords (coord widget canvas)
               neighbours (set (filter #(intersect? widget-coords (coord % canvas))
                                       widgets)) ;;(not= widget %)  
-              neighbours (sort-by #(-> % :args :z) neighbours)]
+              neighbours (sort-by #(-> % :props :z) neighbours)]
     neighbours))
 
 (defn widget->neighbours
@@ -208,10 +208,10 @@
      (if (< (count visited) (count neighbours))
        (let [not-visited (s/difference neighbours visited)
              next-widget (first not-visited)
-             z-of-next (-> next-widget :args :z)
+             z-of-next (-> next-widget :props :z)
              new-neighbours (widget->neighbour canvas next-widget widgets)
              new-neighbours (if operator-f 
-                              (filter #(operator-f (-> % :args :z) z-of-next) new-neighbours)
+                              (filter #(operator-f (-> % :props :z) z-of-next) new-neighbours)
                               new-neighbours)]
          (recur (s/union neighbours (set new-neighbours)) (s/union visited #{next-widget})))
        neighbours))))
@@ -231,12 +231,12 @@
   [canvas ^strigui.widget.Widget widget]
   (let [[_ _ w h] (coord widget canvas)
         set-default (fn [value] (if (number? value) value 0))
-        {{width :width height :height x :x y :y z :z :as args} :args} widget
+        {{width :width height :height x :x y :y z :z :as props} :props} widget
         width (if (and (number? width) (>= width w)) width w)
         height (if (and (number? height) (>= height h)) height h)
         [x y z] (map set-default [x y z])
-        args (assoc args :width width :height height :x x :y y :z z)]
-    (assoc widget :args args)))
+        props (assoc props :width width :height height :x x :y y :z z)]
+    (assoc widget :props props)))
 
 (defn determine-updated-keys
   [before after]
@@ -294,23 +294,23 @@
                            "Exception: " (.getMessage e)))))
 
 (defn trigger-custom-event
-  [action widgets ^strigui.widget.Widget widget & args]
+  [action widgets ^strigui.widget.Widget widget & props]
   (if-let [event-fn (-> widget :events action)]
-    (apply event-fn widgets (:name widget) args)
+    (apply event-fn widgets (:name widget) props)
     widgets))
 
 (defn- handle-widget-dragging
   [^strigui.widget.Widget widget x y x-prev y-prev]
     (let [dx (- x x-prev)
           dy (- y y-prev)
-          new-x (+ (-> widget :args :x) dx)
-          new-y (+ (-> widget :args :y) dy)]
-      (update widget :args #(merge % {:x new-x :y new-y}))))
+          new-x (+ (-> widget :props :x) dx)
+          new-y (+ (-> widget :props :y) dy)]
+      (update widget :props #(merge % {:x new-x :y new-y}))))
 
 (defn- handle-widget-resizing
   [^strigui.widget.Widget widget x y x-prev y-prev]
     (let [[dx dy] [(- x x-prev) (- y y-prev)]
-          [x0 y0 w h] [(-> widget :args :x) (-> widget :args :y) (-> widget :args :width) (-> widget :args :height)]
+          [x0 y0 w h] [(-> widget :props :x) (-> widget :props :y) (-> widget :props :width) (-> widget :props :height)]
           position-f (fn [m0 m] (<= (- m0 border-thickness) m (+ m0 border-thickness)))
           [left? top? right? bottom?] [(position-f x0 x) (position-f y0 y) (position-f (+ x0 w) x) (position-f (+ y0 h) y)]
           [x1 y1 w1 h1] (cond 
@@ -319,17 +319,17 @@
                           right? [x0 y0 (+ w dx) h]
                           bottom? [x0 y0 w (+ h dy)]
                           :else [x0 y0 w h])]
-      (update widget :args #(merge % {:width w1 :height h1
+      (update widget :props #(merge % {:width w1 :height h1
                                       :x x1 :y y1}))))
 
 (defn handle-clicked
   [canvas widgets x y]
   (let [;; get the first widget that is on top close to the mouse position
-        widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))
+        widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))
         clicked (when (seq widget) (:name widget))
         widgets (assoc-arg-for-all widgets :selected? nil)]
-    (if (and clicked (not (-> (get widgets clicked) :args :resizing?)))
-        (let [widgets (assoc-in widgets [clicked :args :selected?] true)
+    (if (and clicked (not (-> (get widgets clicked) :props :resizing?)))
+        (let [widgets (assoc-in widgets [clicked :props :selected?] true)
               widgets (widget-event :mouse-clicked canvas widgets (get widgets clicked) x y)
               widgets (trigger-custom-event :mouse-clicked widgets (get widgets clicked))]
           widgets)
@@ -337,10 +337,10 @@
 
 (defn handle-mouse-dragged
   [canvas widgets x y x-prev y-prev]
-  (if-let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))]
-    (let [widgets (if (-> widget :args :resizing?)
+  (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))]
+    (let [widgets (if (-> widget :props :resizing?)
                     (update widgets (:name widget) handle-widget-resizing x y x-prev y-prev)
-                    (if (-> widget :args :can-move?)
+                    (if (-> widget :props :can-move?)
                       (update widgets (:name widget) handle-widget-dragging x y x-prev y-prev)
                       widgets))]
       (widget-event :mouse-dragged canvas widgets (get widgets (:name widget)) x y x-prev y-prev))
@@ -348,15 +348,15 @@
 
 (defn handle-mouse-moved 
   [canvas widgets x y]
-  (let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))
+  (let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))
         ;; if the mouse is not on a widget, check previously focused widgets, trigger events and unfocus them
         widgets (if-let [focused-widgets (get-with-property (vals widgets) :focused?)]
                   (loop [remaining-focused focused-widgets
                          widgets widgets]
                     (if (seq remaining-focused)
                       (recur (rest remaining-focused) (let [name (first remaining-focused)
-                                                            widgets (assoc-in widgets [name :args :focused?] nil)
-                                                            widgets (assoc-in widgets [name :args :resizing?] nil)
+                                                            widgets (assoc-in widgets [name :props :focused?] nil)
+                                                            widgets (assoc-in widgets [name :props :resizing?] nil)
                                                             widgets (widget-event :widget-focus-out canvas widgets (get widgets name) x y)
                                                             widgets (trigger-custom-event :widget-focus-out widgets (get widgets name) x y)]
                                                         widgets))
@@ -367,13 +367,13 @@
       (let [widgets (widget-event :mouse-moved canvas widgets widget x y)
             widgets (trigger-custom-event :mouse-moved widgets (get widgets (:name widget)) x y)
             widget (get widgets (:name widget))
-            widgets (if (-> widget :args :focused?) 
+            widgets (if (-> widget :props :focused?) 
                       widgets
                       (let [name (:name widget)
                             widgets (widget-event :widget-focus-in canvas widgets (get widgets name) x y)]
                         (trigger-custom-event :widget-focus-in widgets (get widgets name) x y)))
-            widgets (assoc-in widgets [(:name widget) :args :focused?] true)]
-        (assoc-in widgets [(:name widget) :args :resizing?] (and (-> widget :args :can-resize?) 
+            widgets (assoc-in widgets [(:name widget) :props :focused?] true)]
+        (assoc-in widgets [(:name widget) :props :resizing?] (and (-> widget :props :can-resize?) 
                                                                  (on-border? (coord (get widgets (:name widget)) canvas) x y))))
       widgets)))
 
@@ -412,13 +412,13 @@
       (when new-widget
         (let [previously-tabbed (s/union previously-tabbed #{new-widget})]
           (swap! previously assoc :tabbed previously-tabbed)))
-        (assoc-in widgets [new-widget :args :selected?] (seq new-widget)))
+        (assoc-in widgets [new-widget :props :selected?] (seq new-widget)))
     widgets))
 
 (defn handle-key-pressed
   [canvas widgets char code]
   (let [widgets (widget-global-event :key-pressed widgets char code)]
-    (if-let [widget (first (reverse (sort-by #(-> % :args :z) (filter #(-> % :args :selected?) (vals widgets)))))]
+    (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(-> % :props :selected?) (vals widgets)))))]
       (let [widgets (handle-tabbing canvas widgets widget code)
             widgets (widget-event :key-pressed canvas widgets (get widgets (:name widget)) char code)]
         (trigger-custom-event :key-pressed widgets (get widgets (:name widget)) code))

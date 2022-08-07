@@ -2,15 +2,15 @@
   (:require [strigui.widget :as wdg]
             [strigui.box :as b]))
 
-(defrecord Input [name value args]
+(defrecord Input [name value props]
   wdg/Widget
-  (coord [this canvas] (apply b/box-coord [canvas (:value this) (:args this)]))
-  (defaults [this] (assoc-in this [:args :has-border?] true))
+  (coord [this canvas] (apply b/box-coord [canvas (:value this) (:props this)]))
+  (defaults [this] (assoc-in this [:props :has-border?] true))
   (before-drawing [this] this)
   (draw [this canvas]
-        (b/box-draw canvas (if (-> this :args :password?)
+        (b/box-draw canvas (if (-> this :props :password?)
                              (apply str (repeat (count (:value this)) "*"))
-                             (:value this)) (:args this))
+                             (:value this)) (:props this))
         this)
   (after-drawing [this] this))
 
@@ -43,19 +43,19 @@
 (defn input
   " name - name of the input element
     text - text displayed inside the input element
-    args - map of properties:
+    props - map of properties:
       x - x coordinate of top left corner
       y - y coordinate of top left corner
       color - vector consisting of [background-color font-color]
       min-width - the minimum width"
-  [name text args]
-    (let [input (->Input name text args)]
+  [name text props]
+    (let [input (->Input name text props)]
       input))
 
 (defn handle-key-pressed
   [widget char code]
     (let [box-with-new-input (key-pressed widget char code)]
-          ;box-with-new-input (assoc-in box-with-new-input [:args :selected?] (or (not= code 10) ;;enter
+          ;box-with-new-input (assoc-in box-with-new-input [:props :selected?] (or (not= code 10) ;;enter
           ;                                                                       (not= code 9)))] ;; tab
       box-with-new-input))
 

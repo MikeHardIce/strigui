@@ -24,10 +24,10 @@
 
 (defn box-draw-text 
   "Draws the text of the box"
-  [canvas text {:keys [^long x ^long y color ^long width font-style font-size] :as args}]
+  [canvas text {:keys [^long x ^long y color ^long width font-style font-size] :as props}]
   (let [style (if (empty? font-style) :bold (first font-style))
         size (if (number? font-size) font-size default-font-size)
-        [_ _ border-width border-heigth text-width text-heigth] (box-coord canvas text args)
+        [_ _ border-width border-heigth text-width text-heigth] (box-coord canvas text props)
         text-color (get color :text Color/black)
         x-offset (/ (- border-width text-width) 2)
         y-offset (/ (- border-heigth text-heigth) 2)]
@@ -42,14 +42,14 @@
   color - vector consisting of [background-color font-color]
   min-width - the minimum width
    max-width - the maximum width"
-  ([args] (apply box-draw args))
-  ([canvas text args]
-  (let [{:keys [^long x ^long y color ^long min-width]} args
-        [_ _ border-width border-heigth] (box-coord canvas text args)
+  ([props] (apply box-draw props))
+  ([canvas text props]
+  (let [{:keys [^long x ^long y color ^long min-width]} props
+        [_ _ border-width border-heigth] (box-coord canvas text props)
         background-color (get color :background Color/black)]
       (c/draw-> canvas 
                 (c/rect x y border-width border-heigth background-color true)) 
-    (box-draw-text canvas text args)
+    (box-draw-text canvas text props)
     [x y border-width border-heigth])))
 
 (defn box-border 
