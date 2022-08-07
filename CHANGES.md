@@ -4,12 +4,12 @@
 ### 0.0.1-alpha32 (in progress)
 
 * fixed tabbing when no widget was selected previously
-* better documentation
-* TODO: arrange function to automatically adjust size and position of selected widgets
+* arrange function to automatically adjust position of selected widgets. Widgets can be aligned :left :center :right
 * add-multiple function to add a bulk of widgets of a given type by providing just their names and values
 * rework color property (pass a map with keys :background :text :focus :select :resize)
 * TODO: enable updating properties of multiple widgets at the same time (currently one can only do this via the group name)
 * TODO: add optional header and support multi columns for list widgets
+* TODO: better documentation
 
 ### 0.0.1-alpha31
 

@@ -53,33 +53,41 @@
    skip-after - indicates how many items should be displayed per row
    {:from [x y]
    :space [between-space-horizontal between-space-vertical]
+   :align :left :center :right
    Example: 2 by 3 grid that starts at x: 100 y: 50
    (-> wdgs
    ...
    (arrange 2 {:from [100 50]} \"label1\" \"button1\" \"label2\" \"button2\" \"label3\" \"button3\"))"
   ([widgets names] (apply arrange widgets (count names) {} names))
   (^{:pre [#(> % 0)]} 
-   [widgets skip-after {:keys [from space] :or {from [0 0]
-                                                     space [35 15]}} & names] 
-     (loop [name-groups (partition-all skip-after (->> (select-keys widgets names)
-                                                       vals
-                                                       (map (fn [widget]
-                                                              (vec (cons (:name widget) (vals (select-keys (:args widget) [:x :y :width :height]))))))))
+   [widgets skip-after {:keys [from space align] :or {from [0 0]
+                                                     space [35 15]
+                                                      align :left}} & names] 
+   (let [name-groups (partition-all skip-after (->> (select-keys widgets names)
+                                                    vals
+                                                    (map (fn [widget]
+                                                           (vec (cons (:name widget) (vals (select-keys (:args widget) [:x :y :width :height]))))))))
+         max-width (apply max (flatten (for [group name-groups]
+                                         (+ (apply + (map (comp second reverse) group)) (* (count group) (first space))))))]
+     (loop [name-groups name-groups
             widgets widgets
             height (second from)]
        (if-not (seq name-groups)
          widgets
-         (let [coords (reduce (fn [[_ x0 y0 w0 _ :as prev] [name _ _ w h]]
-                                (cons prev [[name (+ x0 w0 (first space))
-                                            y0 w h]]))
+         (let [row-width (apply + (map (comp second reverse) (first name-groups)))
+               start-on-x (case align 
+                            :left (first from)
+                            :right (- (+ (first from) max-width) row-width)
+                            :center (- (+ (first from) (/ max-width 2)) (/ row-width 2)))
+               coords (reduce (fn [prev [name _ _ w h]]
+                                (let [[_ x0 y0 w0 _] (last prev)]
+                                  (concat prev [[name (+ x0 w0 (first space))
+                                                 y0 w h]])))
                               (let [[name _ _ w h] (-> name-groups first first)]
-                                [name (first from) height w h])
+                                [[name start-on-x height w h]])
                               (-> name-groups first rest))
-               coords (if (vector? coords) 
-                        (list coords)
-                        coords)
                max-height (apply max (map last coords))]
-           (recur (rest name-groups) 
+           (recur (rest name-groups)
                   (loop [gr coords
                          wdgs widgets]
                     (if-not (seq gr)
@@ -91,7 +99,8 @@
                                    (assoc-in [name :args :y] y)
                                    (assoc-in [name :args :width] w)
                                    (assoc-in [name :args :height] h))))))
-                  (+ height max-height (last space))))))))
+                  (+ height max-height (last space)))))))
+     ))
 
 (defn window!
   "Initializes a new window or reuses an existing one
