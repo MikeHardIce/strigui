@@ -33,6 +33,16 @@
   [widgets name]
   (apply dissoc widgets (map :name (find-widgets-by-group-name widgets name))))
 
+(defn assoc-property
+  "Assoc a value to a particular widget property for multiple widgets given by widget name"
+  [widgets property-key property-value & widget-names]
+  (loop [names widget-names
+         widgets widgets]
+    (if-not (seq names)
+      widgets
+      (recur (rest names)
+             (assoc-in widgets [(first names) :args property-key] property-value)))))
+
 (defn attach-event 
   "Attach an event to a widget by widget name
    widgets - current collection of widgets
@@ -99,8 +109,7 @@
                                    (assoc-in [name :args :y] y)
                                    (assoc-in [name :args :width] w)
                                    (assoc-in [name :args :height] h))))))
-                  (+ height max-height (last space)))))))
-     ))
+                  (+ height max-height (last space)))))))))
 
 (defn window!
   "Initializes a new window or reuses an existing one

@@ -7,7 +7,7 @@
 * arrange function to automatically adjust position of selected widgets. Widgets can be aligned :left :center :right
 * add-multiple function to add a bulk of widgets of a given type by providing just their names and values
 * rework color property (pass a map with keys :background :text :focus :select :resize)
-* TODO: enable updating properties of multiple widgets at the same time (currently one can only do this via the group name)
+* enable updating properties of multiple widgets at the same time
 * TODO: add optional header and support multi columns for list widgets
 * TODO: better documentation
 
