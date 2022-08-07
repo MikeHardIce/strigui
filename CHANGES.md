@@ -9,6 +9,9 @@
 * rework color property (pass a map with keys :background :text :focus :select :resize)
 * enable updating properties of multiple widgets at the same time
 * changed widgets :args key to :props key (properties of a widget)
+* give option for widget highlights to be a combination of :border :none :alpha (:alpha with add a transparent layer 
+in the highlight color on top)
+* highlight border size can be adjusted via key :highlight-border-size accepting a non negative integer value
 * TODO: add optional header and support multi columns for list widgets
 * TODO: better documentation
 
