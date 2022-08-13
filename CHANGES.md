@@ -11,7 +11,8 @@
 * changed widgets :args key to :props key (properties of a widget)
 * give option for widget highlights to be a combination of :border :none :alpha (:alpha with add a transparent layer 
 in the highlight color on top)
-* highlight border size can be adjusted via key :highlight-border-size accepting a non negative integer value
+* highlight border size can be adjusted via key :highlight-border-size accepting a non negative numbers
+* highlight alpha opacity can be adjusted via key :highlight-alpha-opacity accepting integers from 0 to 255
 * copy and paste via ctrl+c and ctrl+v for input fields
 * TODO: add optional header and support multi columns for list widgets
 * TODO: better documentation

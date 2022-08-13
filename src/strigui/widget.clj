@@ -38,7 +38,8 @@
                                            :select Color/blue
                                            :resize Color/orange}
                                :highlight [:border :alpha]
-                               :highlight-border-size 2})
+                               :highlight-border-size 1.5
+                               :highlight-alpha-opacity 30})
 
 (def previously (atom {:tabbed #{}
                        :mouse-position nil
@@ -108,34 +109,24 @@
    (let [[x y w h] (coord box canvas)]
      (draw-border-rec canvas color strength x y w h (not fill)))))
 
+(defn draw-highlight [key default widget canvas]
+     (when (some #{:border} (-> widget :props :highlight))
+       (draw-border widget canvas (get (-> widget :props :color) key default) (get (-> widget :props) :highlight-border-size (:highlight-border-size widget-default-props))))
+     (when (some #{:alpha} (-> widget :props :highlight))
+       (draw (assoc-in widget [:props :color :background] (let [color ^Color (get (-> widget :props :color) key default)]
+                                                            (Color. (.getRed color) (.getGreen color) (.getBlue color) (get (-> widget :props) :highlight-alpha-opacity (:highlight-alpha-opacity widget-default-props)))))
+             canvas)))
+
 (def-action "hide" (fn [widget canvas]
                      (let [[x y w h] (coord widget canvas)]
                        (c/draw-> (dissoc canvas :rendering) ;;remove rendering hints when erasing a widget on the canvas
                            (c/clear-rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
 
-(def-action "draw-resizing" (fn [widget canvas]
-                              (when (some #{:border} (-> widget :props :highlight))
-                                (draw-border widget canvas (get (-> widget :props :color) :resize Color/orange) (-> widget :props :highlight-border-size)))
-                              (when (some #{:alpha} (-> widget :props :highlight))
-                                (draw (assoc-in widget [:props :color :background] (let [color ^Color (get (-> widget :props :color) :resize Color/orange)]
-                                                                                     (Color. (.getRed color) (.getGreen color) (.getBlue color) 50))) 
-                                      canvas))))
+(def-action "draw-resizing" (partial draw-highlight :resize (-> widget-default-props :color :resize)))
 
-(def-action "draw-selected" (fn [widget canvas]
-                              (when (some #{:border} (-> widget :props :highlight))
-                                (draw-border widget canvas (get (-> widget :props :color) :select Color/blue) (-> widget :props :highlight-border-size)))
-                              (when (some #{:alpha} (-> widget :props :highlight))
-                                (draw (assoc-in widget [:props :color :background] (let [color ^Color (get (-> widget :props :color) :select Color/blue)]
-                                                                                     (Color. (.getRed color) (.getGreen color) (.getBlue color) 50)))
-                                      canvas))))
+(def-action "draw-selected" (partial draw-highlight :select (-> widget-default-props :color :select)))
 
-(def-action "draw-focused" (fn [widget canvas]
-                             (when (some #{:border} (-> widget :props :highlight))
-                               (draw-border widget canvas (get (-> widget :props :color) :focus Color/black) (-> widget :props :highlight-border-size)))
-                             (when (some #{:alpha} (-> widget :props :highlight))
-                               (draw (assoc-in widget [:props :color :background] (let [color ^Color (get (-> widget :props :color) :focus Color/black)]
-                                                                                    (Color. (.getRed color) (.getGreen color) (.getBlue color) 50)))
-                                     canvas))))
+(def-action "draw-focused" (partial draw-highlight :focus (-> widget-default-props :color :focus)))
 
 (defn draw-widget-border
   [^strigui.widget.Widget widget canvas]
