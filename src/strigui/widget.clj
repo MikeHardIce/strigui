@@ -41,7 +41,8 @@
                                :highlight-border-size 2})
 
 (def previously (atom {:tabbed #{}
-                       :mouse-position nil}))
+                       :mouse-position nil
+                       :key-code nil}))
 
 (def state (atom {:widgets {}
                   :context {:canvas nil :window nil}}))
@@ -341,6 +342,7 @@
 
 (defn handle-clicked
   [canvas widgets x y]
+  (swap! previously assoc :key-code nil)
   (let [;; get the first widget that is on top close to the mouse position
         widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))
         clicked (when (seq widget) (:name widget))
@@ -434,11 +436,13 @@
 
 (defn handle-key-pressed
   [canvas widgets char code]
-  (let [widgets (widget-global-event :key-pressed widgets char code)]
+  (let [previous-code (-> @previously :key-code)
+        widgets (widget-global-event :key-pressed widgets char code previous-code)]
+    (swap! previously assoc :key-code code)
     (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(-> % :props :selected?) (vals widgets)))))]
       (let [widgets (handle-tabbing canvas widgets widget code)
-            widgets (widget-event :key-pressed canvas widgets (get widgets (:name widget)) char code)]
-        (trigger-custom-event :key-pressed widgets (get widgets (:name widget)) code))
+            widgets (widget-event :key-pressed canvas widgets (get widgets (:name widget)) char code previous-code)]
+        (trigger-custom-event :key-pressed widgets (get widgets (:name widget)) code char previous-code))
       (if-let [tabable (first (get-with-property (vals widgets) :can-tab? true))]
           (handle-tabbing canvas widgets (get widgets tabable) code)
         widgets))))

@@ -26,13 +26,13 @@
                        (-> wdgs
                            (gui/attach-event "click" :mouse-clicked (fn [_ _]
                                                                       (gui/close-window!)))
-                           (gui/attach-event "input" :key-pressed (fn [widgets name code]
+                           (gui/attach-event "input" :key-pressed (fn [widgets name _ code _]
                                                                     (if (= code 10)
                                                                       (-> widgets
                                                                           (assoc-in [name :props :selected?] nil)
                                                                           (assoc-in ["input1" :props :selected?] true))
                                                                       widgets)))
-                           (gui/attach-event "input1" :key-pressed (fn [widgets name code]
+                           (gui/attach-event "input1" :key-pressed (fn [widgets name _ code _]
                                                                     (if (= code 10)
                                                                       (-> widgets
                                                                           (assoc-in [name :props :selected?] nil)

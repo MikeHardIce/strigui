@@ -12,7 +12,7 @@
   (after-drawing [this] this))
 
 (defmethod wdg/widget-event [strigui.button.Button :key-pressed]
-  [_ canvas widgets widget char code]
+  [_ canvas widgets widget _ code _]
   (if (= code 10) ;;enter
     (let [[x y] (wdg/coord widget canvas)]
       (wdg/handle-clicked canvas widgets x y))
