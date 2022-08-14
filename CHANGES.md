@@ -14,7 +14,9 @@ in the highlight color on top)
 * highlight border size can be adjusted via key :highlight-border-size accepting a non negative numbers
 * highlight alpha opacity can be adjusted via key :highlight-alpha-opacity accepting integers from 0 to 255
 * copy and paste via ctrl+c and ctrl+v for input fields
-* TODO: add optional header and support multi columns for list widgets
+* removed :has-border? property key, hightlight are now active as soon as a :highlight key with a non empty vector is provided
+* multi column support for list widgets
+* TODO: add optional header for list widgets
 * TODO: better documentation
 
 ### 0.0.1-alpha31

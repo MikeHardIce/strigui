@@ -37,7 +37,7 @@
                                            :focus Color/black
                                            :select Color/blue
                                            :resize Color/orange}
-                               :highlight [:border :alpha]
+                               :highlight []
                                :highlight-border-size 1.5
                                :highlight-alpha-opacity 30})
 
@@ -130,7 +130,7 @@
 
 (defn draw-widget-border
   [^strigui.widget.Widget widget canvas]
-  (when (-> widget :props :has-border?)
+  (when (seq (-> widget :props :highlight))
     (cond
       (-> widget :props :resizing?) (draw-resizing! widget canvas)
       (-> widget :props :selected?) (draw-selected! widget canvas)

@@ -24,13 +24,19 @@
         (let [color (:color props)
               item (first items)
               color (if (or (:hovered? item) (:selected? item)) (update color :background make-darker-or-brighter) color)]
-          (b/box-draw canvas (-> items first :value) (merge 
-                                                      {:y (+ (* index item-height) (:y props)) :max-width (- (:width props) item-width-right-margin) :color color}
-                                                      (select-keys props [:width :x])))
+          (if (vector? (:value item))
+                       (let [columns (count (:value item))
+                             width (/ (- (:width props) item-width-right-margin) columns)
+                             cells (map (fn [it ind] [it ind]) (:value item) (range 0 columns))]
+                         (doseq [cell cells]
+                           (b/box-draw canvas (str (first cell)) {:x (+ (:x props) (* (second cell) width)) :y (+ (* index item-height) (:y props)) :width width :max-width width :color color})))
+              (b/box-draw canvas (str (-> items first :value)) (merge
+                                                          {:y (+ (* index item-height) (:y props)) :max-width (- (:width props) item-width-right-margin) :color color}
+                                                          (select-keys props [:width :x]))))
           (when (:selected? item)
             (c/draw-> canvas
-                      (c/line (inc (:x props)) (+ (* index item-height) (:y props)) 
-                              (inc (:x props)) (+ (* (inc index) item-height) (:y props)) 
+                      (c/line (inc (:x props)) (+ (* index item-height) (:y props))
+                              (inc (:x props)) (+ (* (inc index) item-height) (:y props))
                               (get color :text java.awt.Color/green) 3))))
         (recur (rest items) (inc index)))))
 

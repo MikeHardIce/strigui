@@ -5,7 +5,7 @@
 (defrecord Button [name value props]
   wdg/Widget
   (coord [this canvas] (apply b/box-coord [canvas (:value this) (:props this)]))
-  (defaults [this] (assoc-in this [:props :has-border?] true))
+  (defaults [this] (assoc-in this [:props :highlight] [:border :alpha]))
   (before-drawing [this] this)
   (draw [this canvas]
         (b/box-draw canvas (:value this) (:props this)))

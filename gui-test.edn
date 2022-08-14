@@ -10,7 +10,17 @@
                                    {:value "4"} {:value "5"} {:value "6"} {:value "7"} {:value "8"} {:value "9"}] {:x 350 :y 300 :width 150
                                                                                                         :height 200
                                                                                                         :color {:background java.awt.Color/black 
-                                                                                                                :text java.awt.Color/red}}]]
+                                                                                                                :text java.awt.Color/red}}]
+                     ["test-table" [{:value ["First Item" "Second Item" "Third Item"]} {:value [1 2 3]} {:value [4 5 6]}
+                                    {:value [7 8 9]}] {:x 600 :y 100 :width 800
+                                                       :height 400
+                                                       :color {:background java.awt.Color/black
+                                                               :text java.awt.Color/red
+                                                               :focus java.awt.Color/red
+                                                               :select java.awt.Color/red}
+                                                       :highlight [:alpha]
+                                                       :highlight-alpha-opacity 10
+                                                       :header [{:value "Header 01" :action :select-all} {:value "Header 02" :action :sort} {:value "Header 03"}]}]]
  :strigui.input/Input [["input" "abc" {:x 100 :y 150 :z -20 :width 420 :color {:background java.awt.Color/white 
                                                                                :text java.awt.Color/red
                                                                                :focus java.awt.Color/green
