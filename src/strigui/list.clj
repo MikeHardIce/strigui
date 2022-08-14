@@ -12,9 +12,12 @@
     (if (> (get hsl 2) 0.8) (.darker color) (-> color (.brighter) (.brighter) (.brighter) (.brighter) (.brighter)))))
 
 (defn get-index-at 
+  " index >= 0 for items, < 0 for header"
   [widget y]
   (let [index (int (/ (- y (-> widget :props :y)) item-height))]
-    index))
+    (if (-> widget :props :header)
+      (dec index)
+      index)))
 
 (defn draw-list
   [canvas items props]
@@ -47,13 +50,17 @@
 
 (defn make-visible 
   ([widget]
-  (let [max-visible-items (Math/floor (/ (-> widget :props :height) item-height))
+  (let [max-visible-items (- (Math/floor (/ (-> widget :props :height) item-height)) (if (-> widget :props :header)
+                                                                                       1
+                                                                                       0))
         items (:items widget)
         widgets-visible (mapv #(merge % {:visible? true}) (take max-visible-items items))
         widgets-not-visible (take-last (- (count items) max-visible-items) items)]
     (assoc widget :items (apply conj widgets-visible widgets-not-visible))))
   ([widget y]
-   (let [max-visible-items (int (/ (-> widget :props :height) item-height))
+   (let [max-visible-items (- (Math/floor (/ (-> widget :props :height) item-height)) (if (-> widget :props :header)
+                                                                                        1
+                                                                                        0))
          items (:items widget)
          cnt-items (count items)
          index (int (/ (int (- y (-> widget :props :y))) item-height))
@@ -76,11 +83,13 @@
                          [x y width height]))
   (defaults [this] (make-visible this))
   (before-drawing [this] (if (< (count (filter :visible? (:items this)))
-                                (Math/floor (/ (-> this :props :height) item-height)))
+                                (- (Math/floor (/ (-> this :props :height) item-height)) (if (-> this :props :header)
+                                                                                           1
+                                                                                           0)))
                            (make-visible this)
                            this))
   (draw [this canvas]
-        (let [{:keys [x y width height color] :as props} (:props this)
+        (let [{:keys [x y width height color header] :as props} (:props this)
               bar-x (+ x (- width item-width-right-margin))
               items (:items this)
               items-visible (filter :visible? items)
@@ -92,7 +101,11 @@
                     (c/rect x y width height (:background color) false)
                     (c/rect bar-x y item-width-right-margin height (make-darker-or-brighter (:background color)) true)
                     (c/rect bar-x bar-y item-width-right-margin bar-scroll-height (make-darker-or-brighter (:text color)) true))
-          (draw-list canvas items props)
+          (if-not header
+            (draw-list canvas items props)
+            (do
+              (draw-list canvas [{:value (mapv :value header) :visible? true}] props)
+              (draw-list canvas items (update props :y (partial + item-height)))))
           this))
   (after-drawing [this] this))
 
@@ -113,7 +126,10 @@
   (let [item-border-x (+ (-> widget :props :x) (- (-> widget :props :width) item-width-right-margin))]
     (if (< item-border-x x)
       (update widgets (:name widget) make-visible y)
-      (update widgets (:name widget) activate! y :selected?))))
+      (if (>= (get-index-at widget y) 0)
+        (update widgets (:name widget) activate! y :selected?)
+        widgets;;entry for header sort functions)
+      ))))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-moved]
   [_ canvas widgets widget _ y]
