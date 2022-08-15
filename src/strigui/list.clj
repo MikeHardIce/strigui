@@ -121,6 +121,20 @@
           (assoc-in [:items index property] true))
       widget)))
 
+(defn header-action
+  [widget x]
+  (println "header")
+  (let [header (-> widget :props :header)
+        width-per-item (/ (-> widget :props :width) (count header))
+        x (- x (-> widget :props :x) )
+        index (Math/floor (/ x width-per-item))
+        header (get header index)]
+    (update widget :value (fn [items]
+                            (case (:action header)
+                              :sort (vec (sort-by #(-> % :value (get index 0)) items))
+                              :select-all (mapv #(update % :selected? not) items)
+                              items)))))
+
 (defmethod wdg/widget-event [strigui.list.List :mouse-clicked]
  [_ canvas widgets widget x y]
   (let [item-border-x (+ (-> widget :props :x) (- (-> widget :props :width) item-width-right-margin))]
@@ -128,8 +142,7 @@
       (update widgets (:name widget) make-visible y)
       (if (>= (get-index-at widget y) 0)
         (update widgets (:name widget) activate! y :selected?)
-        widgets;;entry for header sort functions)
-      ))))
+        (update widgets (:name widget) header-action x)))))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-moved]
   [_ canvas widgets widget _ y]
