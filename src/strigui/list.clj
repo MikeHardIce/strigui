@@ -121,19 +121,36 @@
           (assoc-in [:items index property] true))
       widget)))
 
+(defn partition-and-sort-by-numeric-and-non-numeric-chars
+  [items index]
+  (let [groups (group-by (fn [item]
+                           (some #(Character/isLetter %) (-> item :value (get index 0) str))) items)]
+    (vec (concat
+          (sort-by #(-> % :value (get index 0)) (get groups nil []))
+          (sort-by #(-> % :value (get index 0) str) (get groups true []))))))
+
 (defn header-action
   [widget x]
-  (println "header")
   (let [header (-> widget :props :header)
         width-per-item (/ (-> widget :props :width) (count header))
-        x (- x (-> widget :props :x) )
-        index (Math/floor (/ x width-per-item))
-        header (get header index)]
-    (update widget :value (fn [items]
-                            (case (:action header)
-                              :sort (vec (sort-by #(-> % :value (get index 0)) items))
-                              :select-all (mapv #(update % :selected? not) items)
-                              items)))))
+        x (- x (-> widget :props :x))
+        index (int (Math/floor (/ x width-per-item)))
+        header (get header index)
+        widget (update widget :items (fn [items]
+                                       (case (:action header)
+                                         :sort (partition-and-sort-by-numeric-and-non-numeric-chars items index)
+                                         :sort-asc (partition-and-sort-by-numeric-and-non-numeric-chars items index)
+                                         :sort-desc (reverse (partition-and-sort-by-numeric-and-non-numeric-chars items index))
+                                         :select-all (let [set-to-selected (not (every? identity (map :selected? items)))]
+                                                       (mapv #(assoc % :selected? set-to-selected) items))
+                                         items)))
+        widget (update-in widget [:props :header index] (fn [head]
+                                                          (assoc head :action (case (:action head)
+                                                                                :sort :sort-desc
+                                                                                :sort-asc :sort-desc
+                                                                                :sort-desc :sort-asc
+                                                                                (:action head)))))]
+    widget))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-clicked]
  [_ canvas widgets widget x y]

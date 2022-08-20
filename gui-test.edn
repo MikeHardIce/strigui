@@ -12,7 +12,7 @@
                                                                                                         :color {:background java.awt.Color/black 
                                                                                                                 :text java.awt.Color/red}}]
                      ["test-table" [{:value ["First Item" "Second Item" "Third Item"]} {:value [1 2 3]} {:value [4 5 6]}
-                                    {:value [7 8 9]} {:value [7 1 9]} {:value [7 -1 9]}] {:x 600 :y 100 :width 800
+                                    {:value [7 8 9]} {:value [7 22 9]} {:value [7 -1 9]}] {:x 600 :y 100 :width 800
                                                        :height 400
                                                        :color {:background java.awt.Color/black
                                                                :text java.awt.Color/red

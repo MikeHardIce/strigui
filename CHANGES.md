@@ -16,7 +16,9 @@ in the highlight color on top)
 * copy and paste via ctrl+c and ctrl+v for input fields
 * removed :has-border? property key, hightlight are now active as soon as a :highlight key with a non empty vector is provided
 * multi column support for list widgets
-* TODO: add optional header for list widgets
+* add optional header for list widgets
+* headers can have header actions :sort :sort-asc :sort-desc :select-all 
+  the header actions gets reversed with consecutive clicks on the header
 * TODO: better documentation
 
 ### 0.0.1-alpha31
