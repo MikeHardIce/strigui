@@ -125,7 +125,7 @@
   ([context] 
    (swap! wdg/state assoc :context context))
   ([x y width height title]
-   (window! x y width height title Color/white {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}))
+   (window! x y width height title (java.awt.Color. 44 44 44) {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}))
   ([x y width height title color]
    (window! x y width height title color {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}))
    ([x y width height title color rendering-hints]
@@ -136,13 +136,20 @@
   
 (defn add 
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"
-  [widgets ^strigui.widget.Widget widget]
+  ([widgets ^strigui.widget.Widget widget] (add widgets widget {:background (java.awt.Color. 47 120 118)
+                                                                :text (java.awt.Color. 247 247 247)
+                                                                :focus (java.awt.Color. 77 150 148)
+                                                                :select (java.awt.Color. 77 150 148)
+                                                                :border (java.awt.Color. 27 100 98)}))
+  ([widgets ^strigui.widget.Widget widget color-profile]
   (let [canvas (-> @wdg/state :context :canvas)
-        widget (update widget :props merge wdg/widget-default-props (->> widget
-                                                                       (wdg/adjust-dimensions canvas)
-                                                                       (wdg/defaults)
-                                                                       :props))]
-    (assoc widgets (:name widget) widget)))
+        widget (update widget :props merge wdg/widget-default-props
+                       (-> widget (assoc-in [:props :color] color-profile) :props)
+                       (->> widget
+                            (wdg/adjust-dimensions canvas)
+                            (wdg/defaults)
+                            :props))]
+    (assoc widgets (:name widget) widget))))
 
 ;; (defmacro add-multiple
 ;;   [type & names]

@@ -3,24 +3,9 @@
             [strigui.widget :as wdg]))
 
 (defn main []
-  (gui/window! 200 300 1500 600 "My Window" (java.awt.Color. 255 200 133) ;{java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}
+  (gui/window! 200 300 1500 600 "My Window" (java.awt.Color. 44 44 44) ;{java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}
                )
-  (gui/from-file! "gui-test.edn")
-
-  ;; (gui/window! 200 300 600 600 "My Window" (java.awt.Color. 255 200 133))
-  
-  ;; (gui/swap-widgets! (fn [wdgs]
-  ;;                      (-> wdgs
-  ;;                          (gui/add-label "welcome" "Welcome to Strigui" {:x 190 :y 100
-  ;;                                                                         :color [(Color. 255 31 0)]
-  ;;                                                                         :font-size 20 :font-style [:bold]})
-  ;;                          (gui/add-button "click" "Click me" {:x 400 :y 200 :color [Color/white Color/black]})
-  ;;                          (gui/add-input "input" "" {:x 100 :y 150 :width 420 :color [Color/white Color/red] :min-width 420}))))
-  
-  ;; (gui/swap-widgets! (fn [wdgs]
-  ;;                      (gui/attach-event wdgs "click" :mouse-clicked (fn [_ _] 
-  ;;                                                                      (gui/close-window!)))))
-  
+  (gui/from-file! "gui-test.edn") 
 
   (gui/swap-widgets! (fn [wdgs]
                        (-> wdgs
@@ -40,8 +25,12 @@
                                                                       widgets)))
                            (assoc-in ["click" :props :x] 100)
                            (assoc-in ["click" :props :y] 400)
-                           (gui/add-button "btnBla" "Don't Click Me" {:x 100 :y 300 :color {:background java.awt.Color/green 
-                                                                                            :text java.awt.Color/red} :can-tab? true})
+                           (gui/add-button "btnBla" "Don't Click Me" {:x 100 :y 300 :color {:background (java.awt.Color. 47 120 118) 
+                                                                                            :text (java.awt.Color. 247 247 247)
+                                                                                            :focus (java.awt.Color. 77 150 148)
+                                                                                            :select (java.awt.Color. 77 150 148)
+                                                                                            :border (java.awt.Color. 27 100 98)}
+                                                                     :highlight [:alpha] :can-tab? true})
                            (update-in ["test-list" :items] conj {:value "10"} {:value "11"} {:value "12"} {:value "13"} {:value "14"} {:value "15"})))))
 
 (defmethod wdg/widget-global-event :mouse-clicked [_ widgets x y]

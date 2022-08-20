@@ -18,7 +18,7 @@ in the highlight color on top)
 * multi column support for list widgets
 * add optional header for list widgets
 * headers can have header actions :sort :sort-asc :sort-desc :select-all 
-  the header actions gets reversed with consecutive clicks on the header
+  the header actions get reversed with consecutive clicks on the header :sort and :sort-asc -> :sort-desc, :select-all will get unselected
 * TODO: better documentation
 
 ### 0.0.1-alpha31

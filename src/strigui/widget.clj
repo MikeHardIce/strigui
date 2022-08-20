@@ -36,7 +36,8 @@
                                            :text Color/black
                                            :focus Color/black
                                            :select Color/blue
-                                           :resize Color/orange}
+                                           :resize Color/orange
+                                           :border Color/black}
                                :highlight []
                                :highlight-border-size 1.5
                                :highlight-alpha-opacity 30})
@@ -135,7 +136,7 @@
       (-> widget :props :resizing?) (draw-resizing! widget canvas)
       (-> widget :props :selected?) (draw-selected! widget canvas)
       (-> widget :props :focused?) (draw-focused! widget canvas)
-      :else (draw-border widget canvas Color/black 1))))
+      :else (draw-border widget canvas (-> widget :props :color :border) 1))))
 
 (defn distance-x
   "Manhatten distance that is sqashed on the x-axis,

@@ -9,7 +9,7 @@
 (defn make-darker-or-brighter
   [^java.awt.Color color]
   (let [hsl (java.awt.Color/RGBtoHSB (.getRed color) (.getGreen color) (.getBlue color) nil)]
-    (if (> (get hsl 2) 0.8) (.darker color) (-> color (.brighter) (.brighter) (.brighter) (.brighter) (.brighter)))))
+    (if (> (get hsl 2) 0.8) (.darker color) (-> color (.brighter))))) ;; (.brighter) (.brighter) (.brighter) (.brighter)
 
 (defn get-index-at 
   " index >= 0 for items, < 0 for header"
@@ -26,7 +26,8 @@
       (when (seq items)
         (let [color (:color props)
               item (first items)
-              color (if (or (:hovered? item) (:selected? item)) (update color :background make-darker-or-brighter) color)]
+              ;;color (if (or (:hovered? item) (:selected? item)) (update color :background make-darker-or-brighter) color)
+              color (if (or (:hovered? item) (:selected? item)) (assoc color :background (:focus color)) color)]
           (if (vector? (:value item))
                        (let [columns (count (:value item))
                              width (/ (- (:width props) item-width-right-margin) columns)
@@ -99,8 +100,8 @@
               bar-y (+ y (/ (* bar-scroll-height (count first-items-hidden)) (if (seq items-visible) (count items-visible) 1)))]
           (c/draw-> canvas
                     (c/rect x y width height (:background color) false)
-                    (c/rect bar-x y item-width-right-margin height (make-darker-or-brighter (:background color)) true)
-                    (c/rect bar-x bar-y item-width-right-margin bar-scroll-height (make-darker-or-brighter (:text color)) true))
+                    (c/rect bar-x y item-width-right-margin height (:background color) true)
+                    (c/rect bar-x bar-y item-width-right-margin bar-scroll-height (:border color) true)) ;;(make-darker-or-brighter (:text color))
           (if-not header
             (draw-list canvas items props)
             (do
@@ -164,6 +165,10 @@
 (defmethod wdg/widget-event [strigui.list.List :mouse-moved]
   [_ canvas widgets widget _ y]
   (update widgets (:name widget) activate! y :hovered?))
+
+(defmethod  wdg/widget-event [strigui.list.List :widget-focus-out]
+ [_ canvas widgets widget _ _]
+ (update-in widgets [(:name widget) :items] (fn [items] (mapv #(dissoc % :hovered?) items))))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-dragged]
   [_ canvas widgets widget x y _ _]
