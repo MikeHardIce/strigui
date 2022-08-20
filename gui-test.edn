@@ -11,6 +11,8 @@
                                                                           :border (java.awt.Color. 27 100 98)}
                                              :highlight [:alpha] :can-tab? true :group "bla"}]]
  :strigui.list/List [["test-list" [{:value "First Item"} {:value "Second Item"} {:value "Third Item"}
+                                   {:value "4"} {:value "5"} {:value "6"} {:value "7"} {:value "8"} {:value "9"}
+                                   {:value "First Item"} {:value "Second Item"} {:value "Third Item"}
                                    {:value "4"} {:value "5"} {:value "6"} {:value "7"} {:value "8"} {:value "9"}] {:x 350 :y 300 :width 150
                                                                                                         :height 200
                                                                                                         :color {:background (java.awt.Color. 47 120 118)
@@ -20,6 +22,14 @@
                                                                                                                 :border (java.awt.Color. 27 100 98)}
                                                                                                                    :highlight [:alpha]}]
                      ["test-table" [{:value ["First Item" "Second Item" "Third Item"]} {:value [1 2 3]} {:value [4 5 6]}
+                                    {:value [7 8 9]} {:value [7 22 9]} {:value [7 -1 9]}
+                                    {:value ["First Item" "Second Item" "Third Item"]} {:value [1 2 3]} {:value [4 5 6]}
+                                    {:value [7 8 9]} {:value [7 22 9]} {:value [7 -1 9]}
+                                    {:value ["First Item" "Second Item" "Third Item"]} {:value [1 2 3]} {:value [4 5 6]}
+                                    {:value [7 8 9]} {:value [7 22 9]} {:value [7 -1 9]}
+                                    {:value ["First Item" "Second Item" "Third Item"]} {:value [1 2 3]} {:value [4 5 6]}
+                                    {:value [7 8 9]} {:value [7 22 9]} {:value [7 -1 9]}
+                                    {:value ["First Item" "Second Item" "Third Item"]} {:value [1 2 3]} {:value [4 5 6]}
                                     {:value [7 8 9]} {:value [7 22 9]} {:value [7 -1 9]}] {:x 600 :y 100 :width 800
                                                        :height 400
                                                        :color {:background (java.awt.Color. 47 120 118)
