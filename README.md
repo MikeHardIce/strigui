@@ -2,9 +2,9 @@
 
 [![Clojars Project](https://img.shields.io/clojars/v/strigui.svg)](https://clojars.org/strigui)
 
-A small "functional" GUI library that can be extended with new Widgets. At the moment, it contains widgets for buttons, input boxes, lists/tables and a label widget for just displaying text.
+A small "kind-of-functional" GUI library that can be extended with new Widgets. At the moment, it contains widgets for buttons, input boxes, lists/tables and a label widget for just displaying text.
 The goal is to provide an easy to use library to create small desktop apps with Clojure in a somehow functional style. 
-Hand swap-widgets! a function to transform all widgets, swap-widgets will apply the function and determine what has been changed to see what needs to redrawn.
+Hand swap-widgets! a function to transform all widgets, swap-widgets will apply the function and determine what has been changed to see what needs to be redrawn.
 
 
 It uses [Capra](https://github.com/MikeHardIce/Capra) underneath (it was using [Clojure2d](https://github.com/Clojure2D/clojure2d) before). So anything that can be drawn could potentially be a widget (like the game board in [Dame](https://github.com/MikeHardIce/Dame)).
