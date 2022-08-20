@@ -112,15 +112,22 @@
 
 (defn activate!
   [widget y property]
-  (let [index (get-index-at widget y)
-        items (:items widget)
-        item (get (filterv :visible? items) index)
-        items-before (take-while #(not (:visible? %)) items)
-        index (+ (count items-before) index)]
-    (if (seq item)
-      (-> widget
-          (update :items clear-out property)
-          (assoc-in [:items index property] true))
+  (let [index (get-index-at widget y)]
+    (if (> index -1)
+      (let [index (get-index-at widget y)
+            bla (println "Index (before): " index)
+            items (:items widget)
+            item (get (filterv :visible? items) index)
+            items-before (take-while #(not (:visible? %)) items)
+            bla (println "Number of items in front: " (count items-before))
+            index (+ (count items-before) index)
+            bla (println "Index (with items before): " index)
+            ]
+        (if (seq item)
+          (-> widget
+              (update :items clear-out property)
+              (assoc-in [:items index property] true))
+          widget))
       widget)))
 
 (defn partition-and-sort-by-numeric-and-non-numeric-chars
@@ -161,7 +168,9 @@
       (update widgets (:name widget) make-visible y)
       (if (>= (get-index-at widget y) 0)
         (update widgets (:name widget) activate! y :selected?)
-        (update widgets (:name widget) header-action x)))))
+        (-> widgets
+            (update (:name widget) header-action x)
+            (update (:name widget) make-visible y))))))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-moved]
   [_ canvas widgets widget _ y]
