@@ -134,6 +134,26 @@ And load it in your clj file via
 (gui/from-file! "gui-test.edn")
 ...
 ```
+
+Modifications could be done as usual via
+```Clojure
+(gui/swap-widgets! (fn [wdgs]
+                       (-> wdgs
+                           (gui/attach-event "click" :mouse-clicked (fn [_ _]
+                                                                      (gui/close-window!)))
+                           (assoc-in ["click" :props :x] 100)
+                           (assoc-in ["click" :props :y] 400)
+                           (gui/add-button "btnBla" "Don't Click Me" {:x 100 :y 300 :color {:background (java.awt.Color. 47 120 118) 
+                                                                                            :text (java.awt.Color. 247 247 247)
+                                                                                            :focus (java.awt.Color. 77 150 148)
+                                                                                            :select (java.awt.Color. 77 150 148)
+                                                                                            :border (java.awt.Color. 27 100 98)}
+                                                                     :highlight [:alpha] :can-tab? true})
+                           (update-in ["test-list" :items] conj {:value "10"} {:value "11"} {:value "12"} {:value "13"} {:value "14"} {:value "15"}))))
+```
+
+Which would result in:
+
 ![](resources/strigui-alpha32.png)
 
 If a widget name already exists, the widget will get overriden by the new widget with the same name.
