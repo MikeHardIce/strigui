@@ -21,17 +21,17 @@
   ;; TODO: Some checks
   (wdg/swap-widgets! f))
 
-(defn find-widgets-by-group-name
+(defn get-widget-names-by-group
   "Retuns a vector of widgets by group name"
   [widgets name]
   (let [get-seq (fn [x] (if (string? x) (vector x) x))
         filter-crit (fn [x] (some #(= name %) (-> x val :props :group get-seq)))]
-    (vals (filter filter-crit widgets))))
+    (map :name (vals (filter filter-crit widgets)))))
 
 (defn remove-widget-group
   "Removes all widgets assigned to the given group"
   [widgets name]
-  (apply dissoc widgets (map :name (find-widgets-by-group-name widgets name))))
+  (apply dissoc widgets (get-widget-names-by-group widgets name)))
 
 (defn assoc-property
   "Assoc a value to a particular widget property for multiple widgets given by widget name"
