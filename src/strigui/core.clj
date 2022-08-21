@@ -28,7 +28,7 @@
         filter-crit (fn [x] (some #(= name %) (-> x val :props :group get-seq)))]
     (map :name (vals (filter filter-crit widgets)))))
 
-(defn remove-widget-group
+(defn remove-widgets-by-group
   "Removes all widgets assigned to the given group"
   [widgets name]
   (apply dissoc widgets (get-widget-names-by-group widgets name)))
