@@ -20,29 +20,29 @@
       index)))
 
 (defn draw-list
-  [canvas items props]
-    (loop [items (filter :visible? items)
+  [canvas items props max-columns]
+  (let [items (filter :visible? items)]
+    (loop [items items
            index 0]
       (when (seq items)
         (let [color (:color props)
               item (first items)
-              ;;color (if (or (:focused? item) (:selected? item)) (update color :background make-darker-or-brighter) color)
               color (if (or (:focused? item) (:selected? item)) (assoc color :background (:focus color)) color)]
           (if (vector? (:value item))
-                       (let [columns (count (:value item))
-                             width (/ (- (:width props) item-width-right-margin) columns)
-                             cells (map (fn [it ind] [it ind]) (:value item) (range 0 columns))]
-                         (doseq [cell cells]
-                           (b/box-draw canvas (str (first cell)) {:x (+ (:x props) (* (second cell) width)) :y (+ (* index item-height) (:y props)) :width width :max-width width :color color})))
-              (b/box-draw canvas (str (-> items first :value)) (merge
-                                                          {:y (+ (* index item-height) (:y props)) :max-width (- (:width props) item-width-right-margin) :color color}
-                                                          (select-keys props [:width :x]))))
+            (let [columns (count (:value item))
+                  width (/ (- (:width props) item-width-right-margin) max-columns)
+                  cells (map (fn [it ind] [it ind]) (vec (concat (:value item) (repeat (- max-columns columns) ""))) (range 0 max-columns))]
+              (doseq [cell cells]
+                (b/box-draw canvas (str (first cell)) {:x (+ (:x props) (* (second cell) width)) :y (+ (* index item-height) (:y props)) :width width :max-width width :color color})))
+            (b/box-draw canvas (str (-> items first :value)) (merge
+                                                              {:y (+ (* index item-height) (:y props)) :max-width (- (:width props) item-width-right-margin) :color color}
+                                                              (select-keys props [:width :x]))))
           (when (:selected? item)
             (c/draw-> canvas
                       (c/line (inc (:x props)) (+ (* index item-height) (:y props))
                               (inc (:x props)) (+ (* (inc index) item-height) (:y props))
                               (get color :text java.awt.Color/green) 3))))
-        (recur (rest items) (inc index)))))
+        (recur (rest items) (inc index))))))
 
 (defn clear-out
   [items property]
@@ -103,10 +103,17 @@
                     (c/rect bar-x y item-width-right-margin height (:background color) true)
                     (c/rect bar-x bar-y item-width-right-margin bar-scroll-height (:border color) true)) ;;(make-darker-or-brighter (:text color))
           (if-not header
-            (draw-list canvas items props)
-            (do
-              (draw-list canvas [{:value (mapv :value header) :visible? true}] props)
-              (draw-list canvas items (update props :y (partial + item-height)))))
+            (draw-list canvas items props (apply max (map #(-> % :value count) items)))
+            (let [columns (count header)]
+              (draw-list canvas [{:value (mapv (fn [head]
+                                                 (let [name (:value head)
+                                                       suffix (case (:action head)
+                                                                :sort \u2191
+                                                                :sort-asc \u2191 
+                                                                :sort-desc \u2193
+                                                                "")]
+                                                   (str name " " suffix))) header) :visible? true}] props columns)
+              (draw-list canvas items (update props :y (partial + item-height)) columns)))
           this))
   (after-drawing [this] this))
 
@@ -115,14 +122,10 @@
   (let [index (get-index-at widget y)]
     (if (> index -1)
       (let [index (get-index-at widget y)
-            bla (println "Index (before): " index)
             items (:items widget)
             item (get (filterv :visible? items) index)
             items-before (take-while #(not (:visible? %)) items)
-            bla (println "Number of items in front: " (count items-before))
-            index (+ (count items-before) index)
-            bla (println "Index (with items before): " index)
-            ]
+            index (+ (count items-before) index)]
         (if (seq item)
           (-> widget
               (update :items clear-out property)
@@ -154,11 +157,12 @@
                                                        (mapv #(assoc % :selected? set-to-selected) items))
                                          items)))
         widget (update-in widget [:props :header index] (fn [head]
-                                                          (assoc head :action (case (:action head)
-                                                                                :sort :sort-desc
-                                                                                :sort-asc :sort-desc
-                                                                                :sort-desc :sort-asc
-                                                                                (:action head)))))]
+                                                          (-> head
+                                                              (assoc :action (case (:action head)
+                                                                                    :sort :sort-desc
+                                                                                    :sort-asc :sort-desc
+                                                                                    :sort-desc :sort-asc
+                                                                                    (:action head))))))]
     widget))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-clicked]

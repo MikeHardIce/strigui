@@ -32,12 +32,7 @@
            (~default-fn this# canvas#)))))
 
 (defonce widget-default-props {:width 150 :height 42
-                              :z 0 :color {:background Color/white
-                                           :text Color/black
-                                           :focus Color/black
-                                           :select Color/blue
-                                           :resize Color/orange
-                                           :border Color/black}
+                              :z 0 
                                :highlight []
                                :highlight-border-size 1.5
                                :highlight-alpha-opacity 30})

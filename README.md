@@ -62,8 +62,6 @@ Events can be attached by using the chosen widget name.
 Event functions should usually always return the entire widget map (which is normally the first parameter),
 but since the window will close and end the program, it can be skipped.
 
-![](resources/basic.png)
-
 Custom widgets can be defined by creating a record that implements the protocol of strigui.widget.Widget
 
 ```Clojure
@@ -98,20 +96,33 @@ Widgets can now be loaded from a edn file too.
 Example:
 gui-test.edn
 ```Clojure
-{:window [200 300 600 600 "From a edn file" (java.awt.Color. 255 200 133)]
+{:window [200 300 1500 600 "My Window" (java.awt.Color. 44 44 44)]
  :strigui.label/Label [["welcome" "Welcome to Strigui
                                    and other stuff ..." {:x 190 :y 100 :z 20
-                                                      :color [(java.awt.Color. 255 31 0)]
+                                                      :color {:text (java.awt.Color. 47 120 118)}
                                                       :font-size 20 :font-style [:bold]
                                                       :can-move? true :group "bla"}]]
- :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 :color [java.awt.Color/white (java.awt.Color. 255 31 0)] :can-tab? true :group "bla"}]]
+ :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 10 
+                                             :highlight [:alpha] :can-tab? true :group "bla"}]]
  :strigui.list/List [["test-list" [{:value "First Item"} {:value "Second Item"} {:value "Third Item"}
                                    {:value "4"} {:value "5"} {:value "6"} {:value "7"} {:value "8"} {:value "9"}] {:x 350 :y 300 :width 150
-                                                                                                        :height 200
-                                                                                                        :color [java.awt.Color/black java.awt.Color/red]}]]
- :strigui.input/Input [["input" "abc" {:x 100 :y 150 :z -20 :width 420 :color [java.awt.Color/white java.awt.Color/red] :selected? true :can-tab? true 
+                                                                                                        :height 200 :highlight [:alpha]}]
+                     ["test-table" [{:value [1 "One"]} {:value [2 "Two"]} {:value [3 "Three"]}
+                                    {:value [4 "Four"]} {:value [5 "Five"]} {:value [6 "Six"]}
+                                    {:value [7 "Seven"]} {:value [8 "Eight"]} {:value [9 "Nine"]}
+                                    {:value [10 "Ten"]} {:value [11 "Eleven"]} {:value [12 "Twelve"]}
+                                    {:value [13 "Thirteen"]} {:value [14 "Fourteen"]} {:value [15 "Fifteen"]}
+                                    {:value [17 "Seventeen"]} {:value [18 "Eighteen"]} {:value [19 "Nineteen"]}
+                                    {:value [20 "Twenty"]} {:value [21 "Twentyone"]} {:value [22 "Twentytwo"]}
+                                    {:value [23 "Twentythree"]} {:value [24 "Twentyfour"]} {:value [25 "Twentyfive"]}] 
+                      {:x 600 :y 100 :width 800 :height 400 :highlight [:alpha]
+                       :highlight-alpha-opacity 10
+                       :header [{:value "Number" :action :sort} {:value "Name" :action :sort} {:value "Select All" :action :select-all}]}]]
+ :strigui.input/Input [["input" "abc" {:x 100 :y 150 :z -20 :width 420 
+                                      :highlight [:alpha] :selected? false :can-tab? true 
                                     :can-resize? true :can-move? true :group ["inputs" "bla"]}]
-                       ["input1" "" {:x 100 :y 200 :color [java.awt.Color/white java.awt.Color/red] :width 420 :can-tab? true :group "inputs" :password? true}]]}
+                       ["input1" "" {:x 100 :y 200 
+                                    :highlight [:alpha] :width 420 :can-tab? true :group "inputs" :password? true}]]}
 ```
 
 And load it in your clj file via
@@ -123,5 +134,6 @@ And load it in your clj file via
 (gui/from-file! "gui-test.edn")
 ...
 ```
+![](resources/strigui-alpha32.png)
 
 If a widget name already exists, the widget will get overriden by the new widget with the same name.
