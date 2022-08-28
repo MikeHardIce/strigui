@@ -151,13 +151,6 @@
                             :props))]
     (assoc widgets (:name widget) widget))))
 
-;; (defmacro add-multiple
-;;   [type & names]
-;;   `(fn [wdgs#]
-;;     (-> wdgs#
-;;         ~@(for [pair (partition 2 names)]
-;;             `(add (clojure.lang.Reflector/invokeConstructor ~type (into-array Object [(first '~pair) (second '~pair) {:x 0 :y 0}])))))))
-
 (defmacro add-multiple
   [wdgs type & names]
   `(-> ~wdgs

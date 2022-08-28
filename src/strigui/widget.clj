@@ -14,23 +14,6 @@
   (draw [this canvas] "draw the widget, returns the widget on success")
   (after-drawing [this] "modify the widget each time after it got drawn"))
 
-(defmacro def-action
-  [name default-fn]
-  (let [symb-big (symbol (clojure.string/capitalize name))
-        symb-small (symbol (clojure.string/lower-case name))
-        symb-mult (symbol (clojure.string/lower-case (str name "!")))]
-    `(do (defprotocol ~symb-big
-             (~symb-small [this# canvas#] ""))
-          (defmulti ~symb-mult (fn [widget# _#]
-                                  (cond
-                                    (extends? ~symb-big (class widget#)) :custom)))
-         (defmethod ~symb-mult :custom 
-           [this# canvas#]
-           (~symb-small this# canvas#))
-         (defmethod ~symb-mult :default
-           [this# canvas#]
-           (~default-fn this# canvas#)))))
-
 (defonce widget-default-props {:width 150 :height 42
                               :z 0 
                                :border-size 1
@@ -114,16 +97,16 @@
                                                             (Color. (.getRed color) (.getGreen color) (.getBlue color) (get (-> widget :props) :highlight-alpha-opacity (:highlight-alpha-opacity widget-default-props)))))
              canvas)))
 
-(def-action "hide" (fn [widget canvas]
+(def hide! (fn [widget canvas]
                      (let [[x y w h] (coord widget canvas)]
                        (c/draw-> (dissoc canvas :rendering) ;;remove rendering hints when erasing a widget on the canvas
                            (c/clear-rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
 
-(def-action "draw-resizing" (partial draw-highlight :resize (-> widget-default-props :color :resize)))
+(def draw-resizing! (partial draw-highlight :resize (-> widget-default-props :color :resize)))
 
-(def-action "draw-selected" (partial draw-highlight :select (-> widget-default-props :color :select)))
+(def draw-selected! (partial draw-highlight :select (-> widget-default-props :color :select)))
 
-(def-action "draw-focused" (partial draw-highlight :focus (-> widget-default-props :color :focus)))
+(def draw-focused! (partial draw-highlight :focus (-> widget-default-props :color :focus)))
 
 (defn draw-widget-border
   [^strigui.widget.Widget widget canvas]
@@ -158,7 +141,6 @@
         (map :name))))
 
 (defn set-with-property
-  ""
   [widgets key value]
   (for [widget widgets]
     (assoc-in widget [:props key] value)))

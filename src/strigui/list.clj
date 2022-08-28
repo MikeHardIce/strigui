@@ -6,10 +6,10 @@
 (defonce item-height 25)
 (defonce item-width-right-margin 10)
 
-(defn make-darker-or-brighter
-  [^java.awt.Color color]
-  (let [hsl (java.awt.Color/RGBtoHSB (.getRed color) (.getGreen color) (.getBlue color) nil)]
-    (if (> (get hsl 2) 0.8) (.darker color) (-> color (.brighter))))) ;; (.brighter) (.brighter) (.brighter) (.brighter)
+;; (defn make-darker-or-brighter
+;;   [^java.awt.Color color]
+;;   (let [hsl (java.awt.Color/RGBtoHSB (.getRed color) (.getGreen color) (.getBlue color) nil)]
+;;     (if (> (get hsl 2) 0.8) (.darker color) (-> color (.brighter))))) ;; (.brighter) (.brighter) (.brighter) (.brighter)
 
 (defn get-index-at 
   " index >= 0 for items, < 0 for header"

@@ -17,21 +17,6 @@
   (after-drawing [this] 
                  this))
 
-;; (extend-protocol wdg/Draw-resizing
-;;   Input
-;;   (draw-resizing [this canvas] (let [[x y w h] (wdg/coord this canvas)]
-;;                                  (c2d/with-canvas-> canvas
-;;                                    (c2d/set-color :orange)
-;;                                    (c2d/rect x y w h))
-;;                                  this)))
-;; (extend-protocol wdg/Hide
-;;  Input
-;;   (hide [this canvas] (let [[x y w h] (wdg/coord this canvas)]
-;;                         (println "hide call to overriden function!")
-;;                         (c2d/with-canvas-> canvas
-;;                           (c2d/set-color :white)
-;;                           (c2d/rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
-
 (defn adjust-text [text char code]
   (if (and (= code 8) (> (count text) 0)) 
     (subs text 0 (- (count text) 1))
