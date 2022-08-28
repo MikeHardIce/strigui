@@ -19,7 +19,8 @@
                                :border-size 1
                                :highlight []
                                :highlight-border-size 1.5
-                               :highlight-alpha-opacity 30})
+                               :highlight-alpha-opacity 30
+                               :can-hide? true})
 
 (def previously (atom {:tabbed #{}
                        :mouse-position nil
@@ -236,7 +237,8 @@
           neighbour-keys (select-neighbouring-keys canvas after (s/union updated-keys added-keys removed-keys))]
       (c/use-buffer-> canvas
                       (doseq [to-hide (vals (select-keys before (s/union updated-keys removed-keys)))];;(vals (select-keys before (s/union updated-keys removed-keys)))]
-                        (hide! to-hide canvas))
+                        (when (-> to-hide :props :can-hide?)
+                          (hide! to-hide canvas)))
                       (when-let [widgets-to-draw (vals (select-keys after neighbour-keys))];;(vals (select-keys after (s/union updated-keys added-keys neighbour-keys)))]
                         (let [widgets-to-draw (map before-drawing widgets-to-draw)]
                           (draw-widgets! canvas widgets-to-draw)

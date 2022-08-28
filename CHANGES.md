@@ -21,6 +21,7 @@ in the highlight color on top)
   the header actions get reversed with consecutive clicks on the header :sort and :sort-asc -> :sort-desc, :select-all will get unselected
 * reworked how widgets are selected for redrawing
 * reworked how neighbours are determined
+* removed def-action macro, use the property :can-hide? instead
 * TODO: better documentation
 
 ### 0.0.1-alpha31
