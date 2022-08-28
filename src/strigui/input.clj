@@ -14,7 +14,8 @@
                              (apply str (repeat (count (:value this)) "*"))
                              (:value this)) (:props this))
         this)
-  (after-drawing [this] this))
+  (after-drawing [this] 
+                 this))
 
 ;; (extend-protocol wdg/Draw-resizing
 ;;   Input

@@ -9,7 +9,8 @@
   (before-drawing [this] this)
   (draw [this canvas]
         (b/box-draw canvas (:value this) (:props this)))
-  (after-drawing [this] this))
+  (after-drawing [this] 
+                 this))
 
 (defmethod wdg/widget-event [strigui.button.Button :key-pressed]
   [_ canvas widgets widget _ code _]
