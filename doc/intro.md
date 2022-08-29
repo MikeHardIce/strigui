@@ -95,7 +95,7 @@ Additional options can be provided, like from which position the arrangement sho
 However, lets keep it simple for now
 
 ```Clojure
-(arrange 1 {:from [200 200]} "txt-name" "txt-description" "txt-food" "txt-how-to-stop")
+(arrange 1 {:from [200 150]} "txt-name" "txt-description" "txt-food" "txt-how-to-stop")
 ```
 
 So overall we have until now
@@ -108,7 +108,7 @@ So overall we have until now
                       (add-label "title" "A wonderful collection of ghostly things" {:x 350 :y 50 :font-size 24})
                       (add-multiple strigui.input.Input "txt-name" "" "txt-description" ""
                                     "txt-food" "" "txt-how-to-stop" "")
-                      (arrange 1 {:from [200 200]} "txt-name" "txt-description" "txt-food" "txt-how-to-stop"))))
+                      (arrange 1 {:from [200 150]} "txt-name" "txt-description" "txt-food" "txt-how-to-stop"))))
 ```
 
 Maybe we should add labels for each text box as well
@@ -116,7 +116,7 @@ Maybe we should add labels for each text box as well
 ```Clojure
 (add-multiple strigui.label.Label "lbl-name" "Name:" "lbl-description" "Description:"
                                     "lbl-food" "Food:" "lbl-how-to-stop" "Stop it with:")
-(arrange 1 {:from [80 230] :space [0 42]} "lbl-name" "lbl-description" "lbl-food" "lbl-how-to-stop")
+(arrange 1 {:from [80 180] :space [0 42]} "lbl-name" "lbl-description" "lbl-food" "lbl-how-to-stop")
 ```
 
 That looks a bit small, so we could change the property of multiple widgets with assoc-property,
@@ -129,7 +129,7 @@ which will take a property key, the new value and the names of the widgets this 
 That looks better. We of course want to list all the wonderful ghostly things we entered. So lets get a list onto the screen
 
 ```Clojure
-(add-list "ghostly-things" [] {:x 400 :y 200 :width 700 :height 500 :header [{:value "Name"}
+(add-list "ghostly-things" [] {:x 400 :y 150 :width 700 :height 500 :header [{:value "Name"}
                                                                             {:value "Description"}
                                                                             {:value "Food"}
                                                                             {:value "Stop it with"}]})
@@ -138,8 +138,14 @@ That looks better. We of course want to list all the wonderful ghostly things we
 Ah maybe we want to sort the contents by those properties, we can do this by using actions
 
 ```Clojure
-(add-list "ghostly-things" [] {:x 400 :y 200 :width 700 :height 500 :header [{:value "Name" :action :sort}
+(add-list "ghostly-things" [] {:x 400 :y 150 :width 700 :height 500 :header [{:value "Name" :action :sort}
                                                                             {:value "Description" :action :sort}
                                                                             {:value "Food" :action :sort}
                                                                             {:value "Stop it with" :action :sort}]})
+```
+
+So far so good. I think a button is needed to actually add some creatures to the list
+
+```Clojure
+(add-button "add" "Add" {:x 80 :y 500})
 ```

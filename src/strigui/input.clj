@@ -17,13 +17,16 @@
   (after-drawing [this] 
                  this))
 
-(defn adjust-text [text char code]
+(defn adjust-text [text char code] 
   (if (and (= code 8) (> (count text) 0)) 
     (subs text 0 (- (count text) 1))
-    (str text char)))
+    (if (= code 10)
+      (str text \newline)
+      (str text char))))
 
 (defn key-pressed [this char code]
-  (if (or (and (<= code 28) (not= code 8))
+  (if (or (and (<= code 28) (not= code 8) (not= code 10))
+          (and (= code 10) (not (-> this :props :can-multiline?)))
           (and (= code 8) (< (count (:value this)) 1)))
     this
     (assoc this :value (adjust-text (:value this) char code))))

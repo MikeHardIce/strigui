@@ -1,6 +1,7 @@
 (ns strigui.box
   (:require [capra.core :as c]
-            [strigui.widget :as wdg])
+            [strigui.widget :as wdg]
+            [clojure.string :as s])
   (:import [java.awt Color]))
 
 (set! *warn-on-reflection* true)
@@ -10,11 +11,11 @@
 (defn box-coord 
   "Computes the full box coordinates.
   Returns the vector [x y border-width border-heigth]"
-  [canvas text {:keys [^long x ^long y ^long height ^long width font-size ^long max-width] :or {x 0 y 0 height 42 width 150 font-size 12 max-width 150}}]
+  [canvas text {:keys [^long x ^long y ^long height ^long width font-size ^long max-width can-multiline?] :or {x 0 y 0 height 42 width 150 font-size 12 max-width 150 can-multiline? false}}]
   (let [size (if (number? font-size) font-size default-font-size)
         text-box (c/get-text-dimensions canvas text size)
         text-width (first text-box)
-        text-heigth  (second text-box)
+        text-heigth (second text-box)
         btn-w (* text-width 1.8)
         btn-h (* text-heigth 1.8)
         border-width (if (and (number? width) (< btn-w width)) width btn-w)
@@ -24,15 +25,22 @@
 
 (defn box-draw-text 
   "Draws the text of the box"
-  [canvas text {:keys [^long x ^long y color ^long width font-style font-size] :as props}]
+  [canvas text {:keys [^long x ^long y color ^long height font-style font-size can-multiline?] :as props}]
   (let [style (if (empty? font-style) :bold (first font-style))
         size (if (number? font-size) font-size default-font-size)
         [_ _ border-width border-heigth text-width text-heigth] (box-coord canvas text props)
         text-color (get color :text Color/black)
         x-offset (/ (- border-width text-width) 2)
         y-offset (/ (- border-heigth text-heigth) 2)]
+    (if can-multiline?
+      (loop [text (s/split-lines text)
+             height-off (+ y-offset (* 0.8 text-heigth))]
+        (when (and (seq text) (<= height-off height))
+          (c/draw-> canvas
+                    (c/text (+ x x-offset) (+ y height-off) (first text) text-color size style))
+          (recur (rest text) (+ height-off (+ y-offset (* 0.8 text-heigth))))))
       (c/draw-> canvas
-        (c/text (+ x x-offset) (+ y y-offset (* 0.8 text-heigth)) text text-color size style))))
+                (c/text (+ x x-offset) (+ y y-offset (* 0.8 text-heigth)) text text-color size style)))))
 
 (defn box-draw
   "canvas - java.awt canvas

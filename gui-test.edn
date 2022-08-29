@@ -24,4 +24,4 @@
                                       :highlight [:alpha] :selected? false :can-tab? true 
                                     :can-resize? true :can-move? true :group ["inputs" "bla"]}]
                        ["input1" "" {:x 100 :y 200 
-                                    :highlight [:alpha] :width 420 :can-tab? true :group "inputs" :password? true}]]}
+                                    :highlight [:alpha] :width 420 :height 300 :can-tab? true :can-multiline? true :group "inputs" :password? true}]]}
