@@ -140,7 +140,8 @@
                                                                 :text (java.awt.Color. 247 247 247)
                                                                 :focus (java.awt.Color. 77 150 148)
                                                                 :select (java.awt.Color. 77 150 148)
-                                                                :border (java.awt.Color. 27 100 98)}))
+                                                                :border (java.awt.Color. 27 100 98)
+                                                                :resize (java.awt.Color. 247 247 247)}))
   ([widgets ^strigui.widget.Widget widget color-profile]
   (let [canvas (-> @wdg/state :context :canvas)
         widget (update widget :props merge wdg/widget-default-props
