@@ -20,7 +20,13 @@
                                :highlight []
                                :highlight-border-size 1.5
                                :highlight-alpha-opacity 30
-                               :can-hide? true})
+                               :can-hide? true
+                               :color {:background (java.awt.Color. 47 120 118)
+                                       :text (java.awt.Color. 247 247 247)
+                                       :focus (java.awt.Color. 77 150 148)
+                                       :select (java.awt.Color. 77 150 148)
+                                       :border (java.awt.Color. 27 100 98)
+                                       :resize (java.awt.Color. 247 247 247)}})
 
 (def previously (atom {:tabbed #{}
                        :mouse-position nil
@@ -91,12 +97,12 @@
      (draw-border-rec canvas color strength x y w h (not fill)))))
 
 (defn draw-highlight [key default widget canvas]
-     (when (some #{:border} (-> widget :props :highlight))
-       (draw-border widget canvas (get (-> widget :props :color) key default) (get (-> widget :props) :highlight-border-size (:highlight-border-size widget-default-props))))
-     (when (some #{:alpha} (-> widget :props :highlight))
-       (draw (assoc-in widget [:props :color :background] (let [color ^Color (get (-> widget :props :color) key default)]
-                                                            (Color. (.getRed color) (.getGreen color) (.getBlue color) (get (-> widget :props) :highlight-alpha-opacity (:highlight-alpha-opacity widget-default-props)))))
-             canvas)))
+  (when (some #{:border} (-> widget :props :highlight))
+    (draw-border widget canvas (get (-> widget :props :color) key default) (get (-> widget :props) :highlight-border-size (:highlight-border-size widget-default-props))))
+  (when (some #{:alpha} (-> widget :props :highlight))
+    (draw (assoc-in widget [:props :color :background] (let [color ^Color (get (-> widget :props :color) key default)]
+                                                         (Color. (.getRed color) (.getGreen color) (.getBlue color) (get (-> widget :props) :highlight-alpha-opacity (:highlight-alpha-opacity widget-default-props)))))
+          canvas)))
 
 (def hide! (fn [widget canvas]
                      (let [[x y w h] (coord widget canvas)]

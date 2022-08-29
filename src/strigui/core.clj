@@ -136,12 +136,7 @@
   
 (defn add 
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"
-  ([widgets ^strigui.widget.Widget widget] (add widgets widget {:background (java.awt.Color. 47 120 118)
-                                                                :text (java.awt.Color. 247 247 247)
-                                                                :focus (java.awt.Color. 77 150 148)
-                                                                :select (java.awt.Color. 77 150 148)
-                                                                :border (java.awt.Color. 27 100 98)
-                                                                :resize (java.awt.Color. 247 247 247)}))
+  ([widgets ^strigui.widget.Widget widget] (add widgets widget (:color wdg/widget-default-props)))
   ([widgets ^strigui.widget.Widget widget color-profile]
   (let [canvas (-> @wdg/state :context :canvas)
         widget (update widget :props merge wdg/widget-default-props
