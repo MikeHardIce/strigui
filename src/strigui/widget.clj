@@ -14,7 +14,7 @@
   (draw [this canvas] "draw the widget, returns the widget on success")
   (after-drawing [this] "modify the widget each time after it got drawn"))
 
-(defonce widget-default-props {:width 150 :height 42
+(defonce widget-default-props {:width 150 :height 42 :min-width 100
                               :z 0 
                                :border-size 1
                                :highlight []
