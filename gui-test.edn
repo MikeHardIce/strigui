@@ -1,6 +1,6 @@
 {:window [200 300 1500 600 "My Window" (java.awt.Color. 44 44 44)]
  :strigui.label/Label [["welcome" "Welcome to Strigui
-                                   and other stuff ..." {:x 190 :y 100 :z 20 :height 100 :width 300
+                                   and other stuff ..." {:x 190 :y 100 :z 20
                                                       :color {:text (java.awt.Color. 47 120 118)}
                                                       :font-size 20 :font-style [:italic]
                                                       :can-move? true :group "bla"}]]

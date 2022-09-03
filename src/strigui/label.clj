@@ -28,7 +28,7 @@
         [width height] [(if (> width text-width) width text-width) (if (> height text-height) height text-height)]]
     [(-> lbl :props :x)
      (-> lbl :props :y (- text-height))
-     width height text-height]))
+     width (+ height text-height) text-height]))
 
 (defn draw-label
   [lbl canvas]

@@ -141,10 +141,10 @@
   (let [canvas (-> @wdg/state :context :canvas)
         widget (update widget :props merge wdg/widget-default-props
                        (-> widget (assoc-in [:props :color] color-profile) :props)
-                       (->> widget
-                            (wdg/adjust-dimensions canvas)
-                            (wdg/defaults)
-                            :props))]
+                       (-> widget :props))
+        widget (->> widget
+                    (wdg/adjust-dimensions canvas)
+                    (wdg/defaults))]
     (assoc widgets (:name widget) widget))))
 
 (defmacro add-multiple
