@@ -11,17 +11,12 @@
 (defn box-coord 
   "Computes the full box coordinates.
   Returns the vector [x y border-width border-heigth]"
-  [canvas text {:keys [^long x ^long y ^long height ^long width font-size ^long max-width can-multiline?] :or {x 0 y 0 height 42 width 150 font-size 12 max-width 150 can-multiline? false}}]
+  [canvas text {:keys [^long x ^long y ^long height ^long width font-size] :or {x 0 y 0 height 42 width 150 font-size 12}}]
   (let [size (if (number? font-size) font-size default-font-size)
         text-box (c/get-text-dimensions canvas text size)
         text-width (first text-box)
-        text-heigth (second text-box)
-        btn-w (* text-width 1.8)
-        btn-h (* text-heigth 1.8)
-        border-width (if (and (number? width) (< btn-w width)) width btn-w)
-        border-heigth (if (and (number? height) (< btn-h height)) height btn-h)
-        border-width (if (and (number? max-width) (> border-width max-width)) max-width border-width)]
-      [x y border-width border-heigth text-width text-heigth]))
+        text-heigth (second text-box)]
+      [x y width height text-width text-heigth]))
 
 (defn box-draw-text 
   "Draws the text of the box"
@@ -34,11 +29,11 @@
         y-offset (/ (- border-heigth text-heigth) 2)]
     (if can-multiline?
       (loop [text (s/split-lines text)
-             height-off (+ y-offset (* 0.8 text-heigth))]
+             height-off 30.0] ;; <-- this is basically the top padding ;;(+ y-offset (* 0.8 text-heigth))
         (when (and (seq text) (<= height-off height))
           (c/draw-> canvas
-                    (c/text (+ x x-offset) (+ y height-off) (first text) text-color size style))
-          (recur (rest text) (+ height-off (+ y-offset (* 0.8 text-heigth))))))
+                    (c/text (+ x 30.0) (+ y height-off) (first text) text-color size style))  ;; (+ x 30.0) 30 is basically the left padding
+          (recur (rest text) (+ height-off (* 0.8 text-heigth) 10.0))))
       (c/draw-> canvas
                 (c/text (+ x x-offset) (+ y y-offset (* 0.8 text-heigth)) text text-color size style)))))
 
@@ -52,7 +47,7 @@
    max-width - the maximum width"
   ([props] (apply box-draw props))
   ([canvas text props]
-  (let [{:keys [^long x ^long y color ^long min-width]} props
+  (let [{:keys [^long x ^long y color]} props
         [_ _ border-width border-heigth] (box-coord canvas text props)
         background-color (get color :background Color/black)]
       (c/draw-> canvas 

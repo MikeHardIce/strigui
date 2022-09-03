@@ -23,7 +23,7 @@ in the highlight color on top)
 * reworked how neighbours are determined
 * removed def-action macro, use the property :can-hide? instead
 * :can-multiline? for multi line support of input boxes and buttons (in progress)
-* TODO: better documentation
+* TODO: better documentation (in progress)
 
 ### 0.0.1-alpha31
 

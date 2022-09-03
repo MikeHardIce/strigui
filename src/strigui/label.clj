@@ -13,19 +13,22 @@
            mlt 0]
       (when (seq lines)
         (c/draw-> canvas
-          (c/text x (+ y (* mlt line-size)) (first lines) font-color size))
+          (c/text x (+ y (* mlt line-size)) (first lines) font-color size style))
           (recur (rest lines) (inc mlt))))))
 
 (defn coord-label
   [lbl canvas]
   (let [text (str/split-lines (str/replace (:value lbl) #"  " ""))
         largest-line (->> text (sort-by count) reverse first)
-        font-size (:font-size (:props lbl))
+        font-size (:font-size (:props lbl)) 
+        {:keys [width height]} (:props lbl)
         size (if (number? font-size) font-size 11)
-        [width height] (c/get-text-dimensions canvas largest-line size)] 
-    [(-> lbl (:props) (:x))                                                                      
-     (-> lbl (:props) (:y) (- height))
-     (* width 1.22) (* height 1.05 (count text)) height]))
+        [text-width text-height] (c/get-text-dimensions canvas largest-line size)
+        [text-width text-height] [(* text-width 1.22) text-height]
+        [width height] [(if (> width text-width) width text-width) (if (> height text-height) height text-height)]]
+    [(-> lbl :props :x)
+     (-> lbl :props :y (- text-height))
+     width height text-height]))
 
 (defn draw-label
   [lbl canvas]

@@ -1,8 +1,8 @@
 {:window [200 300 1500 600 "My Window" (java.awt.Color. 44 44 44)]
  :strigui.label/Label [["welcome" "Welcome to Strigui
-                                   and other stuff ..." {:x 190 :y 100 :z 20
+                                   and other stuff ..." {:x 190 :y 100 :z 20 :height 100 :width 300
                                                       :color {:text (java.awt.Color. 47 120 118)}
-                                                      :font-size 20 :font-style [:bold]
+                                                      :font-size 20 :font-style [:italic]
                                                       :can-move? true :group "bla"}]]
  :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 3
                                              :highlight [:alpha] :can-tab? true :group "bla"}]]
@@ -24,4 +24,4 @@
                                       :highlight [:alpha] :selected? false :can-tab? true 
                                     :can-resize? true :can-move? true :group ["inputs" "bla"]}]
                        ["input1" "" {:x 100 :y 200 
-                                    :highlight [:alpha] :width 420 :height 300 :can-tab? true :can-multiline? true :group "inputs" :password? true}]]}
+                                    :highlight [:alpha] :width 420 :height 300 :can-tab? true :can-multiline? true :group "inputs" :password? false}]]}

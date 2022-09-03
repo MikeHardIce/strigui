@@ -33,9 +33,9 @@
                   width (/ (- (:width props) item-width-right-margin) max-columns)
                   cells (map (fn [it ind] [it ind]) (vec (concat (:value item) (repeat (- max-columns columns) ""))) (range 0 max-columns))]
               (doseq [cell cells]
-                (b/box-draw canvas (str (first cell)) {:x (+ (:x props) (* (second cell) width)) :y (+ (* index item-height) (:y props)) :width width :max-width width :color color})))
+                (b/box-draw canvas (str (first cell)) {:x (+ (:x props) (* (second cell) width)) :y (+ (* index item-height) (:y props)) :width width :height item-height :color color})))
             (b/box-draw canvas (str (-> items first :value)) (merge
-                                                              {:y (+ (* index item-height) (:y props)) :max-width (- (:width props) item-width-right-margin) :color color}
+                                                              {:y (+ (* index item-height) (:y props)) :width (- (:width props) item-width-right-margin) :height item-height :color color}
                                                               (select-keys props [:width :x]))))
           (when (:selected? item)
             (c/draw-> canvas

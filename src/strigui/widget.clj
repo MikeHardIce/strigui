@@ -14,7 +14,7 @@
   (draw [this canvas] "draw the widget, returns the widget on success")
   (after-drawing [this] "modify the widget each time after it got drawn"))
 
-(defonce widget-default-props {:width 150 :height 42 :min-width 100
+(defonce widget-default-props {:width 150 :height 42
                               :z 0 
                                :border-size 1
                                :highlight []
@@ -23,8 +23,8 @@
                                :can-hide? true
                                :color {:background (java.awt.Color. 47 120 118)
                                        :text (java.awt.Color. 247 247 247)
-                                       :focus (java.awt.Color. 77 150 148)
-                                       :select (java.awt.Color. 77 150 148)
+                                       :focus (java.awt.Color. 117 190 188)
+                                       :select (java.awt.Color. 117 190 188)
                                        :border (java.awt.Color. 27 100 98)
                                        :resize (java.awt.Color. 247 247 247)}})
 

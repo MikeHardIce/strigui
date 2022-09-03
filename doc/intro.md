@@ -18,7 +18,7 @@ lein deps
 ```
 in your terminal to download necessary jars.
 
-Having done that, open you favorite IDE and go to src/ghosthly_things/core.clj
+Having done that, open your favorite IDE and go to src/ghosthly_things/core.clj
 
 The first thing we need is a window. So lets add the require for strigui
 
@@ -28,7 +28,7 @@ The first thing we need is a window. So lets add the require for strigui
   (:gen-class))
 ```
 
-A window is create via the window! function, which takes the following mandatory arguments:
+A window is created via the window! function, which takes the following mandatory arguments:
 x - x coordinate on the screen
 y - y coordinate on the screen
 width
@@ -55,7 +55,7 @@ lein run
 ![](pics/tutorial-gt-01.png)
 
 Looks good so far, but we need some kind of a title. The swap-widgets! function is used to add, modify, remove, interact with widgets.
-It requires a function that takes a map of widgets as its argument and expects this a map of widgets in return after evaluating that function.
+It requires a function that takes a map of widgets as its argument and expects a map of widgets in return after evaluating that function.
 
 ```Clojure
 (swap-widgets! #(-> %
@@ -64,8 +64,8 @@ It requires a function that takes a map of widgets as its argument and expects t
                      ... )
 ```
 
-So basically all your widgets will be collected in the map and you simply use a function to transform this map to your liking. Strigui will
-then figure out what needs to be redrawn.
+So basically all your widgets will be collected in a map and you simply use a function to transform this map to your liking. Strigui will
+then figure out what needs to be redrawn or removed from the canvas.
 
 widgets -> transform (your code) -> draw -> widgets -> transform (your code) -> draw -> .... 
 
@@ -90,7 +90,7 @@ followed by multiple widget-name widget-value pairs.
 ```
 
 All of those widgets will appear at the top-left corner, so we need to arrange them by using arrange :D
-Arrange will a number to indicate how many widgets should appear on the same row and the names of the widgets, that need to be arranged, as arguments.
+Arrange needs a number to indicate how many widgets should appear on the same row and it needs to have the names of the widgets that need to be arranged as arguments.
 Additional options can be provided, like from which position the arrangement should start, the spacing between widgets, as well as the widget alignment.
 However, lets keep it simple for now
 
@@ -135,7 +135,7 @@ That looks better. We of course want to list all the wonderful ghostly things we
                                                                             {:value "Stop it with"}]})
 ```
 
-Ah maybe we want to sort the contents by those properties, we can do this by using actions
+Maybe we want to sort the contents by those properties, we can do this by using actions
 
 ```Clojure
 (add-list "ghostly-things" [] {:x 400 :y 150 :width 700 :height 500 :header [{:value "Name" :action :sort}
@@ -144,8 +144,32 @@ Ah maybe we want to sort the contents by those properties, we can do this by usi
                                                                             {:value "Stop it with" :action :sort}]})
 ```
 
-So far so good. I think a button is needed to actually add some creatures to the list
+So far so good. I think a button is needed to actually add and remove some creatures to the list
 
 ```Clojure
-(add-button "add" "Add" {:x 80 :y 500})
+(add-button "add" "Add" {:x 80 :y 500 :width 100})
+(add-button "remove" "\u2620" {:x 190 :y 500 :width 100 :font-size 20})
+```
+
+To summarize, we have
+```Clojure
+(defn -main
+  [& args]
+  (window! 100 50 1200 800 "List of ghostly things")
+  (swap-widgets! #(-> %
+                      (add-label "title" "A wonderful collection of ghostly things" {:x 350 :y 50 :font-size 24})
+                      (add-multiple strigui.input.Input "txt-name" "" "txt-description" ""
+                                    "txt-food" "" "txt-how-to-stop" "")
+                      (assoc-property :height 84 "lbl-description" "txt-description")
+                      (arrange 1 {:from [200 150]} "txt-name" "txt-description" "txt-food" "txt-how-to-stop")
+                      (add-multiple strigui.label.Label "lbl-name" "Name:" "lbl-description" "Description:"
+                                    "lbl-food" "Food:" "lbl-how-to-stop" "Stop it with:")
+                      (arrange 1 {:from [80 180] :space [0 42]} "lbl-name" "lbl-description" "lbl-food" "lbl-how-to-stop")
+                      (assoc-property :font-size 16 "lbl-name" "lbl-description" "lbl-food" "lbl-how-to-stop")
+                      (add-list "ghostly-things" [] {:x 400 :y 150 :width 700 :height 500 :header [{:value "Name" :action :sort}
+                                                                                                   {:value "Description" :action :sort}
+                                                                                                   {:value "Food" :action :sort}
+                                                                                                   {:value "Stop it with" :action :sort}]})
+                      (add-button "add" "Add" {:x 80 :y 500 :width 100})
+                      (add-button "remove" "\u2620" {:x 190 :y 500 :width 100 :font-size 20}))))
 ```
