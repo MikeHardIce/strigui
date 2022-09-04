@@ -11,7 +11,7 @@
 (defn box-coord 
   "Computes the full box coordinates.
   Returns the vector [x y border-width border-heigth]"
-  [canvas text {:keys [^long x ^long y ^long height ^long width font-size] :or {x 0 y 0 height 42 width 150 font-size 12}}]
+  [canvas text {:keys [^long x ^long y ^long height ^long width font-size] :or {x 0 y 0 height 42 width 150 font-size 15}}]
   (let [size (if (number? font-size) font-size default-font-size)
         text-box (c/get-text-dimensions canvas text size)
         text-width (first text-box)
