@@ -4,6 +4,7 @@
             [clojure.string])
   (:import [java.awt Color]))
 
+(set! *warn-on-reflection* true)
 (def ^:private border-thickness 10)
 
 (defprotocol Widget
@@ -77,9 +78,13 @@
          (within? coord1 x2+w2 y2)))))
 
 (defn intersect?
-  [coord1 coord2]
+  ([coord1 coord2]
   (or (within? coord1 coord2)
       (within? coord2 coord1)))
+  ([[x1 y1 w1 h1] [x2 y2 w2 h2] offset]
+   (let [coord1 [(- x1 offset) (- y1 offset) (+ (* 2 offset) w1) (+ (* 2 offset) h1)]
+         coord2 [(- x2 offset) (- y2 offset) (+ (* 2 offset) w2) (+ (* 2 offset) h2)]]
+     (intersect? coord1 coord2))))
 
 (defn- draw-border-rec
   ([canvas color strength x y w h no-fill]
@@ -101,7 +106,7 @@
     (draw-border widget canvas (get (-> widget :props :color) key default) (get (-> widget :props) :highlight-border-size (:highlight-border-size widget-default-props))))
   (when (some #{:alpha} (-> widget :props :highlight))
     (draw (assoc-in widget [:props :color :background] (let [color ^Color (get (-> widget :props :color) key default)]
-                                                         (Color. (.getRed color) (.getGreen color) (.getBlue color) (get (-> widget :props) :highlight-alpha-opacity (:highlight-alpha-opacity widget-default-props)))))
+                                                         (Color. ^int (.getRed color) ^int (.getGreen color) ^int (.getBlue color) ^int (get (-> widget :props) :highlight-alpha-opacity (:highlight-alpha-opacity widget-default-props)))))
           canvas)))
 
 (def hide! (fn [widget canvas]
@@ -132,7 +137,7 @@
    (let [coord1 (coord widget1 canvas)
          coord2 (coord widget2 canvas)]
      (distance-x coord1 coord2)))
-  ([[x1 y1] [x2 y2]]
+  ([[^double x1 ^double y1] [^double x2 ^double y2]]
    (+ (* 0.3 (Math/abs (- x1 x2))) (Math/abs (- y1 y2)))))
 
 (defn get-with-property
@@ -221,9 +226,9 @@
          new-reachable neighbours]
     (if-not (seq new-reachable)
       neighbours
-      (let [all-reachable-widgets (set (flatten (for [neighbour (map #(coord % canvas) (vals (select-keys widgets neighbours)))]
+      (let [all-reachable-widgets (set (flatten (for [neighbour (mapv #(coord % canvas) (vals (select-keys widgets neighbours)))]
                                                   (let [wdgs-to-consider (vals (select-keys widgets to-be-considered))] 
-                                                    (map :name (filterv #(intersect? neighbour (coord % canvas))
+                                                    (mapv :name (filterv #(intersect? neighbour (coord % canvas) 10)
                                                                         wdgs-to-consider))))))]
         (recur (s/union neighbours all-reachable-widgets)
                (s/difference to-be-considered all-reachable-widgets)

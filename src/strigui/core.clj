@@ -15,6 +15,8 @@
            [strigui.input Input]
            [java.awt Color RenderingHints]))
 
+(set! *warn-on-reflection* true)
+
 (defn swap-widgets!
   [f]
   "Used to add or modify widgets"

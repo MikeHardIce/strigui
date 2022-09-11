@@ -6,6 +6,8 @@
   (:import [java.awt.datatransfer Clipboard StringSelection DataFlavor]
            [java.awt Toolkit]))
 
+(set! *warn-on-reflection* true)
+
 (defrecord Input [name value props]
   wdg/Widget
   (coord [this canvas] (apply b/box-coord [canvas (:value this) (:props this)]))
@@ -73,7 +75,7 @@
 (defn handle-key-pressed
   [widget canvas char code prev-code] 
   (if (= prev-code 17)
-    (case code 
+    (case (int code) 
       67 (copy->clipboard! widget)
       86 (clipboard->widget! widget)
       widget)

@@ -3,6 +3,8 @@
             [strigui.widget :as wdg]
             [clojure.string :as str]))
 
+(set! *warn-on-reflection* true)
+
 (defn- create-label [canvas text {:keys [x y align color font-style font-size]} line-size]
   (let [font-color (if (empty? color) :black (:text color))
         ;; TODO: implement style and alignment after capra gets that feature

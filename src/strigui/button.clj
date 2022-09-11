@@ -2,6 +2,8 @@
   (:require [strigui.box :as b]
             [strigui.widget :as wdg]))
 
+(set! *warn-on-reflection* true)
+
 (defrecord Button [name value props]
   wdg/Widget
   (coord [this canvas] (apply b/box-coord [canvas (:value this) (:props this)]))

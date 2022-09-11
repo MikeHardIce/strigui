@@ -3,6 +3,7 @@
              [strigui.widget :as wdg]
              [capra.core :as c]))
 
+(set! *warn-on-reflection* true)
 (defonce item-height 25)
 (defonce item-width-right-margin 10)
 
@@ -20,7 +21,7 @@
       index)))
 
 (defn draw-list
-  [canvas items props max-columns]
+  [canvas items props ^Integer max-columns]
   (let [items (filter :visible? items)]
     (loop [items items
            index 0]
@@ -136,7 +137,7 @@
 (defn partition-and-sort-by-numeric-and-non-numeric-chars
   [items index]
   (let [groups (group-by (fn [item]
-                           (some #(Character/isLetter %) (-> item :value (get index 0) str))) items)]
+                           (some #(Character/isLetter ^char %) (-> item :value (get index 0) str))) items)]
     (vec (concat
           (sort-by #(-> % :value (get index 0)) (get groups nil []))
           (sort-by #(-> % :value (get index 0) str) (get groups true []))))))
