@@ -15,7 +15,7 @@
            mlt 0]
       (when (seq lines)
         (c/draw-> canvas
-          (c/text x (+ y (* mlt line-size)) (first lines) font-color size style))
+          (c/text x (+ 20 y (* mlt line-size)) (first lines) font-color size style))
           (recur (rest lines) (inc mlt))))))
 
 (defn coord-label
@@ -29,8 +29,8 @@
         [text-width text-height] [(* text-width 1.22) text-height]
         [width height] [(if (> width text-width) width text-width) (if (> height text-height) height text-height)]]
     [(-> lbl :props :x)
-     (-> lbl :props :y (- text-height))
-     width (+ height text-height) text-height]))
+     (-> lbl :props :y)
+     width height text-height]))
 
 (defn draw-label
   [lbl canvas]

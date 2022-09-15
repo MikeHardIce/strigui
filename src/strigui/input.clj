@@ -30,12 +30,14 @@
             split-text (s/split-lines new-text)
             h (* (count split-text) (second (c/get-text-dimensions canvas new-text font-size)))
             [w _] (c/get-text-dimensions canvas (last split-text) font-size)
-            should-break-line? (and can-multiline? (>= (+ 30 (* 1.3 w)) width))
+            should-break-line? (>= (+ 30 (* 1.3 w)) width)
             enough-space? (or can-scroll? (>= height (+ 30 (* 1.4 h))))]
         (if should-break-line?
-          (if enough-space?
-            (str text \newline char)
-            (str text)) 
+          (if can-multiline? 
+            (if enough-space?
+              (str text \newline char)
+              (str text))
+            (str text))
           new-text)))))
 
 (defn key-pressed [this canvas char code]
