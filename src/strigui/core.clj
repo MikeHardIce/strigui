@@ -28,7 +28,7 @@
   [widgets name]
   (let [get-seq (fn [x] (if (string? x) (vector x) x))
         filter-crit (fn [x] (some #(= name %) (-> x val :props :group get-seq)))]
-    (map :name (vals (filter filter-crit widgets)))))
+    (map :name (vals (filter filter-crit (dissoc widgets :context))))))
 
 (defn remove-widgets-by-group
   "Removes all widgets assigned to the given group"
@@ -113,6 +113,21 @@
                                    (assoc-in [name :props :height] h))))))
                   (+ height max-height (last space)))))))))
 
+(defn change-color-profile
+  "Changes the color profile of the window and all widgets
+   color-profile is a map with keys:
+   :window-color :background :text :focus :select :resize :border"
+  [widgets color-profile]
+  (when (:window-color color-profile)
+    (.setBackground ^java.awt.Canvas (-> widgets :context :canvas) ^java.awt.Color (:window-color color-profile)))
+  (let [color-profile (dissoc color-profile :window-color)
+        widgets (loop [wdgs widgets
+                       wdgs-keys (keys (dissoc widgets :context))]
+                  (if-not (seq wdgs-keys)
+                    wdgs
+                    (recur (assoc-in wdgs [(first wdgs-keys) :props :color] color-profile) (rest wdgs-keys))))]
+    widgets))
+
 (defn window!
   "Initializes a new window or reuses an existing one
    context - an already existing context (experimental)
@@ -129,7 +144,8 @@
   ([x y width height title]
    (window! x y width height title (java.awt.Color. 44 44 44) {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}))
   ([x y width height title color]
-   (window! x y width height title color {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}))
+   (window! x y width height title color {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON
+                                          java.awt.RenderingHints/KEY_RENDERING java.awt.RenderingHints/VALUE_RENDER_SPEED}))
    ([x y width height title color rendering-hints]
     (swap! wdg/state assoc :context (c/create-window x y width height title (eval color)))
     (swap! wdg/state assoc-in [:context :canvas :rendering] rendering-hints)
@@ -222,12 +238,14 @@
                      (map #(-> %
                                read-string
                                eval)))]
+    (println "bla")
     (swap-widgets! (fn [wdgs]
                      (loop [to-be widgets
                             wdgs wdgs]
                        (if (seq to-be)
                          (recur (rest to-be) (add wdgs (first to-be)))
-                         wdgs))))))
+                         (do (println "bla")
+                             wdgs)))))))
 
 (defn from-file!
   "Initializes the window and the widgets from a edn file"

@@ -22,8 +22,10 @@ in the highlight color on top)
 * reworked how widgets are selected for redrawing
 * reworked how neighbours are determined
 * removed def-action macro, use the property :can-hide? instead
-* :can-multiline? for multi line support of input boxes and buttons (in progress)
+* :can-multiline? for multi line support of input boxes and buttons
 * TODO: better documentation (in progress)
+* TODO: make window a widget (in progress)
+* TODO: make it possible to set a color theme (in progress)
 
 ### 0.0.1-alpha31
 

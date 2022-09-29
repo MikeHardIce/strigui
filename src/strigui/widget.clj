@@ -239,9 +239,16 @@
    f - function that takes a widgets map and returns a new widgets map"
   [f]
   (try
-    (let [canvas (-> @state :context :canvas)
-          before (:widgets @state)
+    (let [before (:widgets @state)
+          before (assoc before :context (:context @state))
           after (f before)
+          canvas (->> after
+                     :context
+                     (swap! state assoc :context)
+                     :context
+                     :canvas)
+          after (dissoc after :context)
+          before (dissoc before :context)
           updated-keys (updated-widgets->keys before after)
           added-keys (added-widgets->keys before after)
           removed-keys (removed-widgets->keys before after)
@@ -293,7 +300,7 @@
   [canvas widgets x y]
   (swap! previously assoc :key-code nil)
   (let [;; get the first widget that is on top close to the mouse position
-        widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))
+        widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals (dissoc widgets :context))))))
         clicked (when (seq widget) (:name widget))
         widgets (assoc-arg-for-all widgets :selected? nil)]
     (if (and clicked (not (-> (get widgets clicked) :props :resizing?)))
@@ -305,7 +312,7 @@
 
 (defn handle-mouse-dragged
   [canvas widgets x y x-prev y-prev]
-  (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))]
+  (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals (dissoc widgets :context))))))]
     (let [widgets (if (-> widget :props :resizing?)
                     (update widgets (:name widget) handle-widget-resizing x y x-prev y-prev)
                     (if (-> widget :props :can-move?)
@@ -316,7 +323,7 @@
 
 (defn handle-mouse-moved 
   [canvas widgets x y]
-  (let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals widgets)))))
+  (let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals (dissoc widgets :context))))))
         ;; if the mouse is not on a widget, check previously focused widgets, trigger events and unfocus them
         widgets (if-let [focused-widgets (get-with-property (vals widgets) :focused?)]
                   (loop [remaining-focused focused-widgets
