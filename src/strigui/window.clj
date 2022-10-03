@@ -1,13 +1,20 @@
 (ns strigui.window
   (:require [strigui.widget :as wdg]
             [capra.core :as c])
-  (:import [javax.swing JFrame]))
+  (:import [java.awt Dimension]))
 
 (defrecord Window [name context props]
  wdg/Widget
   (coord [this _] this)
   (defaults [this] this)
-  (before-drawing [this] this)
+  (before-drawing [this] (let [context (:context this)
+                               {:keys [title x y width height title rendering-hints]} (:props this)
+                               context (assoc-in context [:canvas :rendering] rendering-hints)
+                               wind (doto (:window context)
+                                      (.setLocation x y)
+                                      (.setSize (Dimension. width height))
+                                      (.setTitle title))]
+                           (assoc this :context context)))
   (draw [this _] this)
   (after-drawing [this] this))
 
@@ -22,13 +29,13 @@
    color - java.awt.Color of the windows background color
    rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
    of any widget drawn within the window" 
-  ([x y width height title]
-   (window x y width height title (java.awt.Color. 44 44 44) {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}))
-  ([x y width height title color]
-   (window x y width height title color {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON
+  ([name x y width height title]
+   (window name x y width height title (java.awt.Color. 44 44 44) {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}))
+  ([name x y width height title color]
+   (window name x y width height title color {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON
                                           java.awt.RenderingHints/KEY_RENDERING java.awt.RenderingHints/VALUE_RENDER_SPEED}))
-  ([x y width height title color rendering-hints]
+  ([name x y width height title color rendering-hints]
    (let [context (c/create-window x y width height title (eval color))
          context (assoc-in context [:canvas :rendering] rendering-hints)
          context (update context :canvas c/attach-buffered-strategy 2)]
-     (Window. title context {:x x :y y :width width :height height :color {:background color}}))))
+     (Window. name context {:title title :x x :y y :width width :height height :color {:background color} :rendering-hints rendering-hints}))))

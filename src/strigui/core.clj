@@ -7,6 +7,7 @@
    [strigui.label]
    [strigui.list]
    [strigui.input :as inp]
+   [strigui.window :as wnd]
    [capra.core :as c]
    [strigui.widget :as wdg])
   (:import [strigui.button Button]
@@ -117,9 +118,9 @@
   "Changes the color profile of the window and all widgets
    color-profile is a map with keys:
    :window-color :background :text :focus :select :resize :border"
-  [widgets color-profile]
-  (when (:window-color color-profile)
-    (.setBackground ^java.awt.Canvas (-> widgets :context :canvas) ^java.awt.Color (:window-color color-profile)))
+  [widgets window-name color-profile]
+  (when (and (get widgets window-name) (:window-color color-profile))
+    (.setBackground ^java.awt.Canvas (-> widgets (get window-name) :context :canvas) ^java.awt.Color (:window-color color-profile)))
   (let [color-profile (dissoc color-profile :window-color)
         widgets (loop [wdgs widgets
                        wdgs-keys (keys (dissoc widgets :context))]
@@ -128,9 +129,8 @@
                     (recur (assoc-in wdgs [(first wdgs-keys) :props :color] color-profile) (rest wdgs-keys))))]
     widgets))
 
-(defn window!
-  "Initializes a new window or reuses an existing one
-   context - an already existing context (experimental)
+(defn add-window
+  "Creates a new window widget with the parameters:
    x - x position on the screen
    y - y position on the screen
    width - width of the window
@@ -139,19 +139,9 @@
    color - java.awt.Color of the windows background color
    rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
    of any widget drawn within the window"
-  ([context] 
-   (swap! wdg/state assoc :context context))
-  ([x y width height title]
-   (window! x y width height title (java.awt.Color. 44 44 44) {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}))
-  ([x y width height title color]
-   (window! x y width height title color {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON
-                                          java.awt.RenderingHints/KEY_RENDERING java.awt.RenderingHints/VALUE_RENDER_SPEED}))
-   ([x y width height title color rendering-hints]
-    (swap! wdg/state assoc :context (c/create-window x y width height title (eval color)))
-    (swap! wdg/state assoc-in [:context :canvas :rendering] rendering-hints)
-    (swap! wdg/state update-in [:context :canvas] c/attach-buffered-strategy 2)
-    (:context @wdg/state)))
-  
+  [widgets name x y width height title color rendering-hints]
+  (assoc widgets name (wnd/window name x y width height title color rendering-hints))) 
+
 (defn add 
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"
   ([widgets ^strigui.widget.Widget widget] (add widgets widget (:color wdg/widget-default-props)))
@@ -229,7 +219,7 @@
   "Initializes the window and the widgets from a map"
   [strigui-map]
   (when-let [window-props (:window strigui-map)]
-    (apply window! window-props))
+    (swap-widgets! #(apply add-window % window-props)))
   (let [exprs (for [widget-key (filter #(not= % :window) (keys strigui-map))]
                 (for [widget-props (map identity (widget-key strigui-map))]
                   (str "(apply " (namespace widget-key) "/->" (name widget-key) " " (vec widget-props) ")")))
@@ -238,14 +228,12 @@
                      (map #(-> %
                                read-string
                                eval)))]
-    (println "bla")
     (swap-widgets! (fn [wdgs]
                      (loop [to-be widgets
                             wdgs wdgs]
                        (if (seq to-be)
                          (recur (rest to-be) (add wdgs (first to-be)))
-                         (do (println "bla")
-                             wdgs)))))))
+                         wdgs))))))
 
 (defn from-file!
   "Initializes the window and the widgets from a edn file"
