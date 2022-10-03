@@ -218,8 +218,9 @@
 (defn from-map!
   "Initializes the window and the widgets from a map"
   [strigui-map]
-  (when-let [window-props (:window strigui-map)]
-    (swap-widgets! #(apply add-window % window-props)))
+  (when-let [windows (:window strigui-map)]
+    (doseq [window-props windows]
+      (swap-widgets! #(apply add-window % window-props))))
   (let [exprs (for [widget-key (filter #(not= % :window) (keys strigui-map))]
                 (for [widget-props (map identity (widget-key strigui-map))]
                   (str "(apply " (namespace widget-key) "/->" (name widget-key) " " (vec widget-props) ")")))
@@ -255,8 +256,11 @@
 (defn to-map
   "converts the current state to a map that could be stored in a file"
   []
-  (let [{:keys [x y width height name color]} (c/properties (-> @wdg/state :context))
-        strigui-map {:window [x y width height name (first (extract-rgb-constructors (str color)))]}
+  (let [windows (->> @wdg/state :widgets vals (filter (fn [wdg] (-> wdg :context :canvas))))
+        window (for [window windows]
+                 (let [{:keys [x y width height name color]} (c/properties (:context window))]
+                   [(:name window) x y width height name (first (extract-rgb-constructors (str color)))]))
+        strigui-map {:window (vec window)}
         widgets-grouped (group-by #(class %) (vals (-> @wdg/state :widgets)))
         widget-types (keys widgets-grouped)
         widget-types (map #(let [parts (clojure.string/split (clojure.string/replace-first (str %) #"class " "") #"\.")
