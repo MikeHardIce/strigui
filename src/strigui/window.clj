@@ -7,14 +7,15 @@
  wdg/Widget
   (coord [this _] this)
   (defaults [this] this)
-  (before-drawing [this] (let [context (:context this)
-                               {:keys [title x y width height title rendering-hints]} (:props this)
-                               context (assoc-in context [:canvas :rendering] rendering-hints)
-                               wind (doto (:window context)
+  (before-drawing [this] (let [{:keys [window canvas]} (:context this)
+                               {:keys [x y width height title rendering-hints color-profile]} (:props this)
+                               canvas (assoc canvas :rendering rendering-hints)
+                               window (doto window
                                       (.setLocation x y)
                                       (.setSize (Dimension. width height))
-                                      (.setTitle title))]
-                           (assoc this :context context)))
+                                      (.setTitle title)
+                                      (.setBackground ^java.awt.Color (:window-color color-profile)))]
+                           (assoc this :context {:window window :canvas canvas})))
   (draw [this _] this)
   (after-drawing [this] this))
 

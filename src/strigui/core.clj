@@ -119,15 +119,13 @@
    color-profile is a map with keys:
    :window-color :background :text :focus :select :resize :border"
   [widgets window-name color-profile]
-  (when (and (get widgets window-name) (:window-color color-profile))
-    (.setBackground ^java.awt.Canvas (-> widgets (get window-name) :context :canvas) ^java.awt.Color (:window-color color-profile)))
-  (let [color-profile (dissoc color-profile :window-color)
+  (let [color-prof (dissoc color-profile :window-color)
         widgets (loop [wdgs widgets
-                       wdgs-keys (keys (dissoc widgets :context))]
+                       wdgs-keys (keys widgets)]
                   (if-not (seq wdgs-keys)
                     wdgs
-                    (recur (assoc-in wdgs [(first wdgs-keys) :props :color] color-profile) (rest wdgs-keys))))]
-    widgets))
+                    (recur (assoc-in wdgs [(first wdgs-keys) :props :color] color-prof) (rest wdgs-keys))))]
+    (assoc-in widgets [window-name :props :color] color-profile)))
 
 (defn add-window
   "Creates a new window widget with the parameters:
