@@ -26,6 +26,8 @@ in the highlight color on top)
 * TODO: better documentation (in progress)
 * TODO: make window a widget (in progress)
 * TODO: make it possible to set a color theme (in progress)
+* TODO: extract swap-widgets so that it can be used with update-in 
+* TODO: try out an agent because in theory it could draw multiple times if its an atom and the change above is made
 
 ### 0.0.1-alpha31
 

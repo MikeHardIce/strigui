@@ -234,21 +234,14 @@
                (s/difference to-be-considered all-reachable-widgets)
                all-reachable-widgets)))))
 
-(defn swap-widgets!
-  "Swaps out the widgets using the given function.
-   f - function that takes a widgets map and returns a new widgets map"
-  [f]
-  (try
-    (let [before (:widgets @state)
-          before (assoc before :context (:context @state))
-          after (f before)
-          canvas (->> after
-                     :context
-                     (swap! state assoc :context)
-                     :context
-                     :canvas)
-          after (dissoc after :context)
-          before (dissoc before :context)
+(defn- filter-by-window
+  [window-key widgets]
+  (into {} (filter (comp #(= % window-key) :window :props val) widgets)))
+
+(defn- swap-window!
+  [window-key before after updated-keys added-keys removed-keys]
+  (when-let [{:keys [window canvas]} (get before window-key)]
+    (let [before (filter-by-window window-key before)
           updated-keys (updated-widgets->keys before after)
           added-keys (added-widgets->keys before after)
           removed-keys (removed-widgets->keys before after)
@@ -262,7 +255,17 @@
                           (draw-widgets! canvas widgets-to-draw)
                           (let [widgets-to-draw (map after-drawing widgets-to-draw)
                                 after (merge-with into after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
-                            (swap! state assoc :widgets after))))))
+                            (swap! state assoc :widgets after))))))))
+
+(defn swap-widgets!
+  "Swaps out the widgets using the given function.
+   f - function that takes a widgets map and returns a new widgets map"
+  [f]
+  (try
+    (let [before (:widgets @state)
+          after (f before)
+          ]
+      (swap-window! "" before after updated-keys added-keys removed-keys))
     (catch Exception e (str "Failed to update widgets, perhaps the given function" \newline
                            "doesn't take or doesn't return a widgets map." \newline
                            "Exception: " (.getMessage e)))))
