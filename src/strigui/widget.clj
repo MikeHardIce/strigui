@@ -238,37 +238,52 @@
   [window-key widgets]
   (into {} (filter (comp #(= % window-key) :window :props val) widgets)))
 
-(defn- swap-window!
-  [window-key before after updated-keys added-keys removed-keys]
-  (when-let [{:keys [window canvas]} (get before window-key)]
-    (let [before (filter-by-window window-key before)
-          updated-keys (updated-widgets->keys before after)
-          added-keys (added-widgets->keys before after)
-          removed-keys (removed-widgets->keys before after)
-          neighbour-keys (select-neighbouring-keys canvas after (s/union updated-keys added-keys removed-keys))]
-      (c/use-buffer-> canvas
-                      (doseq [to-hide (vals (select-keys before (s/union updated-keys removed-keys)))]
-                        (when (-> to-hide :props :can-hide?)
-                          (hide! to-hide canvas)))
-                      (when-let [widgets-to-draw (vals (select-keys after neighbour-keys))]
-                        (let [widgets-to-draw (map before-drawing widgets-to-draw)]
-                          (draw-widgets! canvas widgets-to-draw)
-                          (let [widgets-to-draw (map after-drawing widgets-to-draw)
-                                after (merge-with into after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
-                            (swap! state assoc :widgets after))))))))
+(defn- get-windows
+  [widgets]
+  (into {} (filter (comp :rendering-hints :props val) widgets)))
+
+(defn- refresh-window!
+  [window-key before after]
+  (if-let [{:keys [window canvas]} (get before window-key)]
+    (try 
+      (let [before (filter-by-window window-key before)
+            widgets-after (atom (filter-by-window window-key after))
+            updated-keys (updated-widgets->keys before @widgets-after)
+            added-keys (added-widgets->keys before @widgets-after)
+            removed-keys (removed-widgets->keys before @widgets-after)
+            neighbour-keys (select-neighbouring-keys canvas @widgets-after (s/union updated-keys added-keys removed-keys))]
+        (c/use-buffer-> canvas
+                        (doseq [to-hide (vals (select-keys before (s/union updated-keys removed-keys)))]
+                          (when (-> to-hide :props :can-hide?)
+                            (hide! to-hide canvas)))
+                        (when-let [widgets-to-draw (vals (select-keys @widgets-after neighbour-keys))]
+                          (let [widgets-to-draw (map before-drawing widgets-to-draw)]
+                            (draw-widgets! canvas widgets-to-draw)
+                            (let [widgets-to-draw (map after-drawing widgets-to-draw)
+                                  wdgs-after (merge-with into @widgets-after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
+                              (reset! widgets-after wdgs-after)))))
+        (merge after @widgets-after))
+      (catch Exception e
+        (println "Failed to update widgets, perhaps the given function" \newline
+                 "doesn't take or doesn't return a widgets map." \newline
+                 "Exception: " (.getMessage e))
+        after))
+    after))
+
+(defn- refresh-windows!
+  [before f]
+  (let [after (f before)]
+    (loop [windows (get-windows after)
+           widgets after]
+      (if (seq windows)
+        (recur (rest windows) (refresh-window! (-> windows first key) before widgets))
+        widgets))))
 
 (defn swap-widgets!
   "Swaps out the widgets using the given function.
    f - function that takes a widgets map and returns a new widgets map"
   [f]
-  (try
-    (let [before (:widgets @state)
-          after (f before)
-          ]
-      (swap-window! "" before after updated-keys added-keys removed-keys))
-    (catch Exception e (str "Failed to update widgets, perhaps the given function" \newline
-                           "doesn't take or doesn't return a widgets map." \newline
-                           "Exception: " (.getMessage e)))))
+  (swap! state update :widgets refresh-windows! f))
 
 (defn trigger-custom-event
   [action widgets ^strigui.widget.Widget widget & props]

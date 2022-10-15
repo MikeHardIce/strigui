@@ -8,13 +8,13 @@
   (coord [this _] this)
   (defaults [this] this)
   (before-drawing [this] (let [{:keys [window canvas]} (:context this)
-                               {:keys [x y width height title rendering-hints color-profile]} (:props this)
+                               {:keys [x y width height title rendering-hints color]} (:props this)
                                canvas (assoc canvas :rendering rendering-hints)
                                window (doto window
                                       (.setLocation x y)
                                       (.setSize (Dimension. width height))
                                       (.setTitle title)
-                                      (.setBackground ^java.awt.Color (:window-color color-profile)))]
+                                      (.setBackground ^java.awt.Color (:background color)))]
                            (assoc this :context {:window window :canvas canvas})))
   (draw [this _] this)
   (after-drawing [this] this))
