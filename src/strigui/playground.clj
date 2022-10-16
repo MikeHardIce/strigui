@@ -29,19 +29,18 @@
   
   (gui/swap-widgets! (fn [wdgs]
                        (-> wdgs
-                           (gui/attach-event "click" :mouse-clicked (fn [_ _]
-                                                                      (gui/close-window!)))
+                           (gui/attach-event "click" :mouse-clicked (fn [wdgs_]
+                                                                      (gui/close-window! wdgs "main")))
                            (assoc-in ["click" :props :x] 100)
                            (assoc-in ["click" :props :y] 400)
-                           (gui/add-button "btnBla" "Change Theme" {:x 100 :y 300 :width 200 :height 42  :color {:background (java.awt.Color. 147 220 218) 
+                           (gui/add-button "main" "btnBla" "Change Theme" {:x 100 :y 300 :width 200 :height 42  :color {:background (java.awt.Color. 147 220 218) 
                                                                                             :text (java.awt.Color. 247 247 247)
                                                                                             :focus (java.awt.Color. 77 150 148)
                                                                                             :select (java.awt.Color. 77 150 148)
                                                                                             :border (java.awt.Color. 27 100 98)}
                                                                      :highlight [] :can-tab? true})
                            (gui/attach-event "btnBla" :mouse-clicked (fn [wdgs _]
-                                                                       (println "blabli")
-                                                                       (gui/change-color-profile wdgs (first (swap! color-profiles reverse)))))
+                                                                       (gui/change-color-profile wdgs "main"(first (swap! color-profiles reverse)))))
                            (update-in ["test-list" :items] conj {:value "10"} {:value "11"} {:value "12"} {:value "13"} {:value "14"} {:value "15"})))))
 
 (defmethod wdg/widget-global-event :mouse-clicked [_ widgets x y]

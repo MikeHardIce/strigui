@@ -16,7 +16,8 @@
                                       (.setTitle title)
                                       (.setBackground ^java.awt.Color (:background color)))]
                            (assoc this :context {:window window :canvas canvas})))
-  (draw [this _] this)
+  (draw [this _] 
+        this)
   (after-drawing [this] this))
 
 (defn window

@@ -1,7 +1,8 @@
 (ns strigui.widget
   (:require [capra.core :as c]
             [clojure.set :as s]
-            [clojure.string])
+            [clojure.string]
+            [clojure.stacktrace])
   (:import [java.awt Color]))
 
 (set! *warn-on-reflection* true)
@@ -244,40 +245,51 @@
 
 (defn- refresh-window!
   [window-key before after]
-  (if-let [{:keys [window canvas]} (get before window-key)]
-    (try 
-      (let [before (filter-by-window window-key before)
-            widgets-after (atom (filter-by-window window-key after))
-            updated-keys (updated-widgets->keys before @widgets-after)
-            added-keys (added-widgets->keys before @widgets-after)
-            removed-keys (removed-widgets->keys before @widgets-after)
-            neighbour-keys (select-neighbouring-keys canvas @widgets-after (s/union updated-keys added-keys removed-keys))]
-        (c/use-buffer-> canvas
-                        (doseq [to-hide (vals (select-keys before (s/union updated-keys removed-keys)))]
-                          (when (-> to-hide :props :can-hide?)
-                            (hide! to-hide canvas)))
-                        (when-let [widgets-to-draw (vals (select-keys @widgets-after neighbour-keys))]
-                          (let [widgets-to-draw (map before-drawing widgets-to-draw)]
-                            (draw-widgets! canvas widgets-to-draw)
-                            (let [widgets-to-draw (map after-drawing widgets-to-draw)
-                                  wdgs-after (merge-with into @widgets-after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
-                              (reset! widgets-after wdgs-after)))))
-        (merge after @widgets-after))
-      (catch Exception e
-        (println "Failed to update widgets, perhaps the given function" \newline
-                 "doesn't take or doesn't return a widgets map." \newline
-                 "Exception: " (.getMessage e))
-        after))
-    after))
+  (let [window-before (get before window-key)
+        window-after (get after window-key)
+        window-after (if (and (seq window-after) (not= window-before window-after))
+                       (before-drawing window-after)
+                       window-after)
+        after (if (seq window-after) (assoc after window-key window-after) after)]
+    (if-let [window (get after window-key)]
+      (try
+        (let [canvas (-> window :context :canvas)
+              before (filter-by-window window-key before)
+              widgets-after (atom (filter-by-window window-key after))
+              updated-keys (updated-widgets->keys before @widgets-after)
+              added-keys (added-widgets->keys before @widgets-after)
+              removed-keys (removed-widgets->keys before @widgets-after)
+              neighbour-keys (select-neighbouring-keys canvas @widgets-after (s/union updated-keys added-keys removed-keys))]
+          (c/use-buffer-> canvas
+                          (doseq [to-hide (vals (select-keys before (s/union updated-keys removed-keys)))]
+                            (when (-> to-hide :props :can-hide?)
+                              (hide! to-hide canvas)))
+                          (when-let [widgets-to-draw (vals (select-keys @widgets-after neighbour-keys))]
+                            (let [widgets-to-draw (map before-drawing widgets-to-draw)]
+                              (draw-widgets! canvas widgets-to-draw)
+                              (let [widgets-to-draw (map after-drawing widgets-to-draw)
+                                    wdgs-after (merge-with into @widgets-after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
+                                (reset! widgets-after wdgs-after)))))
+          (merge after @widgets-after))
+        (catch Exception e
+          (println "Failed to update widgets, perhaps the given function" \newline
+                   "doesn't take or doesn't return a widgets map." \newline
+                   "Exception: " (.getMessage e))
+          after))
+      after)))
 
 (defn- refresh-windows!
   [before f]
-  (let [after (f before)]
-    (loop [windows (get-windows after)
-           widgets after]
-      (if (seq windows)
-        (recur (rest windows) (refresh-window! (-> windows first key) before widgets))
-        widgets))))
+  (try
+   (let [after (f before)]
+     (loop [windows (get-windows after)
+            widgets after]
+       (if (seq windows)
+         (recur (rest windows) (refresh-window! (-> windows first key) before widgets))
+         widgets))) 
+    (catch Exception e
+      (clojure.stacktrace/print-stack-trace e)
+      before)))
 
 (defn swap-widgets!
   "Swaps out the widgets using the given function.

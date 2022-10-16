@@ -25,11 +25,16 @@
   (wdg/swap-widgets! f))
 
 (defn get-widget-names-by-group
-  "Retuns a vector of widgets by group name"
+  "Retuns a vector of widget names of widgets that belong to the given group name"
   [widgets name]
   (let [get-seq (fn [x] (if (string? x) (vector x) x))
         filter-crit (fn [x] (some #(= name %) (-> x val :props :group get-seq)))]
-    (map :name (vals (filter filter-crit (dissoc widgets :context))))))
+    (mapv :name (vals (filter filter-crit widgets)))))
+
+(defn get-widget-names-by-window
+  "Returns a vector of widget names of widgets that are part of the window with the given window key"
+  [widgets window-key]
+  (mapv :name (vals (filter (comp #(= % window-key) :window :props val) widgets))))
 
 (defn remove-widgets-by-group
   "Removes all widgets assigned to the given group"
@@ -142,11 +147,12 @@
 
 (defn add 
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"
-  ([widgets ^strigui.widget.Widget widget] (add widgets widget (:color wdg/widget-default-props)))
-  ([widgets ^strigui.widget.Widget widget color-profile]
-  (let [canvas (-> @wdg/state :context :canvas)
+  ([widgets window-key ^strigui.widget.Widget widget] (add widgets window-key widget (:color wdg/widget-default-props)))
+  ([widgets window-key ^strigui.widget.Widget widget color-profile]
+  (let [canvas (-> widgets (get window-key) :context :canvas)
         widget (update widget :props merge wdg/widget-default-props
                        (-> widget (assoc-in [:props :color] color-profile) :props)
+                       (-> widget (assoc-in [:props :window] window-key) :props)
                        (-> widget :props))
         widget (->> widget
                     (wdg/adjust-dimensions canvas)
@@ -154,15 +160,16 @@
     (assoc widgets (:name widget) widget))))
 
 (defmacro add-multiple
-  [wdgs type & names]
+  [wdgs window-key type & names]
   `(-> ~wdgs
          ~@(for [pair (partition 2 names)]
-             `(add (clojure.lang.Reflector/invokeConstructor ~type (into-array Object [(first '~pair) (second '~pair) {:x 0 :y 0}]))))))
+             `(add ~window-key (clojure.lang.Reflector/invokeConstructor ~type (into-array Object [(first '~pair) (second '~pair) {:x 0 :y 0}]))))))
 
 (defn close-window!
-  "Closes the current active window."
-  []
-  (c/close-window (-> @wdg/state :context :window)))
+  "Closes the given window."
+  [widgets window-key]
+  (c/close-window (-> widgets (get window-key) :context :window))
+  widgets)
 
 (defn add-button
   "Adds a button widget to the given map of widgets.
@@ -174,8 +181,8 @@
      y - y coordinate of top left corner
      color - vector consisting of [background-color font-color]
      min-width - the minimum width"
-  [widgets name text props]
-  (add widgets (Button. name text props)))
+  [widgets window-key name text props]
+  (add widgets window-key (Button. name text props)))
 
 (defn add-label
   "Adds a label widget to the given map of widgets.
@@ -188,8 +195,8 @@
      color - vector consisting of [font-color]
      font-style - vector consisting of either :bold :italic :italic-bold
      font-size - number"
-  [widgets name text props]
-  (add widgets (Label. name text props)))
+  [widgets window-key name text props]
+  (add widgets window-key (Label. name text props)))
 
 (defn add-input
   "Adds a imput widget to the map of widgets.
@@ -201,8 +208,8 @@
     y - y coordinate of top left corner
     color - vector consisting of [background-color font-color]
     min-width - the minimum width"
-  [widgets name text props]
-  (add widgets (inp/Input. name text props)))
+  [widgets window-key name text props]
+  (add widgets window-key (inp/Input. name text props)))
 
 (defn add-list
   "Adds a list widget holding on a vector of items to the map of widgets.
@@ -210,8 +217,8 @@
    name - name of the list
    items - vector of items [{:value bla} {:value bla} ...]
            items can be maps and should at least contain a :value"
-  [widgets name items props]
-  (add widgets (List. name items props)))
+  [widgets window-key name items props]
+  (add widgets window-key (List. name items props)))
 
 (defn from-map!
   "Initializes the window and the widgets from a map"
@@ -231,7 +238,7 @@
                      (loop [to-be widgets
                             wdgs wdgs]
                        (if (seq to-be)
-                         (recur (rest to-be) (add wdgs (first to-be)))
+                         (recur (rest to-be) (add wdgs (-> to-be first :props :window) (first to-be)))
                          wdgs))))))
 
 (defn from-file!
@@ -254,7 +261,7 @@
 (defn to-map
   "converts the current state to a map that could be stored in a file"
   []
-  (let [windows (->> @wdg/state :widgets vals (filter (fn [wdg] (-> wdg :context :canvas))))
+  (let [windows (->> @wdg/state :widgets vals (filter (fn [wdg] (-> wdg (get :context {}) :canvas))))
         window (for [window windows]
                  (let [{:keys [x y width height name color]} (c/properties (:context window))]
                    [(:name window) x y width height name (first (extract-rgb-constructors (str color)))]))
