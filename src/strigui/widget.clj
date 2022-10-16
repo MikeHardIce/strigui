@@ -48,6 +48,11 @@
 
 (defmethod widget-global-event :default [_ widgets & props] widgets)
 
+(defn get-widget-names-by-window
+  "Returns a vector of widget names of widgets that are part of the window with the given window key"
+  [widgets window-key]
+  (mapv :name (vals (filter (comp #(= % window-key) :window :props val) widgets))))
+
 (defn on-border?
   [[x y w h] x0 y0]
   (let [bottom-start (+ y h)
@@ -382,26 +387,27 @@
                                                                  (on-border? (coord (get widgets (:name widget)) canvas) x y))))
       widgets)))
 
-(defmethod c/handle-event :mouse-dragged [_ {:keys [x y]}]
-  (let [canvas (-> @state :context :canvas)
-        [x-prev y-prev] (-> @previously :mouse-position)]
-    (swap-widgets! #(let [widgets (handle-mouse-dragged canvas % x y x-prev y-prev)]
+(defmethod c/handle-event :mouse-dragged [_ {:keys [x y window]}]
+  (let [[x-prev y-prev] (-> @previously :mouse-position)]
+    (swap-widgets! #(let [canvas (-> % (get window) :context :canvas)
+                          widgets (handle-mouse-dragged canvas % x y x-prev y-prev)]
                       (widget-global-event :mouse-dragged widgets x y x-prev y-prev)))
     (swap! previously assoc :mouse-position [x y])))
 
-(defmethod c/handle-event :mouse-moved [_ {:keys [x y]}]
-  (let [canvas (-> @state :context :canvas)]
-    (swap-widgets! #(let [widgets (handle-mouse-moved canvas % x y)]
-                      (widget-global-event :mouse-moved widgets x y)))
-    (swap! previously assoc :mouse-position [x y])))
+(defmethod c/handle-event :mouse-moved [_ {:keys [x y window]}]
+  (swap-widgets! #(let [canvas (-> % (get window) :context :canvas)
+                        widgets (handle-mouse-moved canvas % x y)]
+                    (widget-global-event :mouse-moved widgets x y)))
+  (swap! previously assoc :mouse-position [x y]))
 
-(defmethod c/handle-event :mouse-pressed [_ {:keys [x y]}]
-  (let [canvas (-> @state :context :canvas)]
-    (swap-widgets! #(let [widgets (handle-clicked canvas % x y)]
-                      (widget-global-event :mouse-clicked widgets x y)))))
+(defmethod c/handle-event :mouse-pressed [_ {:keys [x y window]}]
+  (swap-widgets! #(let [canvas (-> % (get window) :context :canvas)
+                        widgets (handle-clicked canvas % x y)]
+                    (widget-global-event :mouse-clicked widgets x y))))
 
-(defmethod c/handle-event :mouse-released [_ {:keys [x y]}]
-  (swap-widgets! #(let [widgets (widget-global-event :mouse-released % x y)]
+(defmethod c/handle-event :mouse-released [_ {:keys [x y window]}]
+  (swap-widgets! #(let [canvas (-> % (get window) :context :canvas)
+                        widgets (widget-global-event :mouse-released % x y)]
                     (widget-global-event :mouse-released widgets x y))))
 
 (defn handle-tabbing
@@ -421,7 +427,7 @@
     widgets))
 
 (defn handle-key-pressed
-  [canvas widgets char code]
+  [canvas widgets window-key char code]
   (let [previous-code (-> @previously :key-code)
         widgets (widget-global-event :key-pressed widgets char code previous-code)]
     (swap! previously assoc :key-code code)
@@ -433,6 +439,6 @@
           (handle-tabbing canvas widgets (get widgets tabable) code)
         widgets))))
 
-(defmethod c/handle-event :key-pressed [_ {:keys [char code]}]
-  (let [canvas (:canvas (:context @state))]
-    (swap-widgets! #(handle-key-pressed canvas % char code))))
+(defmethod c/handle-event :key-pressed [_ {:keys [char code window]}]
+  (swap-widgets! #(let [canvas (-> % (get window) :context :canvas)]
+                    (handle-key-pressed canvas % window char code))))

@@ -34,7 +34,7 @@
 (defn get-widget-names-by-window
   "Returns a vector of widget names of widgets that are part of the window with the given window key"
   [widgets window-key]
-  (mapv :name (vals (filter (comp #(= % window-key) :window :props val) widgets))))
+  (wdg/get-widget-names-by-window widgets window-key))
 
 (defn remove-widgets-by-group
   "Removes all widgets assigned to the given group"
@@ -142,8 +142,8 @@
    color - java.awt.Color of the windows background color
    rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
    of any widget drawn within the window"
-  [widgets name x y width height title color rendering-hints]
-  (assoc widgets name (wnd/window name x y width height title color rendering-hints))) 
+  [widgets name x y width height title props]
+  (assoc widgets name (wnd/window name x y width height title props))) 
 
 (defn add 
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"
