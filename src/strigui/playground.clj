@@ -24,10 +24,14 @@
 
 (defn main []
   ;;(gui/window! 200 300 1500 600 "My Window" (java.awt.Color. 44 44 44)) ;{java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}
-               
-  (gui/from-file! "gui-test.edn") 
+
+  (gui/swap-widgets! #(gui/add-window % "main-window" 50 50 700 500 "Main Window" {:on-close gui/hide}))
   
-  (gui/swap-widgets! (fn [wdgs]
+  ;;TODO: cabra with window hide/exit event
+
+  #_(gui/from-file! "gui-test.edn") 
+  
+  #_(gui/swap-widgets! (fn [wdgs]
                        (-> wdgs
                            (gui/attach-event "click" :mouse-clicked (fn [wdgs_]
                                                                       (gui/close-window! wdgs "main")))
@@ -43,6 +47,6 @@
                                                                        (gui/change-color-profile wdgs "main"(first (swap! color-profiles reverse)))))
                            (update-in ["test-list" :items] conj {:value "10"} {:value "11"} {:value "12"} {:value "13"} {:value "14"} {:value "15"})))))
 
-(defmethod wdg/widget-global-event :mouse-clicked [_ widgets x y]
-  (println "Mouse clicked x:" x " y:" y)
+(defmethod wdg/widget-global-event :mouse-clicked [_ widgets window-name x y]
+  (println "Mouse clicked x:" x " y:" y " on window: " window-name)
   widgets)

@@ -167,7 +167,7 @@
     widget))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-clicked]
- [_ canvas widgets widget x y]
+ [_ widgets widget x y]
   (let [item-border-x (+ (-> widget :props :x) (- (-> widget :props :width) item-width-right-margin))]
     (if (< item-border-x x)
       (update widgets (:name widget) make-visible y)
@@ -178,15 +178,15 @@
             (update (:name widget) make-visible y))))))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-moved]
-  [_ canvas widgets widget _ y]
+  [_ widgets widget _ y]
   (update widgets (:name widget) activate! y :focused?))
 
 (defmethod  wdg/widget-event [strigui.list.List :widget-focus-out]
- [_ canvas widgets widget _ _]
+ [_ widgets widget _ _]
  (update-in widgets [(:name widget) :items] (fn [items] (mapv #(dissoc % :focused?) items))))
 
 (defmethod wdg/widget-event [strigui.list.List :mouse-dragged]
-  [_ canvas widgets widget x y _ _]
+  [_ widgets widget x y _ _]
   (let [item-border-x (+ (-> widget :props :x) (- (-> widget :props :width) item-width-right-margin))]
     (if (< item-border-x x)
       (update widgets (:name widget) make-visible y)

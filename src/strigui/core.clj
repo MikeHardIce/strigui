@@ -9,7 +9,7 @@
    [strigui.input :as inp]
    [strigui.window :as wnd]
    [capra.core :as c]
-   [strigui.widget :as wdg])
+   [strigui.widget :as wdg]) 
   (:import [strigui.button Button]
            [strigui.label Label]
            [strigui.list List]
@@ -17,6 +17,9 @@
            [java.awt Color RenderingHints]))
 
 (set! *warn-on-reflection* true)
+
+(defonce ^:const exit c/exit)
+(defonce ^:const hide c/hide)
 
 (defn swap-widgets!
   [f]
@@ -34,7 +37,7 @@
 (defn get-widget-names-by-window
   "Returns a vector of widget names of widgets that are part of the window with the given window key"
   [widgets window-key]
-  (wdg/get-widget-names-by-window widgets window-key))
+  (wdg/window->widgets widgets window-key))
 
 (defn remove-widgets-by-group
   "Removes all widgets assigned to the given group"

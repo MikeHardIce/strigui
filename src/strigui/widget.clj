@@ -34,24 +34,29 @@
                        :mouse-position nil
                        :key-code nil}))
 
-(def state (atom {:widgets {}
-                  :context {:canvas nil :window nil}}))
+(def state (atom {:widgets {}}))
 
 (defmulti widget-event
-  (fn [action canvas widgets widget & props]
+  (fn [action widgets widget & props]
     [(class widget) action]))
 
-(defmethod widget-event :default [action canvas widgets widget & props] widgets)
+(defmethod widget-event :default [action widgets widget & props] widgets)
 
 (defmulti widget-global-event
-  (fn [action widgets & props] action))
+  (fn [action widgets window-name & props] action))
 
-(defmethod widget-global-event :default [_ widgets & props] widgets)
+(defmethod widget-global-event :default [_ widgets window-name & props] widgets)
 
-(defn get-widget-names-by-window
+(defn window->widgets
   "Returns a vector of widget names of widgets that are part of the window with the given window key"
   [widgets window-key]
   (mapv :name (vals (filter (comp #(= % window-key) :window :props val) widgets))))
+
+(defn widget->window
+  "Returns the window the given widget is displayed on"
+  [widgets widget-name]
+  (when-let [widget (get widgets widget-name)]
+    (-> widget :props :window)))
 
 (defn on-border?
   [[x y w h] x0 y0]
@@ -332,113 +337,123 @@
                                       :x x1 :y y1}))))
 
 (defn handle-clicked
-  [canvas widgets x y]
+  [widgets window-name x y]
   (swap! previously assoc :key-code nil)
-  (let [;; get the first widget that is on top close to the mouse position
-        widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals (dissoc widgets :context))))))
-        clicked (when (seq widget) (:name widget))
-        widgets (assoc-arg-for-all widgets :selected? nil)]
-    (if (and clicked (not (-> (get widgets clicked) :props :resizing?)))
+  (if-let [window (get widgets window-name)]
+    (let [;; get the first widget that is on top close to the mouse position
+          canvas (-> window :context :canvas)
+          widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals (select-keys widgets (window->widgets widgets window-name)))))))
+          clicked (when (seq widget) (:name widget))
+          widgets (assoc-arg-for-all widgets :selected? nil)]
+      (if (and clicked (not (-> (get widgets clicked) :props :resizing?)))
         (let [widgets (assoc-in widgets [clicked :props :selected?] true)
               widgets (widget-event :mouse-clicked canvas widgets (get widgets clicked) x y)
               widgets (trigger-custom-event :mouse-clicked widgets (get widgets clicked))]
           widgets)
-      widgets)))
+        widgets))
+    widgets))
 
 (defn handle-mouse-dragged
-  [canvas widgets x y x-prev y-prev]
-  (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals (dissoc widgets :context))))))]
-    (let [widgets (if (-> widget :props :resizing?)
-                    (update widgets (:name widget) handle-widget-resizing x y x-prev y-prev)
-                    (if (-> widget :props :can-move?)
-                      (update widgets (:name widget) handle-widget-dragging x y x-prev y-prev)
-                      widgets))]
-      (widget-event :mouse-dragged canvas widgets (get widgets (:name widget)) x y x-prev y-prev))
+  [widgets window-name x y x-prev y-prev]
+  (if-let [window (get widgets window-name)]
+    (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % (-> window :context :canvas)) x y) (vals (select-keys widgets (window->widgets widgets window-name)))))))]
+      (let [canvas (-> window :context :canvas)
+            widgets (if (-> widget :props :resizing?)
+                      (update widgets (:name widget) handle-widget-resizing x y x-prev y-prev)
+                      (if (-> widget :props :can-move?)
+                        (update widgets (:name widget) handle-widget-dragging x y x-prev y-prev)
+                        widgets))]
+        (widget-event :mouse-dragged canvas widgets (get widgets (:name widget)) x y x-prev y-prev))
+      widgets)
     widgets))
 
 (defn handle-mouse-moved 
-  [canvas widgets x y]
-  (let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals (dissoc widgets :context))))))
+  [widgets window-name x y]
+  (if-let [current-widgets (seq (window->widgets widgets window-name))]
+    (let [canvas (-> (get widgets window-name) :context :canvas)
+          widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals (select-keys widgets current-widgets))))))
         ;; if the mouse is not on a widget, check previously focused widgets, trigger events and unfocus them
-        widgets (if-let [focused-widgets (get-with-property (vals widgets) :focused?)]
-                  (loop [remaining-focused focused-widgets
-                         widgets widgets]
-                    (if (seq remaining-focused)
-                      (recur (rest remaining-focused) (let [name (first remaining-focused)
-                                                            widgets (assoc-in widgets [name :props :focused?] nil)
-                                                            widgets (assoc-in widgets [name :props :resizing?] nil)
-                                                            widgets (widget-event :widget-focus-out canvas widgets (get widgets name) x y)
-                                                            widgets (trigger-custom-event :widget-focus-out widgets (get widgets name) x y)]
-                                                        widgets))
-                      widgets))
-                  widgets)]
-    (if (seq widget)
+          widgets (if-let [focused-widgets (get-with-property (vals widgets) :focused?)]
+                            (loop [remaining-focused focused-widgets
+                                   widgets widgets]
+                              (if (seq remaining-focused)
+                                (recur (rest remaining-focused) (let [name (first remaining-focused)
+                                                                      widgets (assoc-in widgets [name :props :focused?] nil)
+                                                                      widgets (assoc-in widgets [name :props :resizing?] nil)
+                                                                      widgets (widget-event :widget-focus-out widgets (get widgets name) x y)
+                                                                      widgets (trigger-custom-event :widget-focus-out widgets (get widgets name) x y)]
+                                                                  widgets))
+                                widgets))
+                            widgets)]
+      (if (seq widget)
       ;; if the mouse is on a widget, focus it and trigger events in case it wasn't focused before, check if it should resize
-      (let [widgets (widget-event :mouse-moved canvas widgets widget x y)
-            widgets (trigger-custom-event :mouse-moved widgets (get widgets (:name widget)) x y)
-            widget (get widgets (:name widget))
-            widgets (if (-> widget :props :focused?) 
-                      widgets
-                      (let [name (:name widget)
-                            widgets (widget-event :widget-focus-in canvas widgets (get widgets name) x y)]
-                        (trigger-custom-event :widget-focus-in widgets (get widgets name) x y)))
-            widgets (assoc-in widgets [(:name widget) :props :focused?] true)]
-        (assoc-in widgets [(:name widget) :props :resizing?] (and (-> widget :props :can-resize?) 
-                                                                 (on-border? (coord (get widgets (:name widget)) canvas) x y))))
-      widgets)))
+        (let [widgets (widget-event :mouse-moved widgets widget x y)
+              widgets (trigger-custom-event :mouse-moved widgets (get widgets (:name widget)) x y)
+              widget (get widgets (:name widget))
+              widgets (if (-> widget :props :focused?)
+                        widgets
+                        (let [name (:name widget)
+                              widgets (widget-event :widget-focus-in widgets (get widgets name) x y)]
+                          (trigger-custom-event :widget-focus-in widgets (get widgets name) x y)))
+              widgets (assoc-in widgets [(:name widget) :props :focused?] true)]
+          (assoc-in widgets [(:name widget) :props :resizing?] (and (-> widget :props :can-resize?)
+                                                                    (on-border? (coord (get widgets (:name widget)) (-> (widget->window widgets (:name widget)) :context :canvas)) x y))))
+        widgets))
+    widgets))
 
 (defmethod c/handle-event :mouse-dragged [_ {:keys [x y window]}]
-  (let [[x-prev y-prev] (-> @previously :mouse-position)]
-    (swap-widgets! #(let [canvas (-> % (get window) :context :canvas)
-                          widgets (handle-mouse-dragged canvas % x y x-prev y-prev)]
-                      (widget-global-event :mouse-dragged widgets x y x-prev y-prev)))
-    (swap! previously assoc :mouse-position [x y])))
+  (let [[x-prev y-prev] (-> @previously :mouse-position (get window [0 0]))]
+    (swap-widgets! #(let [widgets (handle-mouse-dragged % window x y x-prev y-prev)]
+                      (widget-global-event :mouse-dragged widgets window x y x-prev y-prev)))
+    (swap! previously assoc-in [:mouse-position window] [x y])))
 
 (defmethod c/handle-event :mouse-moved [_ {:keys [x y window]}]
-  (swap-widgets! #(let [canvas (-> % (get window) :context :canvas)
-                        widgets (handle-mouse-moved canvas % x y)]
-                    (widget-global-event :mouse-moved widgets x y)))
-  (swap! previously assoc :mouse-position [x y]))
+  (println "mouse-moved  x: " x " y: " y " window: " window)
+  (swap-widgets! #(let [bla (println "#1: " window)
+                        widgets (handle-mouse-moved % window x y)
+                        bla (println "#1: " widgets)]
+                    (widget-global-event :mouse-moved widgets window x y)))
+  (swap! previously assoc-in [:mouse-position window] [x y]))
 
 (defmethod c/handle-event :mouse-pressed [_ {:keys [x y window]}]
-  (swap-widgets! #(let [canvas (-> % (get window) :context :canvas)
-                        widgets (handle-clicked canvas % x y)]
-                    (widget-global-event :mouse-clicked widgets x y))))
+  (swap-widgets! #(let [widgets (handle-clicked % window x y)]
+                    (widget-global-event :mouse-clicked widgets window x y))))
 
 (defmethod c/handle-event :mouse-released [_ {:keys [x y window]}]
-  (swap-widgets! #(let [canvas (-> % (get window) :context :canvas)
-                        widgets (widget-global-event :mouse-released % x y)]
-                    (widget-global-event :mouse-released widgets x y))))
+  (swap-widgets! #(let [widgets (widget-global-event :mouse-released % window x y)]
+                    (widget-global-event :mouse-released widgets window x y))))
 
 (defn handle-tabbing
-  [canvas widgets widget code]
-  (if (= code 9) ;;tab
-    (let [previously-tabbed (:tabbed @previously)
-          previously-tabbed (if (= (set (get-with-property (vals widgets) :can-tab?))
-                                   (set previously-tabbed))
-                              #{}
-                              previously-tabbed)
-          new-widget (:name (next-widget-to-tab canvas widgets previously-tabbed widget))
-          widgets (assoc-arg-for-all widgets :selected? nil)]
-      (when new-widget
-        (let [previously-tabbed (s/union previously-tabbed #{new-widget})]
-          (swap! previously assoc :tabbed previously-tabbed)))
+  [widgets widget code]
+  (if-let [window (widget->window widgets (:name widget))]
+    (if (= code 9) ;;tab
+      (let [canvas (-> window :context :canvas)
+            previously-tabbed (:tabbed @previously)
+            previously-tabbed (if (= (set (get-with-property (vals widgets) :can-tab?))
+                                     (set previously-tabbed))
+                                #{}
+                                previously-tabbed)
+            new-widget (:name (next-widget-to-tab canvas widgets previously-tabbed widget))
+            widgets (assoc-arg-for-all widgets :selected? nil)]
+        (when new-widget
+          (let [previously-tabbed (s/union previously-tabbed #{new-widget})]
+            (swap! previously assoc :tabbed previously-tabbed)))
         (assoc-in widgets [new-widget :props :selected?] (seq new-widget)))
+      widgets)
     widgets))
 
 (defn handle-key-pressed
-  [canvas widgets window-key char code]
+  [widgets window-name char code]
   (let [previous-code (-> @previously :key-code)
         widgets (widget-global-event :key-pressed widgets char code previous-code)]
     (swap! previously assoc :key-code code)
-    (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(-> % :props :selected?) (vals widgets)))))]
-      (let [widgets (handle-tabbing canvas widgets widget code)
-            widgets (widget-event :key-pressed canvas widgets (get widgets (:name widget)) char code previous-code)]
+    (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(-> % :props :selected?) (vals (select-keys widgets (window->widgets widgets window-name)))))))]
+      (let [widgets (handle-tabbing widgets widget code)
+            widgets (widget-event :key-pressed widgets (get widgets (:name widget)) char code previous-code)]
         (trigger-custom-event :key-pressed widgets (get widgets (:name widget)) code char previous-code))
       (if-let [tabable (first (get-with-property (vals widgets) :can-tab? true))]
-          (handle-tabbing canvas widgets (get widgets tabable) code)
+          (handle-tabbing widgets (get widgets tabable) code)
         widgets))))
 
 (defmethod c/handle-event :key-pressed [_ {:keys [char code window]}]
-  (swap-widgets! #(let [canvas (-> % (get window) :context :canvas)]
-                    (handle-key-pressed canvas % window char code))))
+  (swap-widgets! #(handle-key-pressed % window char code)))
