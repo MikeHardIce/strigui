@@ -347,7 +347,7 @@
           widgets (assoc-arg-for-all widgets :selected? nil)]
       (if (and clicked (not (-> (get widgets clicked) :props :resizing?)))
         (let [widgets (assoc-in widgets [clicked :props :selected?] true)
-              widgets (widget-event :mouse-clicked canvas widgets (get widgets clicked) x y)
+              widgets (widget-event :mouse-clicked widgets (get widgets clicked) x y)
               widgets (trigger-custom-event :mouse-clicked widgets (get widgets clicked))]
           widgets)
         widgets))
@@ -408,10 +408,7 @@
     (swap! previously assoc-in [:mouse-position window] [x y])))
 
 (defmethod c/handle-event :mouse-moved [_ {:keys [x y window]}]
-  (println "mouse-moved  x: " x " y: " y " window: " window)
-  (swap-widgets! #(let [bla (println "#1: " window)
-                        widgets (handle-mouse-moved % window x y)
-                        bla (println "#1: " widgets)]
+  (swap-widgets! #(let [widgets (handle-mouse-moved % window x y)]
                     (widget-global-event :mouse-moved widgets window x y)))
   (swap! previously assoc-in [:mouse-position window] [x y]))
 

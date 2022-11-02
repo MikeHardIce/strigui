@@ -8,8 +8,8 @@
   (coord [this _] this)
   (defaults [this] this)
   (before-drawing [this] (let [{:keys [window canvas]} (:context this)
-                               bla (println "window: " window " canvas: " canvas)
                                {:keys [x y width height title rendering-hints color on-close resizable?]} (:props this)
+                               bla (println "window: " (:name this) " x: " x)
                                canvas (assoc canvas :rendering rendering-hints)
                                window (doto window
                                         (.setLocation x y)
