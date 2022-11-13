@@ -34,7 +34,7 @@
                        :mouse-position nil
                        :key-code nil}))
 
-(def state (atom {:widgets {}}))
+(def state (agent {:widgets {}}))
 
 (defmulti widget-event
   (fn [action widgets widget & props]
@@ -305,7 +305,7 @@
   "Swaps out the widgets using the given function.
    f - function that takes a widgets map and returns a new widgets map"
   [f]
-  (swap! state update :widgets refresh-windows! f))
+  (send state update :widgets refresh-windows! f))
 
 (defn trigger-custom-event
   [action widgets ^strigui.widget.Widget widget & props]

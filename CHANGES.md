@@ -10,7 +10,7 @@
 * enable updating properties of multiple widgets at the same time
 * changed widgets :args key to :props key (properties of a widget)
 * give option for widget highlights to be a combination of :border :none :alpha (:alpha with add a transparent layer 
-in the highlight color on top)
+  in the highlight color on top)
 * highlight border size can be adjusted via key :highlight-border-size accepting a non negative numbers
 * highlight alpha opacity can be adjusted via key :highlight-alpha-opacity accepting integers from 0 to 255
 * copy and paste via ctrl+c and ctrl+v for input fields
@@ -23,11 +23,11 @@ in the highlight color on top)
 * reworked how neighbours are determined
 * removed def-action macro, use the property :can-hide? instead
 * :can-multiline? for multi line support of input boxes and buttons
-* TODO: better documentation (in progress)
-* TODO: make window a widget (in progress)
+* made window a widget
+* internally extracted swap-widgets so that it can be used with update-in 
+* State map now uses an agent instead of an atom
 * TODO: make it possible to set a color theme (in progress)
-* TODO: extract swap-widgets so that it can be used with update-in 
-* TODO: try out an agent because in theory it could draw multiple times if its an atom and the change above is made
+* TODO: better documentation (in progress)
 
 ### 0.0.1-alpha31
 
