@@ -9,24 +9,20 @@
   (defaults [this] this)
   (before-drawing [this] 
                   (if (-> this :props :source-object-changed?)
-                    (do 
-                      (println (:name this) " before-drawing -> :source-object-changed")
-                      (assoc-in this [:props :source-object-changed?] false))
-                    (do 
-                      (println (:name this) " before-drawing -> normal change")
-                      (let [{:keys [window canvas]} (:context this)
-                            {:keys [x y width height title rendering-hints color on-close resizable? visible?]
-                             :or {x 0 y 0 width 0 height 0 title "" rendering-hints {} color Color/white on-close c/exit resizable? false visible? true}} (:props this)
-                            canvas (assoc canvas :rendering rendering-hints)
-                            window (doto window
-                                     (.setLocation x y)
-                                     (.setSize (Dimension. width height))
-                                     (.setTitle title)
-                                     (.setBackground ^java.awt.Color (:background color))
-                                     (.setDefaultCloseOperation on-close)
-                                     (.setResizable resizable?)
-                                     (.setVisible visible?))]
-                        (assoc this :context {:window window :canvas canvas})))))
+                    (assoc-in this [:props :source-object-changed?] false)
+                    (let [{:keys [window canvas]} (:context this)
+                          {:keys [x y width height title rendering-hints color on-close resizable? visible?]
+                           :or {x 0 y 0 width 0 height 0 title "" rendering-hints {} color Color/white on-close c/exit resizable? false visible? true}} (:props this)
+                          canvas (assoc canvas :rendering rendering-hints)
+                          window (doto window
+                                   (.setLocation x y)
+                                   (.setSize (Dimension. width height))
+                                   (.setTitle title)
+                                   (.setBackground ^java.awt.Color (:background color))
+                                   (.setDefaultCloseOperation on-close)
+                                   (.setResizable resizable?)
+                                   (.setVisible visible?))]
+                      (assoc this :context {:window window :canvas canvas}))))
   (draw [this _] 
         this)
   (after-drawing [this] this))
@@ -56,26 +52,22 @@
                             :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})))
 
 (defmethod c/handle-event :window-hidden [_ {:keys [window]}]
-  (println "Window " window " hidden")
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :visible?] false)
                           (assoc-in [window :props :source-object-changed?] true))))
 
 (defmethod c/handle-event :window-shown [_ {:keys [window]}]
-  (println "Window " window " shown")
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :visible?] true)
                           (assoc-in [window :props :source-object-changed?] true))))
 
 (defmethod c/handle-event :window-resized [_ {:keys [x y width height window]}]
-  (println "Window " window " resized")
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :width] width)
                           (assoc-in [window :props :height] height)
                           (assoc-in [window :props :source-object-changed?] true))))
 
 (defmethod c/handle-event :window-moved [_ {:keys [x y width height window]}]
-  (println "Window " window " moved")
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :x] x)
                           (assoc-in [window :props :y] y)
