@@ -25,6 +25,7 @@
 (defn main []
   ;;(gui/window! 200 300 1500 600 "My Window" (java.awt.Color. 44 44 44)) ;{java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}
 
+  
   (gui/swap-widgets! #(gui/add-window % "main-window" 50 50 700 500 "Main Window" {:on-close gui/hide :resizable? true}))
 
   (gui/swap-widgets! #(-> % 

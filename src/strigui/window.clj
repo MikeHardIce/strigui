@@ -52,23 +52,30 @@
                             :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})))
 
 (defmethod c/handle-event :window-hidden [_ {:keys [window]}]
+  (println "Window " window " hidden")
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :visible?] false)
                           (assoc-in [window :props :source-object-changed?] true))))
 
 (defmethod c/handle-event :window-shown [_ {:keys [window]}]
+  (println "Window " window " shown")
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :visible?] true)
                           (assoc-in [window :props :source-object-changed?] true))))
 
 (defmethod c/handle-event :window-resized [_ {:keys [x y width height window]}]
+  (println "Window " window " resized")
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :width] width)
                           (assoc-in [window :props :height] height)
                           (assoc-in [window :props :source-object-changed?] true))))
 
 (defmethod c/handle-event :window-moved [_ {:keys [x y width height window]}]
+  (println "Window " window " moved")
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :x] x)
                           (assoc-in [window :props :y] y)
                           (assoc-in [window :props :source-object-changed?] true))))
+
+(defmethod  c/handle-event :window-closed [_ {:keys [window]}]
+  (println "Window " window " closed"))
