@@ -9,7 +9,7 @@ Hand swap-widgets! a function to transform all widgets, swap-widgets will apply 
 
 It uses [Capra](https://github.com/MikeHardIce/Capra) underneath (it was using [Clojure2d](https://github.com/Clojure2D/clojure2d) before). So anything that can be drawn could potentially be a widget (like the game board in [Dame](https://github.com/MikeHardIce/Dame)).
 
-*Still in alpha, currently under a bit of rework so that windows can be treated as widgets as well. Basically all widgets, all windows and the theming will be accessible during the state transition in swap-widgets*
+**Still in alpha, currently under a bit of rework so that windows can be treated as widgets as well. Basically all widgets, all windows and the theming will be accessible during the state transition in swap-widgets**
 
 [See Changes](CHANGES.md)
 
