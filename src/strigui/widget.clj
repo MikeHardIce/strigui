@@ -357,13 +357,12 @@
   [widgets window-name x y x-prev y-prev]
   (if-let [window (get widgets window-name)]
     (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % (-> window :context :canvas)) x y) (vals (select-keys widgets (window->widgets widgets window-name)))))))]
-      (let [canvas (-> window :context :canvas)
-            widgets (if (-> widget :props :resizing?)
+      (let [widgets (if (-> widget :props :resizing?)
                       (update widgets (:name widget) handle-widget-resizing x y x-prev y-prev)
                       (if (-> widget :props :can-move?)
                         (update widgets (:name widget) handle-widget-dragging x y x-prev y-prev)
                         widgets))]
-        (widget-event :mouse-dragged canvas widgets (get widgets (:name widget)) x y x-prev y-prev))
+        (widget-event :mouse-dragged widgets (get widgets (:name widget)) x y x-prev y-prev))
       widgets)
     widgets))
 
