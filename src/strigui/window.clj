@@ -1,6 +1,7 @@
 (ns strigui.window
   (:require [strigui.widget :as wdg]
-            [capra.core :as c])
+            [capra.core :as c]
+            [clojure.stacktrace])
   (:import [java.awt Dimension Color]))
 
 (defrecord Window [name context props]
@@ -14,16 +15,21 @@
                           {:keys [x y width height title rendering-hints color on-close resizable? visible?]
                            :or {x 0 y 0 width 0 height 0 title "" rendering-hints {} color Color/white on-close c/exit resizable? false visible? true}} (:props this)
                           canvas (assoc canvas :rendering rendering-hints)
+                          canvas (assoc canvas :canvas (doto (:canvas canvas)
+                                                         (.setBackground ^java.awt.Color (:background color))))
                           window (doto window
                                    (.setLocation x y)
                                    (.setSize (Dimension. width height))
-                                   (.setTitle title)
                                    (.setBackground ^java.awt.Color (:background color))
+                                   (.setTitle title)
                                    (.setDefaultCloseOperation on-close)
                                    (.setResizable resizable?)
                                    (.setVisible visible?))]
                       (assoc this :context {:window window :canvas canvas}))))
-  (draw [this _] 
+  (draw [{:keys [name context props] :as this} canvas] 
+        (let [{:keys [width height color]} props]
+          (c/draw-> canvas
+                    (c/rect 0 0 width height (:background color) true)))
         this)
   (after-drawing [this] this))
 

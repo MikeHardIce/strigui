@@ -15,8 +15,8 @@
                                 :border (java.awt.Color. 27 100 98)
                                 :resize (java.awt.Color. 247 247 247)}
                                {:window-color (java.awt.Color. 250 250 250)
-                                :background (java.awt.Color. 47 120 118)
-                                :text (java.awt.Color. 61 61 61)
+                                :background (java.awt.Color. 44 44 44)
+                                :text (java.awt.Color. 161 161 161)
                                 :focus (java.awt.Color. 117 190 188)
                                 :select (java.awt.Color. 117 190 188)
                                 :border (java.awt.Color. 27 100 98)
@@ -32,8 +32,10 @@
                           (gui/add-window "sub-window" 100 100 700 500 "Sub Window" {:on-close gui/hide :resizable? true})
                           (gui/add-button "sub-window" "btnBla" "Change Theme" {:x 100 :y 300 :width 200})
                           (gui/attach-event "btnBla" :mouse-clicked (fn [wdgs _]
-                                                                      (update-in wdgs ["main-window" :props :x] (partial + 50))))))
-  
+                                                                      (-> wdgs 
+                                                                          (update-in ["main-window" :props :x] (partial + 50))
+                                                                          (gui/change-color-profile "sub-window" (first (swap! color-profiles reverse)))
+                                                                          )))))
   ;;TODO: cabra with window hide/exit/resize event
   ;; in particular the resizing needs to update the properties
 

@@ -271,6 +271,8 @@
               removed-keys (removed-widgets->keys before @widgets-after)
               neighbour-keys (select-neighbouring-keys canvas @widgets-after (s/union updated-keys added-keys removed-keys))]
           (c/use-buffer-> canvas
+                          (when (and (seq window-after) (not= window-before window-after))
+                            (draw window canvas))
                           (doseq [to-hide (vals (select-keys before (s/union updated-keys removed-keys)))]
                             (when (-> to-hide :props :can-hide?)
                               (hide! to-hide canvas)))
@@ -284,7 +286,8 @@
         (catch Exception e
           (println "Failed to update widgets, perhaps the given function" \newline
                    "doesn't take or doesn't return a widgets map." \newline
-                   "Exception: " (.getMessage e))
+                   "Exception: " (.getMessage e) \newline
+                   (clojure.stacktrace/print-stack-trace e))
           after))
       after)))
 

@@ -133,7 +133,8 @@
                   (if-not (seq wdgs-keys)
                     wdgs
                     (recur (assoc-in wdgs [(first wdgs-keys) :props :color] color-prof) (rest wdgs-keys))))]
-    (assoc-in widgets [window-name :props :color] color-profile)))
+    (assoc-in widgets [window-name :props :color] (dissoc (assoc color-profile :background (:window-color color-profile))
+                                                          :window-color))))
 
 (defn add-window
   "Creates a new window widget with the parameters:
