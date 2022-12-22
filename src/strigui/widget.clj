@@ -266,7 +266,9 @@
         (let [canvas (-> window :context :canvas)
               before (filter-by-window window-key before)
               widgets-after (atom (filter-by-window window-key after))
-              updated-keys (updated-widgets->keys before @widgets-after)
+              updated-keys (if (and (seq window-after) (not= window-before window-after))
+                             (keys @widgets-after)
+                             (updated-widgets->keys before @widgets-after))
               added-keys (added-widgets->keys before @widgets-after)
               removed-keys (removed-widgets->keys before @widgets-after)
               neighbour-keys (select-neighbouring-keys canvas @widgets-after (s/union updated-keys added-keys removed-keys))]
