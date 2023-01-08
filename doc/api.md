@@ -107,7 +107,7 @@ Parameter | Explanation
 :width | width of the widget
 :height | height of the widget
 :color | Map of java.awt.Color instances, where the keys can be :background :text :focus :select :border :resize
-:highlight | <p>Vector with possible elements: </br><table><tr><td>:alpha</td><td>uses the highlight colors for focusing, selecting and resizing of the widget transparent on top of the widget</td><td>:border</td><td>uses the highlight colors for focusing, selecting and resizing of the widget within the border around the widget</td> </tr></table></br> It is possible to use both via [:alpha :border]</p>
+:highlight | <p>Vector with possible elements: </br><table><tr><td>:alpha</td><td>uses the highlight colors for focusing, selecting and resizing of the widget transparent on top of the widget</td></tr><tr><td>:border</td><td>uses the highlight colors for focusing, selecting and resizing of the widget within the border around the widget</td> </tr></table></br> It is possible to use both via [:alpha :border]</p>
 
 ### Buttons
 
