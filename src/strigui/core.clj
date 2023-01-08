@@ -129,7 +129,7 @@
   [widgets window-name color-profile]
   (let [color-prof (dissoc color-profile :window-color)
         widgets (loop [wdgs widgets
-                       wdgs-keys (keys widgets)]
+                       wdgs-keys (wdg/window->widgets wdgs window-name)]
                   (if-not (seq wdgs-keys)
                     wdgs
                     (recur (assoc-in wdgs [(first wdgs-keys) :props :color] color-prof) (rest wdgs-keys))))]
