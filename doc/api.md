@@ -47,7 +47,15 @@ options map | A map containing settings for the window behavior or appearance
 Options map:
 Parameter | Explanation
 ---|---
-:color | Map of java.awt.Color values where the keys are :background :text :focus :select :border :resize
+:color | <p>Map of java.awt.Color values where the keys are: 
+<table><tr><th>Key</th><th><Explanation/th></tr>
+<tr><td>:background-widgets</td><td>Background color of the widgets located on the window</td></tr>
+<tr><td>:background</td><td>Background color of the window</td></tr>
+<tr><td>:text</td><td>Font color of the widgets located on the window</td></tr>
+<tr><td>:focus</td><td>Color when widgets are focused/hovered over</td></tr>
+<tr><td>:select</td><td>Color when widgets are clicked/selected</td></tr>
+<tr><td>:border</td><td>Border color of widgets</td></tr>
+<tr><td>:resize</td><td>Color used when widgets are resized</td></tr></table></p>
 :rendering-hints | Map of java.awt.RenderingHint keys and values, specifying the quality of the elements painted
 :on-close | Determines the closing behaviour of the window. Possible values capra.core/exit, capra.core/hide
 :icon-path | Path to the window icon image in jpeg, gif or png - default: nil
@@ -78,7 +86,16 @@ Parameter | Explanation
 ---|---
 widgets | The full widget map representing the state of the UI
 window-name | The window name whoise color profile should be changed.
-colors | Map of java.awt.Colors, keys :background-widgets :background :text :focus :select :border :resize
+colors | <p>Map of java.awt.Colors, the following keys are allowed:
+<table><tr><th>Key</th><th><Explanation/th></tr>
+<tr><td>:background-widgets</td><td>Background color of the widgets located on the window</td></tr>
+<tr><td>:background</td><td>Background color of the window</td></tr>
+<tr><td>:text</td><td>Font color of the widgets located on the window</td></tr>
+<tr><td>:focus</td><td>Color when widgets are focused/hovered over</td></tr>
+<tr><td>:select</td><td>Color when widgets are clicked/selected</td></tr>
+<tr><td>:border</td><td>Border color of widgets</td></tr>
+<tr><td>:resize</td><td>Color used when widgets are resized</td></tr></table>
+</p>
 
 Example:
 ```Clojure
@@ -107,7 +124,10 @@ Parameter | Explanation
 :width | width of the widget
 :height | height of the widget
 :color | Map of java.awt.Color instances, where the keys can be :background :text :focus :select :border :resize
-:highlight | <p>Vector with possible elements: </br><table><tr><td>:alpha</td><td>uses the highlight colors for focusing, selecting and resizing of the widget transparent on top of the widget</td></tr><tr><td>:border</td><td>uses the highlight colors for focusing, selecting and resizing of the widget within the border around the widget</td> </tr></table></br> It is possible to use both via [:alpha :border]</p>
+:highlight | <p>Vector with possible elements: 
+<table><tr><td>:alpha</td><td>uses the highlight colors for focusing, selecting and resizing of the widget transparent on top of the widget</td></tr>
+<tr><td>:border</td><td>uses the highlight colors for focusing, selecting and resizing of the widget within the border around the widget</td> </tr>
+</table> It is possible to use both via [:alpha :border]</p>
 
 ### Buttons
 
