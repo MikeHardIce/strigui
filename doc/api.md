@@ -77,13 +77,13 @@ Changes the color profile of a window, which in effect changes the colors of exi
 Parameter | Explanation
 ---|---
 widgets | The full widget map representing the state of the UI
-window-name | The window name whois color profile should be changed.
-colors | Map of java.awt.Colors, keys :window-color :background :text :focus :select :border :resize
+window-name | The window name whoise color profile should be changed.
+colors | Map of java.awt.Colors, keys :background-widgets :background :text :focus :select :border :resize
 
 Example:
 ```Clojure
-(gui/swap-widgets! #(gui/change-color-profile % "main-window" { :window-color (java.awt.Color. 250 250 250)
-                                                                :background (java.awt.Color. 44 44 44)
+(gui/swap-widgets! #(gui/change-color-profile % "main-window" { :background-widgets (java.awt.Color. 44 44 44) 
+                                                                :background (java.awt.Color. 250 250 250)
                                                                 :text (java.awt.Color. 161 161 161)
                                                                 :focus (java.awt.Color. 117 190 188)
                                                                 :select (java.awt.Color. 117 190 188)
@@ -99,11 +99,15 @@ up the possibility to implement custom widgets that can be used in the same way 
 Widgets, Windows and their current state can be exported to an edn file, as well as imported from an edn file.
 
 
-All widget share the following common properties:
+All widget share the following common *properties* map:
 Parameter | Explanation
 ---|---
-x | x position relative of the assigned window (the top left corner of the window is (0 , 0))
-y | y position relative of the assigned window (the top left corner of the window is (0 , 0))
+:x | x position relative of the assigned window (the top left corner of the window is (0 , 0))
+:y | y position relative of the assigned window (the top left corner of the window is (0 , 0))
+:width | width of the widget
+:height | height of the widget
+:color | Map of java.awt.Color instances, where the keys can be :background :text :focus :select :border :resize
+:highlight | <p>Vector with possible elements: </br><table><tr><td>:alpha</td><td>uses the highlight colors for focusing, selecting and resizing of the widget transparent on top of the widget</td><td>:border</td><td>uses the highlight colors for focusing, selecting and resizing of the widget within the border around the widget</td> </tr></table></br> It is possible to use both via [:alpha :border]</p>
 
 ### Buttons
 

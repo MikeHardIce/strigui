@@ -125,16 +125,15 @@
 (defn change-color-profile
   "Changes the color profile of the window and all widgets
    color-profile is a map with keys:
-   :window-color :background :text :focus :select :resize :border"
+  :background :background-widgets :text :focus :select :resize :border"
   [widgets window-name color-profile]
-  (let [color-prof (dissoc color-profile :window-color)
+  (let [color-prof (dissoc (merge color-profile {:background (:background-widgets color-profile)}) :background-widgets)
         widgets (loop [wdgs widgets
                        wdgs-keys (wdg/window->widgets wdgs window-name)]
                   (if-not (seq wdgs-keys)
                     wdgs
                     (recur (assoc-in wdgs [(first wdgs-keys) :props :color] color-prof) (rest wdgs-keys))))]
-    (assoc-in widgets [window-name :props :color] (dissoc (assoc color-profile :background (:window-color color-profile))
-                                                          :window-color))))
+    (assoc-in widgets [window-name :props :color] color-profile)))
 
 (defn add-window
   "Creates a new window widget with the parameters:
