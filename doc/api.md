@@ -107,10 +107,10 @@ Parameter | Explanation
 :z | z position, widgets with higher z value are drawn on top of widgets with lower z value
 :width | width of the widget
 :height | height of the widget
-:color | <p>Map of java.awt.Color instances, where the keys can be:<table><tr><th>Key</th><th>Explanation</th></tr><tr><td>:background-widgets</td><td>Background color of the widgets located on the window</td></tr><tr><td>:background</td><td>Background color of the window</td></tr><tr><td>:text</td><td>Font color of the widgets located on the window</td></tr><tr><td>:focus</td><td>Color when widgets are focused/hovered over</td></tr><tr><td>:select</td><td>Color when widgets are clicked/selected</td></tr><tr><td>:border</td><td>Border color of widgets</td></tr><tr><td>:resize</td><td>Color used when widgets are resized</td></tr></table></p>
+:color | <p>Map of java.awt.Color instances, where the keys can be:<table><tr><th>Key</th><th>Explanation</th></tr><tr><td>:background</td><td>Background color of the widget</td></tr><tr><td>:text</td><td>Font color of the widgets located on the window</td></tr><tr><td>:focus</td><td>Color when widgets are focused/hovered over</td></tr><tr><td>:select</td><td>Color when widgets are clicked/selected</td></tr><tr><td>:border</td><td>Border color of widgets</td></tr><tr><td>:resize</td><td>Color used when widgets are resized</td></tr></table></p>
 :highlight | <p>Vector with possible elements: </br><table><tr><td>:alpha</td><td>uses the highlight colors for focusing, selecting and resizing of the widget transparent on top of the widget</td></tr><tr><td>:border</td><td>uses the highlight colors for focusing, selecting and resizing of the widget within the border around the widget</td> </tr></table></br> It is possible to use both via [:alpha :border]</p>
 :highlight-alpha-opacity | alpha channel from 0 to 100 for the hightlight color. Only used if :highlight includes :alpha
-:can-tab? | Enable widget tabbing. Values: true, false
+:can-tab? | Enable widget tabbing. Values: true, false   default: false
 
 
 ### Buttons
