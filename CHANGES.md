@@ -26,7 +26,7 @@
 * made window a widget
 * internally extracted swap-widgets so that it can be used with update-in 
 * State map now uses an agent instead of an atom
-* TODO: make it possible to set a color theme (in progress)
+* make it possible to set a color theme
 * TODO: better documentation (in progress)
 
 ### 0.0.1-alpha31

@@ -152,10 +152,17 @@
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"
   ([widgets window-key ^strigui.widget.Widget widget] (add widgets window-key widget (:color wdg/widget-default-props)))
   ([widgets window-key ^strigui.widget.Widget widget color-profile]
-  (let [canvas (-> widgets (get window-key) :context :canvas)
+  (let [window (get widgets window-key)
+        canvas (-> window :context :canvas)
+        window-color-profile (-> window :props :color)
+        window-color-profile (-> window-color-profile
+                                 ((fn [p]
+                                    (assoc p :background (:background-widgets p))))
+                                 (dissoc :background-widgets))
         widget (update widget :props merge wdg/widget-default-props
                        (-> widget (assoc-in [:props :color] color-profile) :props)
                        (-> widget (assoc-in [:props :window] window-key) :props)
+                       (-> widget (assoc-in [:props :color] window-color-profile) :props)
                        (-> widget :props))
         widget (->> widget
                     (wdg/adjust-dimensions canvas)
