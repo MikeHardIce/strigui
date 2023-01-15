@@ -13,7 +13,7 @@
                     (assoc-in this [:props :source-object-changed?] false)
                     (let [{:keys [window canvas]} (:context this)
                           {:keys [x y width height title rendering-hints color on-close resizable? visible?]
-                           :or {x 0 y 0 width 0 height 0 title "" rendering-hints {} color Color/white on-close c/exit resizable? false visible? true}} (:props this)
+                           :or {x 0 y 0 width 0 height 0 title "" rendering-hints {} color (:background Color/white) on-close c/exit resizable? false visible? true}} (:props this)
                           canvas (assoc canvas :rendering rendering-hints)
                           canvas (assoc canvas :canvas (doto (:canvas canvas)
                                                          (.setBackground ^java.awt.Color (:background color))))
@@ -44,17 +44,17 @@
    color - java.awt.Color of the windows background color
    rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
    of any widget drawn within the window" 
-  [name x y width height title {:keys [color rendering-hints on-close icon-path resizable? visible?] :or {color (java.awt.Color. 44 44 44)
+  [name x y width height title {:keys [color rendering-hints on-close icon-path resizable? visible?] :or {color {:background (java.awt.Color. 44 44 44)}
                                                                                                             rendering-hints {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON
                                                                                                                              java.awt.RenderingHints/KEY_RENDERING java.awt.RenderingHints/VALUE_RENDER_SPEED}
                                                                                                             on-close c/exit
                                                                                                             icon-path nil
                                                                                                             resizable? false
                                                                                                             visible? true}}]
-   (let [context (c/create-window name x y width height title {:color color :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})
+   (let [context (c/create-window name x y width height title {:color (:background color) :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})
          context (assoc-in context [:canvas :rendering] rendering-hints)
          context (update context :canvas c/attach-buffered-strategy 2)]
-     (Window. name context {:title title :x x :y y :width width :height height :color {:background color} :rendering-hints rendering-hints 
+     (Window. name context {:title title :x x :y y :width width :height height :color color :rendering-hints rendering-hints 
                             :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})))
 
 (defmethod c/handle-event :window-hidden [_ {:keys [window]}]
