@@ -1,66 +1,79 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
-### 0.0.1-alpha32 (in progress)
+## next next
+  * focus on a complete set of widgets, like DatePicker, DropDown, Radio Buttons, etc. ...
 
-* fixed tabbing when no widget was selected previously
-* arrange function to automatically adjust position of selected widgets. Widgets can be aligned :left :center :right
-* add-multiple function to add a bulk of widgets of a given type by providing just their names and values
-* rework color property (pass a map with keys :background :text :focus :select :resize)
-* enable updating properties of multiple widgets at the same time
-* changed widgets :args key to :props key (properties of a widget)
-* give option for widget highlights to be a combination of :border :none :alpha (:alpha with add a transparent layer 
-  in the highlight color on top)
-* highlight border size can be adjusted via key :highlight-border-size accepting a non negative numbers
-* highlight alpha opacity can be adjusted via key :highlight-alpha-opacity accepting integers from 0 to 255
-* copy and paste via ctrl+c and ctrl+v for input fields
-* removed :has-border? property key, hightlight are now active as soon as a :highlight key with a non empty vector is provided
-* multi column support for list widgets
-* add optional header for list widgets
-* headers can have header actions :sort :sort-asc :sort-desc :select-all 
-  the header actions get reversed with consecutive clicks on the header :sort and :sort-asc -> :sort-desc, :select-all will get unselected
-* reworked how widgets are selected for redrawing
-* reworked how neighbours are determined
-* removed def-action macro, use the property :can-hide? instead
-* :can-multiline? for multi line support of input boxes and buttons
-* made window a widget
-* internally extracted swap-widgets so that it can be used with update-in 
-* State map now uses an agent instead of an atom
-* make it possible to set a color theme
-* TODO: better documentation (in progress)
+## 0.0.1-alpha32 (in progress)
 
-### 0.0.1-alpha31
+### General
+  * arrange function to automatically adjust position of selected widgets. Widgets can be aligned :left :center :right
+  * add-multiple function to add a bulk of widgets of a given type by providing just their names and values
+  * fixed tabbing when no widget was selected previously
+  * enable updating properties of multiple widgets at the same time
+  * reworked how widgets are selected for redrawing  
+  * reworked how neighbours are determined
+  * removed def-action macro, use the property :can-hide? instead
+  * internally reworked swap-widgets so that it can be used internally with update-in 
+  * State map now uses an agent instead of an atom
+  * support for multiple windows
+  * TODO: better documentation (in progress, [wiki](https://github.com/MikeHardIce/strigui/wiki))
+
+### Highlight properties
+  * highlight alpha opacity can be adjusted via key :highlight-alpha-opacity accepting integers from 0 to 255
+  * highlight border size can be adjusted via key :highlight-border-size (accepting a non negative numbers)
+  * removed :has-border? property key, hightlight are now active as soon as a :highlight key with a non empty vector is provided
+  * give option for widget highlights to be a combination of :border :none :alpha (:alpha with add a transparent layer 
+    in the highlight color on top)
+
+### Widgets
+  * **windows** are now widgets
+  * checkboxes (TODO)
+  * each widget needs to be assigned to a window key in order for it to be drawn
+  * changed widgets **:args** key to **:props** key (properties of a widget)
+  * copy and paste via ctrl+c and ctrl+v for **input fields**
+  * :can-multiline? for multi line support of **input fields** and **buttons**
+  * multi column support for **list** widgets
+  * add optional header for **list** widgets
+  * headers for **list** widgets can have **header actions** :sort :sort-asc :sort-desc :select-all 
+    the header actions get reversed with consecutive clicks on the header :sort and :sort-asc -> :sort-desc, :select-all will get unselected
+
+### Colors
+  * rework color property (pass a map with keys :background :text :focus :select :resize)
+  * made it possible to set a color theme
+
+## 0.0.1-alpha31
 
 * fixed severe bug when hiding, forgot to hide items which were removed
 
-### 0.0.1-alpha30
+## 0.0.1-alpha30
 
 * reworked when to hide widgets, now that double buffering is enabled and no flickering occurs,
   I can go less specific. Therefore widgets simply hide when they have changed (immutability is great!)
   this fixes a bug where widgets are updated and need to redraw completly 
 
-### 0.0.1-alpha29
+## 0.0.1-alpha29
 
 * added after-drawing function to widget protocol
 * enabled double buffering via Capra, which flips at the end of the swap-widgets!, removing basically
   all flickering (who ever invented double buffering and who ever made it so easy usable in awt should get a noble prize)
 
-### 0.0.1-alpha28
+## 0.0.1-alpha28
 
 * bugfix: rendering hints not applying
 * remove rendering hints on hide for performance
 
-### 0.0.1-alpha27
+## 0.0.1-alpha27
 
 * support rendering hints
 * fixed a bug where widgets on top of widgets wouldn't lose their focus
 * reduced flickering: widgets now only hide when they change their size or position before being drawn again
 * fixed widget borders slightly to leave no trace when widgets are drawn over
 
-### 0.0.1-alpha26 (latest)
+## 0.0.1-alpha26 (latest)
 * fixed remove-widget-group
 
-### 0.0.1-alpha25
+## 0.0.1-alpha25
 
 * fixed the export/import of the current state to/from an edn file
 * hiding based on background color by using capra/clear-rect
@@ -81,45 +94,45 @@
 * new widget: list
   
 
-### 0.0.1-alpha24
+## 0.0.1-alpha24
 
 * fixed removing of widgets
 
-### 0.0.1-alpha23
+## 0.0.1-alpha23
 
 * expose mouse position in mouse related widget-events 
 
-### 0.0.1-alpha22
+## 0.0.1-alpha22
 
 * replaced clojure2d with capra
 
-### 0.0.1-alpha21
+## 0.0.1-alpha21
 
 * update function now are variadic (skip-redrawing moved to own function -> update-skip-redraw!,
   update-group-skip-redraw!)
 * added global events via strigui.widget namespace
 * reverted tab fix
 
-### 0.0.1-alpha20
+## 0.0.1-alpha20
 
 * support multiline labels
 * fixed an issue where a tabbed widget couldn't be tabbed again when removed and then read
 
-### 0.0.1-alpha19 
+## 0.0.1-alpha19 
 
 * added skip-redraw? for widget updates
 * added :skip-redrawing option to widget
 * fixed issue where widgets can be removed on click by the user before it can get replaced
 
-### 0.0.1-alpha18
+## 0.0.1-alpha18
 
 * fixed find-by-group! and remove-group!
 
-### 0.0.1-alpha17
+## 0.0.1-alpha17
 
 * removed unnecessary redrawing of widgets
 
-### 0.0.1-alpha16
+## 0.0.1-alpha16
 
 * converting strigui.widget/state :widgets to a hashmap instead of a vector
 * fixing drawing order when widgets are above/below other widgets and 
@@ -127,17 +140,17 @@
 * fixed tabbing which wasn't tabbing through all tabbable widgets
 * register!/unregister!/replace! can now be used without redrawing the body of the widget
 
-### 0.0.1-alpha15
+## 0.0.1-alpha15
 
 * fixes around the drawing order of widgets and their neighbouring widgets
 * when the mouse moves within a widgets, it is not constantly redrawn anymore
 
-### 0.0.1-alpha14
+## 0.0.1-alpha14
 
 * some fixes to the drawing order, this probably needs a rework/different strategy
 * resizing, selecting and focusing state drawing functions can be overriden when defining custom widgets
 
-### 0.0.1-alpha13
+## 0.0.1-alpha13
 
 * the entire gui can now be stored into an edn file
 * widgets can now be resized with the mouse (props :can-resize?)
@@ -147,7 +160,7 @@
 * the widget protocol provides now a "default" function, called when the widget gets created, this helps setting specific properties
 * removed value and widget-name functions from widget protocol
 
-### 0.0.1-alpha12
+## 0.0.1-alpha12
 
 * load gui from an edn file (or load only a subset of widgets via an edn file)
 * possibility of custom hide function
