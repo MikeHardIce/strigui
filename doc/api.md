@@ -125,9 +125,11 @@ Parameter | Explanation
 
 ### Arranging widgets
 
+## Custom Widgets
+
 ## Import/Export from/to Edn
 
-All windows and widgets can be imported from an edn file as well as exported.
+All windows and widgets can be imported and exported via edn.
 
 ### Import
 
@@ -149,6 +151,3 @@ The above file can be loaded with
 ```
 which will read the edn file, create 2 windows and a label, and assign the label to the main window:
 ![](pics/strigui-import.png)
-
-
-## Custom Widgets
