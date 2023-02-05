@@ -125,6 +125,30 @@ Parameter | Explanation
 
 ### Arranging widgets
 
-## Import/Export to Edn
+## Import/Export from/to Edn
+
+All windows and widgets can be imported from an edn file as well as exported.
+
+### Import
+
+Example file: gui-test.edn
+```Clojure
+{:window [["main-window" 50 50 700 500 "Main Window" {:resizable? true :on-close #window exit}]
+          ["sub-window" 700 100 700 500 "Sub Window" {:on-close #window hide :resizable? true}]]
+ :strigui.label/Label [["welcome" "Welcome to Strigui
+                                   and other stuff ..." {:x 190 :y 100 :z 20
+                                                         :color {:text (java.awt.Color. 47 120 118)}
+                                                         :font-size 20 :font-style [:italic]
+                                                         :can-move? true :group "bla"
+                                                         :window "main-window"}]]}
+```
+
+The above file can be loaded with
+```Clojure
+(gui/from-file! "gui-test.edn")
+```
+which will read the edn file, create 2 windows and a label, and assign the label to the main window:
+![](pics/strigui-import.png)
+
 
 ## Custom Widgets
