@@ -3,6 +3,7 @@
 
 ## next next
   * focus on a complete set of widgets, like DatePicker, DropDown, Radio Buttons, etc. ...
+  * window property :guides? which draws visual guides to help align widgets when dragging them across the window
 
 ## 0.0.1-alpha32 (in progress)
 

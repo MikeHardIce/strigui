@@ -1,14 +1,16 @@
-{:window ["main" 200 300 1500 600 "My Window" (java.awt.Color. 44 44 44)]
+{:window [["main-window" 50 50 700 500 "Main Window" {:resizable? true :on-close strigui.core/exit}]
+          ["sub-window" 100 100 700 500 "Sub Window" {:on-close strigui.core/hide :resizable? true}]]
  :strigui.label/Label [["welcome" "Welcome to Strigui
                                    and other stuff ..." {:x 190 :y 100 :z 20
                                                       :color {:text (java.awt.Color. 47 120 118)}
                                                       :font-size 20 :font-style [:italic]
-                                                      :can-move? true :group "bla"}]]
+                                                      :can-move? true :group "bla"
+                                                      :window "main-window"}]]
  :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 3
-                                             :highlight [:alpha] :can-tab? true :group "bla"}]]
+                                             :highlight [:alpha] :can-tab? true :group "bla" :window "main-window"}]]
  :strigui.list/List [["test-list" [{:value "First Item"} {:value "Second Item"} {:value "Third Item"}
                                    {:value "4"} {:value "5"} {:value "6"} {:value "7"} {:value "8"} {:value "9"}] {:x 350 :y 300 :width 150
-                                                                                                        :height 200 :highlight [:alpha]}]
+                                                                                                        :height 200 :highlight [:alpha] :window "main-window"}]
                      ["test-table" [{:value [1 "One"]} {:value [2 "Two"]} {:value [3 "Three"]}
                                     {:value [4 "Four"]} {:value [5 "Five"]} {:value [6 "Six"]}
                                     {:value [7 "Seven"]} {:value [8 "Eight"]} {:value [9 "Nine"]}
@@ -18,10 +20,10 @@
                                     {:value [20 "Twenty"]} {:value [21 "Twentyone"]} {:value [22 "Twentytwo"]}
                                     {:value [23 "Twentythree"]} {:value [24 "Twentyfour"]} {:value [25 "Twentyfive"]}] 
                       {:x 600 :y 100 :width 800 :height 400 :highlight [:alpha]
-                       :highlight-alpha-opacity 10
+                       :highlight-alpha-opacity 10 :window "sub-window"
                        :header [{:value "Number" :action :sort} {:value "Name" :action :sort} {:value "Select All" :action :select-all}]}]]
  :strigui.input/Input [["input" "abc" {:x 100 :y 150 :z 3 :width 420 
                                       :highlight [:alpha] :selected? false :can-tab? true 
-                                    :can-resize? true :can-move? true :group ["inputs" "bla"]}]
+                                    :can-resize? true :can-move? true :group ["inputs" "bla"] :window "main-window"}]
                        ["input1" "" {:x 100 :y 200 :z -1
-                                    :highlight [:alpha] :width 420 :height 300 :can-tab? true :can-multiline? true :group "inputs" :password? false}]]}
+                                    :highlight [:alpha] :width 420 :height 300 :can-tab? true :can-multiline? true :group "inputs" :password? false :window "main-window"}]]}

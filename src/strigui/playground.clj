@@ -22,20 +22,32 @@
                                 :border (java.awt.Color. 27 100 98)
                                 :resize (java.awt.Color. 247 247 247)}]))
 
-(defn main []
-  ;;(gui/window! 200 300 1500 600 "My Window" (java.awt.Color. 44 44 44)) ;{java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}
-
-  
+(defn moving-by-button
+  []
   (gui/swap-widgets! #(gui/add-window % "main-window" 50 50 700 500 "Main Window" {:on-close gui/exit :resizable? true :color (-> @color-profiles first)}))
 
-  (gui/swap-widgets! #(-> % 
+  (gui/swap-widgets! #(-> %
                           (gui/add-window "sub-window" 100 100 700 500 "Sub Window" {:on-close gui/hide :resizable? true :color (-> @color-profiles first)})
                           (gui/add-button "sub-window" "btnBla" "Change Theme" {:x 100 :y 300 :width 200})
                           (gui/attach-event "btnBla" :mouse-clicked (fn [wdgs _]
-                                                                      (-> wdgs 
+                                                                      (-> wdgs
                                                                           (update-in ["main-window" :props :x] (partial + 50))
-                                                                          (gui/change-color-profile "sub-window" (first (swap! color-profiles reverse)))
-                                                                          )))))
+                                                                          (gui/change-color-profile "sub-window" (first (swap! color-profiles reverse)))))))))
+
+(defn default-stuff
+  []
+  (gui/from-file! "gui-test-simple.edn")
+  #_(gui/swap-widgets! #(-> %
+                          (gui/add-window "main" 100 100 1200 800 "Welcome to Strigui" {})
+                          (gui/add-button "main" "btnOk" "Ok" {:x 150 :y 700}))))
+
+(defn main []
+  
+  #_(moving-by-button)
+  (default-stuff)
+  ;;(gui/window! 200 300 1500 600 "My Window" (java.awt.Color. 44 44 44)) ;{java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}
+
+  
   ;;TODO: cabra with window hide/exit/resize event
   ;; in particular the resizing needs to update the properties
 

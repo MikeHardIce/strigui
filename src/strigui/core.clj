@@ -235,6 +235,7 @@
   [strigui-map]
   (when-let [windows (:window strigui-map)]
     (doseq [window-props windows]
+      (println "window-props: " window-props)
       (swap-widgets! #(apply add-window % window-props))))
   (let [exprs (for [widget-key (filter #(not= % :window) (keys strigui-map))]
                 (for [widget-props (map identity (widget-key strigui-map))]
@@ -251,12 +252,17 @@
                          (recur (rest to-be) (add wdgs (-> to-be first :props :window) (first to-be)))
                          wdgs))))))
 
+(defn- resolve-window-operation [key]
+  (case key
+    hide hide
+    exit exit))
+
 (defn from-file!
   "Initializes the window and the widgets from a edn file"
   [file-name]
   (when (.exists (io/file file-name))
     (->> (slurp file-name)
-         edn/read-string
+         (edn/read-string {:readers {'window resolve-window-operation}})
          from-map!)))
 
 (defn extract-rgb-constructors
