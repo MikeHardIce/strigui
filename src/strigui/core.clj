@@ -146,7 +146,8 @@
    rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
    of any widget drawn within the window"
   [widgets name x y width height title props]
-  (assoc widgets name (wnd/window name x y width height title props))) 
+  (assoc widgets name (wnd/window name x y width height title (update props :color merge {:background (java.awt.Color. 44 44 44)}
+                                                                      (:color props))))) 
 
 (defn add 
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"
@@ -235,8 +236,7 @@
   [strigui-map]
   (when-let [windows (:window strigui-map)]
     (doseq [window-props windows]
-      (println "window-props: " window-props)
-      (swap-widgets! #(apply add-window % window-props))))
+      (swap-widgets! #(apply add-window % (eval window-props)))))
   (let [exprs (for [widget-key (filter #(not= % :window) (keys strigui-map))]
                 (for [widget-props (map identity (widget-key strigui-map))]
                   (str "(apply " (namespace widget-key) "/->" (name widget-key) " " (vec widget-props) ")")))

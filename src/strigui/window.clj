@@ -51,6 +51,7 @@
                                                                                                             icon-path nil
                                                                                                             resizable? false
                                                                                                             visible? true}}]
+  (println "window color: " color)
    (let [context (c/create-window name x y width height title {:color (:background color) :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})
          context (assoc-in context [:canvas :rendering] rendering-hints)
          context (update context :canvas c/attach-buffered-strategy 2)]
