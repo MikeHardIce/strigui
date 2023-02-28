@@ -47,12 +47,12 @@
 
 (defmethod widget-global-event :default [_ widgets window-name & props] widgets)
 
-(defn window->widgets
+(defn window-key->widgets
   "Returns a vector of widget names of widgets that are part of the window with the given window key"
   [widgets window-key]
   (mapv :name (vals (filter (comp #(= % window-key) :window :props val) widgets))))
 
-(defn widget->window
+(defn widget->window-key
   "Returns the window the given widget is displayed on"
   [widgets widget-name]
   (when-let [widget (get widgets widget-name)]
@@ -347,7 +347,7 @@
   (if-let [window (get widgets window-name)]
     (let [;; get the first widget that is on top close to the mouse position
           canvas (-> window :context :canvas)
-          widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals (select-keys widgets (window->widgets widgets window-name)))))))
+          widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals (select-keys widgets (window-key->widgets widgets window-name)))))))
           clicked (when (seq widget) (:name widget))
           widgets (assoc-arg-for-all widgets :selected? nil)]
       (if (and clicked (not (-> (get widgets clicked) :props :resizing?)))
@@ -361,7 +361,7 @@
 (defn handle-mouse-dragged
   [widgets window-name x y x-prev y-prev]
   (if-let [window (get widgets window-name)]
-    (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % (-> window :context :canvas)) x y) (vals (select-keys widgets (window->widgets widgets window-name)))))))]
+    (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % (-> window :context :canvas)) x y) (vals (select-keys widgets (window-key->widgets widgets window-name)))))))]
       (let [widgets (if (-> widget :props :resizing?)
                       (update widgets (:name widget) handle-widget-resizing x y x-prev y-prev)
                       (if (-> widget :props :can-move?)
@@ -373,7 +373,7 @@
 
 (defn handle-mouse-moved 
   [widgets window-name x y]
-  (if-let [current-widgets (seq (window->widgets widgets window-name))]
+  (if-let [current-widgets (seq (window-key->widgets widgets window-name))]
     (let [canvas (-> (get widgets window-name) :context :canvas)
           widget (first (reverse (sort-by #(-> % :props :z) (filter #(within? (coord % canvas) x y) (vals (select-keys widgets current-widgets))))))
         ;; if the mouse is not on a widget, check previously focused widgets, trigger events and unfocus them
@@ -401,7 +401,7 @@
                           (trigger-custom-event :widget-focus-in widgets (get widgets name) x y)))
               widgets (assoc-in widgets [(:name widget) :props :focused?] true)]
           (assoc-in widgets [(:name widget) :props :resizing?] (and (-> widget :props :can-resize?)
-                                                                    (on-border? (coord (get widgets (:name widget)) (:canvas (:context (get widgets (widget->window widgets (:name widget)))))) x y))))
+                                                                    (on-border? (coord (get widgets (:name widget)) (:canvas (:context (get widgets (widget->window-key widgets (:name widget)))))) x y))))
         widgets))
     widgets))
 
@@ -426,7 +426,7 @@
 
 (defn handle-tabbing
   [widgets widget code]
-  (if-let [window (widget->window widgets (:name widget))]
+  (if-let [window (widget->window-key widgets (:name widget))]
     (if (= code 9) ;;tab
       (let [canvas (-> window :context :canvas)
             previously-tabbed (:tabbed @previously)
@@ -448,7 +448,7 @@
   (let [previous-code (-> @previously :key-code)
         widgets (widget-global-event :key-pressed widgets char code previous-code)]
     (swap! previously assoc :key-code code)
-    (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(-> % :props :selected?) (vals (select-keys widgets (window->widgets widgets window-name)))))))]
+    (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(-> % :props :selected?) (vals (select-keys widgets (window-key->widgets widgets window-name)))))))]
       (let [widgets (handle-tabbing widgets widget code)
             widgets (widget-event :key-pressed widgets (get widgets (:name widget)) char code previous-code)]
         (trigger-custom-event :key-pressed widgets (get widgets (:name widget)) code char previous-code))

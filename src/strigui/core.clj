@@ -37,7 +37,7 @@
 (defn get-widget-names-by-window
   "Returns a vector of widget names of widgets that are part of the window with the given window key"
   [widgets window-key]
-  (wdg/window->widgets widgets window-key))
+  (wdg/window-key->widgets widgets window-key))
 
 (defn remove-widgets-by-group
   "Removes all widgets assigned to the given group"
@@ -129,7 +129,7 @@
   [widgets window-name color-profile]
   (let [color-prof (dissoc (merge color-profile {:background (:background-widgets color-profile)}) :background-widgets)
         widgets (loop [wdgs widgets
-                       wdgs-keys (wdg/window->widgets wdgs window-name)]
+                       wdgs-keys (wdg/window-key->widgets wdgs window-name)]
                   (if-not (seq wdgs-keys)
                     wdgs
                     (recur (assoc-in wdgs [(first wdgs-keys) :props :color] color-prof) (rest wdgs-keys))))]

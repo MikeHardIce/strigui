@@ -86,6 +86,6 @@
 
 (defmethod wdg/widget-event [strigui.input.Input :key-pressed]
   [_ widgets widget char code prev-code]
-  (if-let [window-name (wdg/widget->window widgets (:name widget))]
+  (if-let [window-name (wdg/widget->window-key widgets (:name widget))]
     (update widgets (:name widget) handle-key-pressed (-> (get widgets window-name) :context :canvas) char code prev-code)
     widgets))
