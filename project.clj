@@ -3,9 +3,9 @@
   :url "https://github.com/MikeHardIce/strigui"
   :license {:name "MIT License"
             :url "none"
-            :year 2022
+            :year 2023
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.10.3"]
                  [com.github.mikehardice/capra "0.0.4"]]
-  ;;:resource-paths ["resources/capra-0.0.4-test5.jar"]
+  ;;:resource-paths ["resources/capra-0.0.5-test1.jar"]
   :repl-options {:init-ns strigui.playground})

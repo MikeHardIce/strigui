@@ -8,4 +8,9 @@
                                                          :can-move? true :group "bla"
                                                          :window "main-window"}]]
  :strigui.button/Button [["click" "Click me" {:x 400 :y 250 :z 3
-                                              :highlight [:alpha] :can-tab? true :group "bla" :window "main-window"}]]}
+                                              :highlight [:alpha] :can-tab? true :group "bla" :window "main-window"}]]
+ :strigui.input/Input [["input" "abc" {:x 100 :y 150 :z 3 :width 420
+                                       :highlight [:alpha] :selected? false :can-tab? true
+                                       :can-resize? true :can-move? true :group ["inputs" "bla"] :window "main-window"}]
+                       ["input1" "" {:x 100 :y 200 :z -1
+                                     :highlight [:alpha] :width 420 :height 300 :can-tab? true :can-multiline? true :group "inputs" :password? false :window "main-window"}]]}

@@ -401,7 +401,7 @@
                           (trigger-custom-event :widget-focus-in widgets (get widgets name) x y)))
               widgets (assoc-in widgets [(:name widget) :props :focused?] true)]
           (assoc-in widgets [(:name widget) :props :resizing?] (and (-> widget :props :can-resize?)
-                                                                    (on-border? (coord (get widgets (:name widget)) (-> (widget->window widgets (:name widget)) :context :canvas)) x y))))
+                                                                    (on-border? (coord (get widgets (:name widget)) (:canvas (:context (get widgets (widget->window widgets (:name widget)))))) x y))))
         widgets))
     widgets))
 
