@@ -115,13 +115,57 @@ Parameter | Explanation
 
 ### Buttons
 
-
+```Clojure
+(gui/add-button widgets window-key name text props)
+```
 
 ### Labels
 
+```Clojure
+(gui/add-label widgets window-key name text props)
+```
+
 ### Text fields
 
+```Clojure
+(gui/add-input widgets window-key name text props)
+```
+
 ### Lists
+
+```Clojure
+(gui/add-list widgets window-key name items props)
+```
+
+## Events
+
+### Local Events
+
+```Clojure
+(gui/attach-event widgets name event f)
+```
+
+f - fn to handle the event with the following props: 
+   :mouse-clicked -> widgets widget
+   :mouse-moved -> widgets widget x y
+   :key-pressed -> widgets widget key-code
+   :widget-focus-in -> widgets widget x y
+   :widget-focus-out -> widgets widget x y
+
+### Global Events
+
+```Clojure
+(defmethod wdg/widget-global-event :mouse-clicked [_ widgets window-name x y]
+  ....
+  widgets)
+```
+
+with the following signatures based on the event:
+    :mouse-dragged -> widgets window x y x-prev y-prev
+    :mouse-moved -> widgets window x y
+    :mouse-clicked -> widgets window x y
+    :mouse-released -> widgets window x y
+    :key-pressed -> widgets char code previous-code
 
 ## Helpful functions
 
