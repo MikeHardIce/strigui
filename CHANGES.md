@@ -9,6 +9,7 @@
 
 ### General
   * arrange function to automatically adjust position of selected widgets. Widgets can be aligned :left :center :right
+  * TODO: align function to align an widget relative to another widget with :left :center :right. 
   * add-multiple function to add a bulk of widgets of a given type by providing just their names and values
   * fixed tabbing when no widget was selected previously
   * enable updating properties of multiple widgets at the same time

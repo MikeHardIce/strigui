@@ -44,8 +44,7 @@
    color - java.awt.Color of the windows background color
    rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
    of any widget drawn within the window" 
-  [name x y width height title {:keys [color rendering-hints on-close icon-path resizable? visible?] :or {color {:background (java.awt.Color. 44 44 44)}
-                                                                                                            rendering-hints {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON
+  [name x y width height title {:keys [color rendering-hints on-close icon-path resizable? visible?] :or {rendering-hints {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON
                                                                                                                              java.awt.RenderingHints/KEY_RENDERING java.awt.RenderingHints/VALUE_RENDER_SPEED}
                                                                                                             on-close c/exit
                                                                                                             icon-path nil

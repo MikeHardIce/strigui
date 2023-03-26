@@ -36,7 +36,8 @@
 
 (defn default-stuff
   []
-  (gui/from-file! "gui-test-simple.edn")
+  #_(gui/from-file! "gui-test-simple.edn")
+  (gui/from-file! "gui-test.edn")
   #_(gui/swap-widgets! #(-> %
                           (gui/add-window "main" 100 100 1200 800 "Welcome to Strigui" {})
                           (gui/add-button "main" "btnOk" "Ok" {:x 150 :y 700}))))

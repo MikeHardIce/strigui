@@ -23,12 +23,12 @@
                                :highlight-border-size 1.5
                                :highlight-alpha-opacity 30
                                :can-hide? true
-                               :color {:background (java.awt.Color. 47 120 118)
-                                       :text (java.awt.Color. 247 247 247)
+                               :color {:background (java.awt.Color. 250 250 250)
+                                       :text (java.awt.Color. 10 10 10)
                                        :focus (java.awt.Color. 117 190 188)
                                        :select (java.awt.Color. 117 190 188)
                                        :border (java.awt.Color. 27 100 98)
-                                       :resize (java.awt.Color. 247 247 247)}})
+                                       :resize (java.awt.Color. 147 220 118)}})
 
 (def previously (atom {:tabbed #{}
                        :mouse-position nil

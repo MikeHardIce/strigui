@@ -13,4 +13,15 @@
                                        :highlight [:alpha] :selected? false :can-tab? true
                                        :can-resize? true :can-move? true :group ["inputs" "bla"] :window "main-window"}]
                        ["input1" "" {:x 100 :y 200 :z -1
-                                     :highlight [:alpha] :width 420 :height 300 :can-tab? true :can-multiline? true :group "inputs" :password? false :window "main-window"}]]}
+                                     :highlight [:alpha] :width 420 :height 300 :can-tab? true :can-multiline? true :group "inputs" :password? false :window "main-window"}]]
+ :strigui.list/List [["test-list" [{:value "First Item"} {:value "Second Item"} {:value "Third Item"}
+                                   {:value "4"} {:value "5"} {:value "6"} {:value "7"} {:value "8"} {:value "9"}
+                                   {:value "First Item"} {:value "Second Item"} {:value "Third Item"}
+                                   {:value "4"} {:value "5"} {:value "6"} {:value "7"} {:value "8"} {:value "9"}] {:x 350 :y 300 :width 150
+                                                                                                        :height 200
+                                                                                                        :color {:background (java.awt.Color. 47 120 118)
+                                                                                                                :text (java.awt.Color. 247 247 247)
+                                                                                                                :focus (java.awt.Color. 77 150 148)
+                                                                                                                :select (java.awt.Color. 77 150 148)
+                                                                                                                :border (java.awt.Color. 27 100 98)}
+                                                                                                                   :highlight [:alpha] :window "sub-window"}]]}

@@ -122,6 +122,14 @@
                                    (assoc-in [name :props :height] h))))))
                   (+ height max-height (last space)))))))))
 
+(defn align
+  "Aligns a widget relative to another widget.
+   For example:
+   (align wdgs \"a\" \"main-window\" :center)
+   would align the widget \"a\" to the center of the main window"
+  [widgets widget-name reference-widget-name alignment]
+  widgets)
+
 (defn change-color-profile
   "Changes the color profile of the window and all widgets
    color-profile is a map with keys:
@@ -146,7 +154,7 @@
    rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
    of any widget drawn within the window"
   [widgets name x y width height title props]
-  (assoc widgets name (wnd/window name x y width height title (update props :color merge {:background (java.awt.Color. 44 44 44)}
+  (assoc widgets name (wnd/window name x y width height title (update props :color merge {:background (java.awt.Color. 250 250 250)}
                                                                       (:color props))))) 
 
 (defn add 
