@@ -3,13 +3,13 @@
 [![Clojars Project](https://img.shields.io/clojars/v/strigui.svg)](https://clojars.org/strigui)
 
 A small "kind-of-functional" GUI library that can be extended with new Widgets. At the moment, it contains widgets for buttons, input boxes, lists/tables and a label widget for just displaying text.
-The goal is to provide an easy to use library to create small desktop apps with Clojure in a somehow functional style. 
-Hand swap-widgets! a function to transform all widgets, swap-widgets will apply the function and determine what has been changed to see what needs to be redrawn.
+The goal is to provide an easy to use library to create small desktop apps with Clojure. Widgets like buttons, checkboxes etc. or windows themself shouldn't feel like objects. Instead, everything is basically just a map that gets rendered.
+Hand swap-widgets! a function to transition all widgets, including windows, into a new state. After the transition, strigui should figure out what needs to be redrawn and in which order.
 
 
-It uses [Capra](https://github.com/MikeHardIce/Capra) underneath (it was using [Clojure2d](https://github.com/Clojure2D/clojure2d) before). So anything that can be drawn could potentially be a widget (like the game board in [Dame](https://github.com/MikeHardIce/Dame)).
+Strigui uses [Capra](https://github.com/MikeHardIce/Capra) underneath (it was using [Clojure2d](https://github.com/Clojure2D/clojure2d) before). This is just to have a thin wrapper for java.awt. and no other dependencies besides what comes with the jvm. That means also that anything that can be drawn could potentially be a widget (like the game board in [Dame](https://github.com/MikeHardIce/Dame)).
 
-**Still in alpha, currently under a bit of rework so that windows can be treated as widgets as well. Basically all widgets, all windows and the theming will be accessible during the state transition in swap-widgets**
+**In alpha, currently under a bit of rework so that windows can be treated as widgets. Basically all widgets, all windows and the theming will be accessible during the state transition in swap-widgets. The current version Alpha31 cannot have multiple windows and creating a window is a separate action atm. Alpha32 will move everything to swap-widgets + support multiple windows and work with windows as if they were widgets, add helper functions for arranging widgets, color-profiles and more**
 
 [See Changes](CHANGES.md)
 
