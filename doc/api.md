@@ -115,6 +115,8 @@ Parameter | Explanation
 
 ### Buttons
 
+
+
 ### Labels
 
 ### Text fields
@@ -124,6 +126,19 @@ Parameter | Explanation
 ## Helpful functions
 
 ### Arranging widgets
+
+#### Align
+
+```Clojure
+(gui/align widgets name reference-widget-name alignment)
+```
+
+#### Arrange
+
+```Clojure
+(gui/arrage widgets widget-names...)
+(gui/arrange widgets skip-after options widget-names...)
+```
 
 ## Custom Widgets
 
@@ -151,3 +166,9 @@ The above file can be loaded with
 ```
 which will read the edn file, create 2 windows and a label, and assign the label to the main window:
 ![](pics/strigui-import.png)
+
+### Export
+
+```Clojure
+(gui/to-file "layout.edn")
+```
