@@ -49,39 +49,34 @@
                                                                                                             on-close c/exit
                                                                                                             icon-path nil
                                                                                                             resizable? false
-                                                                                                            visible? true}}]
-  (println "window color: " color)
+                                                                                                            visible? true}}] 
    (let [context (c/create-window name x y width height title {:color (:background color) :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})
          context (assoc-in context [:canvas :rendering] rendering-hints)
          context (update context :canvas c/attach-buffered-strategy 2)]
      (Window. name context {:title title :x x :y y :width width :height height :color color :rendering-hints rendering-hints 
                             :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})))
 
-(defmethod c/handle-event :window-hidden [_ {:keys [window]}]
-  (println "Window " window " hidden")
+(defmethod c/handle-event :window-hidden [_ {:keys [window]}] 
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :visible?] false)
                           (assoc-in [window :props :source-object-changed?] true))))
 
-(defmethod c/handle-event :window-shown [_ {:keys [window]}]
-  (println "Window " window " shown")
+(defmethod c/handle-event :window-shown [_ {:keys [window]}] 
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :visible?] true)
                           (assoc-in [window :props :source-object-changed?] true))))
 
 (defmethod c/handle-event :window-resized [_ {:keys [x y width height window]}]
-  (println "Window " window " resized")
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :width] width)
                           (assoc-in [window :props :height] height)
                           (assoc-in [window :props :source-object-changed?] true))))
 
 (defmethod c/handle-event :window-moved [_ {:keys [x y width height window]}]
-  (println "Window " window " moved")
   (wdg/swap-widgets! #(-> %
                           (assoc-in [window :props :x] x)
                           (assoc-in [window :props :y] y)
                           (assoc-in [window :props :source-object-changed?] true))))
 
 (defmethod  c/handle-event :window-closed [_ {:keys [window]}]
-  (println "Window " window " closed"))
+  )

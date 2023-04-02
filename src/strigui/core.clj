@@ -183,7 +183,6 @@
                           (-> widget :props :color))
         widget (update widget :props merge wdg/widget-default-props (:props widget))
         widget (assoc-in widget [:props :window] window-key)
-        bla (println widget)
         widget (->> widget
                     (wdg/adjust-dimensions canvas)
                     (wdg/defaults))]
