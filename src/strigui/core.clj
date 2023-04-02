@@ -122,8 +122,16 @@
                                    (assoc-in [name :props :height] h))))))
                   (+ height max-height (last space)))))))))
 
-(defn align
-  "Aligns a widget relative to another widget.
+(defn align-horizontal
+  "Aligns a widget relative to another widget horizontally.
+   For example:
+   (align wdgs \"a\" \"main-window\" :center)
+   would align the widget \"a\" to the center of the main window"
+  [widgets widget-name reference-widget-name alignment]
+  widgets)
+
+(defn align-vertical
+  "Aligns a widget relative to another widget vertically
    For example:
    (align wdgs \"a\" \"main-window\" :center)
    would align the widget \"a\" to the center of the main window"
@@ -154,8 +162,8 @@
    rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
    of any widget drawn within the window"
   [widgets name x y width height title props]
-  (assoc widgets name (wnd/window name x y width height title (update props :color merge {:background (java.awt.Color. 250 250 250)}
-                                                                      (:color props))))) 
+  (assoc widgets name (wnd/window name x y width height title (update props :color merge (:color props)
+                                                                      {:background (java.awt.Color. 250 250 250) :background-widgets (java.awt.Color. 250 250 250 250)})))) 
 
 (defn add 
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"
@@ -168,11 +176,14 @@
                                  ((fn [p]
                                     (assoc p :background (:background-widgets p))))
                                  (dissoc :background-widgets))
-        widget (update widget :props merge wdg/widget-default-props
-                       (-> widget (assoc-in [:props :color] color-profile) :props)
-                       (-> widget (assoc-in [:props :window] window-key) :props)
-                       (-> widget (assoc-in [:props :color] window-color-profile) :props)
-                       (-> widget :props))
+        widget (update-in widget [:props :color] merge
+                          (:color wdg/widget-default-props)
+                          color-profile
+                          window-color-profile
+                          (-> widget :props :color))
+        widget (update widget :props merge wdg/widget-default-props (:props widget))
+        widget (assoc-in widget [:props :window] window-key)
+        bla (println widget)
         widget (->> widget
                     (wdg/adjust-dimensions canvas)
                     (wdg/defaults))]
