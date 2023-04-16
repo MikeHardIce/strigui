@@ -123,19 +123,19 @@
                   (+ height max-height (last space)))))))))
 
 (defn align-horizontal
-  "Aligns a widget relative to another widget horizontally.
+  "Aligns a widget or widgets relative to another widget horizontally, only changing its x-coordinate.
    For example:
-   (align wdgs \"a\" \"main-window\" :center)
-   would align the widget \"a\" to the center of the main window"
-  [widgets widget-name reference-widget-name alignment]
+   (align wdgs \"main-window\" :center \"a\" \"b\")
+   would align the widget \"a\" and \"b\" to the horizontal center of the main window"
+  [widgets reference-widget-name alignment & widget-names]
   widgets)
 
 (defn align-vertical
-  "Aligns a widget relative to another widget vertically
+  "Aligns a widget relative to another widget vertically, only changing its y-coordinate
    For example:
-   (align wdgs \"a\" \"main-window\" :center)
-   would align the widget \"a\" to the center of the main window"
-  [widgets widget-name reference-widget-name alignment]
+   (align-vertical wdgs \"main-window\" :center \"a\" \"b\")
+   would align the widget \"a\" and \"b\" to the vertical center of the main window"
+  [widgets reference-widget-name alignment & widget-names]
   widgets)
 
 (defn change-color-profile

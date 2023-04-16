@@ -174,14 +174,14 @@ with the following signatures based on the event:
 #### Align
 
 ```Clojure
-(gui/align-horizontal widgets name reference-widget-name alignment)
-(gui/align-vertical widgets name reference-widget-name alignment)
+(gui/align-horizontal widgets reference-widget-name alignment & widget-names)
+(gui/align-vertical widgets reference-widget-name alignment & widget-names)
 ```
 
 #### Arrange
 
 ```Clojure
-(gui/arrage widgets widget-names)
+(gui/arrange widgets widget-names)
 (gui/arrange widgets skip-after options widget-names...)
 ```
 
