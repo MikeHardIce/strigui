@@ -217,3 +217,14 @@ which will read the edn file, create 2 windows and a label, and assign the label
 ```Clojure
 (gui/to-file "layout.edn")
 ```
+
+## Others
+
+### Inspect Widgets
+
+Returns all widgets as a map that are currently held by strigui. The keys are the widget 
+names. 
+
+```Clojure
+(gui/inspect-widgets)
+```

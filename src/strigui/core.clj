@@ -21,6 +21,11 @@
 (defonce ^:const exit c/exit)
 (defonce ^:const hide c/hide)
 
+(defn inspect-widgets
+  "Returns the entire widget map."
+  []
+  (:widgets (@wdg/state)))
+
 (defn swap-widgets!
   [f]
   "Used to add or modify widgets"

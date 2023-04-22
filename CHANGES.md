@@ -1,9 +1,12 @@
 
 [back](https://github.com/MikeHardIce/strigui)
 
-## next next
+## future
   * focus on a complete set of widgets, like DatePicker, DropDown, Radio Buttons, etc. ...
   * window property :guides? which draws visual guides to help align widgets when dragging them across the window
+  * get rid of box.clj and rather provide a namespace with helper functions to easily construct
+    types of widgets
+  * multi-select widgets via shift+left-mouse-click to drag them as a group
 
 ## 0.0.1-alpha32 (in progress)
 
@@ -20,6 +23,7 @@
   * State map now uses an agent instead of an atom
   * support for multiple windows
   * TODO: better documentation (in progress, [wiki](https://github.com/MikeHardIce/strigui/wiki))
+  * TODO: fix export
 
 ### Highlight properties
   * highlight alpha opacity can be adjusted via key :highlight-alpha-opacity accepting integers from 0 to 255
