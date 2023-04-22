@@ -446,7 +446,7 @@
 (defn handle-key-pressed
   [widgets window-name char code]
   (let [previous-code (-> @previously :key-code)
-        widgets (widget-global-event :key-pressed widgets char code previous-code)]
+        widgets (widget-global-event :key-pressed widgets window-name char code previous-code)]
     (swap! previously assoc :key-code code)
     (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(-> % :props :selected?) (vals (select-keys widgets (window-key->widgets widgets window-name)))))))]
       (let [widgets (handle-tabbing widgets widget code)
