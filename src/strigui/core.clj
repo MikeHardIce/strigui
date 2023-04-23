@@ -3,6 +3,7 @@
    [clojure.edn :as edn]
    [clojure.java.io :as io]
    [clojure.string]
+   [clojure.pprint :refer [pprint]]
    [strigui.button]
    [strigui.label]
    [strigui.list]
@@ -328,8 +329,4 @@
   [file-name]
   (when (.exists (io/file file-name))
     (io/delete-file file-name))
-  (->> (to-map)
-       str
-       (#(clojure.string/replace % #"]]," "]]\n"))
-       (#(clojure.string/replace % #"," ""))
-       (spit file-name)))
+  (pprint (to-map) (clojure.java.io/writer file-name)))

@@ -52,7 +52,7 @@
   ;;TODO: cabra with window hide/exit/resize event
   ;; in particular the resizing needs to update the properties
 
-  #_(gui/from-file! "gui-test.edn") 
+  #_(gui/from-file! "bla.edn") 
   
   #_(gui/swap-widgets! (fn [wdgs]
                        (-> wdgs
