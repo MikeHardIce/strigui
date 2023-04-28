@@ -11,13 +11,13 @@
   (before-drawing [this] 
                   (if (-> this :props :source-object-changed?)
                     (assoc-in this [:props :source-object-changed?] false)
-                    (let [{:keys [window canvas]} (:context this)
+                    (let [{:keys [frame canvas]} (:context this)
                           {:keys [x y width height title rendering-hints color on-close resizable? visible?]
                            :or {x 0 y 0 width 0 height 0 title "" rendering-hints {} color (:background Color/white) on-close c/exit resizable? false visible? true}} (:props this)
                           canvas (assoc canvas :rendering rendering-hints)
                           canvas (assoc canvas :canvas (doto (:canvas canvas)
                                                          (.setBackground ^java.awt.Color (:background color))))
-                          window (doto window
+                          window (doto frame
                                    (.setLocation x y)
                                    (.setSize (Dimension. width height))
                                    (.setBackground ^java.awt.Color (:background color))
@@ -25,10 +25,10 @@
                                    (.setDefaultCloseOperation on-close)
                                    (.setResizable resizable?)
                                    (.setVisible visible?))]
-                      (assoc this :context {:window window :canvas canvas}))))
-  (draw [{:keys [name context props] :as this} canvas] 
+                      (assoc this :context {:frame window :canvas canvas}))))
+  (draw [{:keys [name context props] :as this} window] 
         (let [{:keys [width height color]} props]
-          (c/draw-> canvas
+          (c/draw-> window
                     (c/rect 0 0 width height (:background color) true)))
         this)
   (after-drawing [this] this))
@@ -52,31 +52,31 @@
                                                                                                             visible? true}}] 
    (let [context (c/create-window name x y width height title {:color (:background color) :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})
          context (assoc-in context [:canvas :rendering] rendering-hints)
-         context (update context :canvas c/attach-buffered-strategy 2)]
+         context (c/attach-buffered-strategy context 2)]
      (Window. name context {:title title :x x :y y :width width :height height :color color :rendering-hints rendering-hints 
                             :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})))
 
-(defmethod c/handle-event :window-hidden [_ {:keys [window]}] 
+(defmethod c/handle-event :window-hidden [_ {:keys [window-name]}] 
   (wdg/swap-widgets! #(-> %
-                          (assoc-in [window :props :visible?] false)
-                          (assoc-in [window :props :source-object-changed?] true))))
+                          (assoc-in [window-name :props :visible?] false)
+                          (assoc-in [window-name :props :source-object-changed?] true))))
 
-(defmethod c/handle-event :window-shown [_ {:keys [window]}] 
+(defmethod c/handle-event :window-shown [_ {:keys [window-name]}] 
   (wdg/swap-widgets! #(-> %
-                          (assoc-in [window :props :visible?] true)
-                          (assoc-in [window :props :source-object-changed?] true))))
+                          (assoc-in [window-name :props :visible?] true)
+                          (assoc-in [window-name :props :source-object-changed?] true))))
 
-(defmethod c/handle-event :window-resized [_ {:keys [x y width height window]}]
+(defmethod c/handle-event :window-resized [_ {:keys [x y width height window-name]}]
   (wdg/swap-widgets! #(-> %
-                          (assoc-in [window :props :width] width)
-                          (assoc-in [window :props :height] height)
-                          (assoc-in [window :props :source-object-changed?] true))))
+                          (assoc-in [window-name :props :width] width)
+                          (assoc-in [window-name :props :height] height)
+                          (assoc-in [window-name :props :source-object-changed?] true))))
 
-(defmethod c/handle-event :window-moved [_ {:keys [x y width height window]}]
+(defmethod c/handle-event :window-moved [_ {:keys [x y width height window-name]}]
   (wdg/swap-widgets! #(-> %
-                          (assoc-in [window :props :x] x)
-                          (assoc-in [window :props :y] y)
-                          (assoc-in [window :props :source-object-changed?] true))))
+                          (assoc-in [window-name :props :x] x)
+                          (assoc-in [window-name :props :y] y)
+                          (assoc-in [window-name :props :source-object-changed?] true))))
 
-(defmethod  c/handle-event :window-closed [_ {:keys [window]}]
+(defmethod  c/handle-event :window-closed [_ {:keys [window-name]}]
   )

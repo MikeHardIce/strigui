@@ -21,7 +21,7 @@
       index)))
 
 (defn draw-list
-  [canvas items props ^Integer max-columns]
+  [context items props ^Integer max-columns]
   (let [items (filter :visible? items)]
     (loop [items items
            index 0]
@@ -34,12 +34,12 @@
                   width (/ (- (:width props) item-width-right-margin) max-columns)
                   cells (map (fn [it ind] [it ind]) (vec (concat (:value item) (repeat (- max-columns columns) ""))) (range 0 max-columns))]
               (doseq [cell cells]
-                (b/box-draw canvas (str (first cell)) {:x (+ (:x props) (* (second cell) width)) :y (+ (* index item-height) (:y props)) :width width :height item-height :color color})))
-            (b/box-draw canvas (str (-> items first :value)) (merge
+                (b/box-draw context (str (first cell)) {:x (+ (:x props) (* (second cell) width)) :y (+ (* index item-height) (:y props)) :width width :height item-height :color color})))
+            (b/box-draw context (str (-> items first :value)) (merge
                                                               {:y (+ (* index item-height) (:y props)) :width (- (:width props) item-width-right-margin) :height item-height :color color}
                                                               (select-keys props [:width :x]))))
           (when (:selected? item)
-            (c/draw-> canvas
+            (c/draw-> context
                       (c/line (inc (:x props)) (+ (* index item-height) (:y props))
                               (inc (:x props)) (+ (* (inc index) item-height) (:y props))
                               (get color :text java.awt.Color/green) 3))))
@@ -90,7 +90,7 @@
                                                                                            0)))
                            (make-visible this)
                            this))
-  (draw [this canvas]
+  (draw [this context]
         (let [{:keys [x y width height color header] :as props} (:props this)
               bar-x (+ x (- width item-width-right-margin))
               items (:items this)
@@ -99,14 +99,14 @@
               first-items-hidden (take-while #(not (:visible? %)) items)
               bar-scroll-height (* bar-ratio height)
               bar-y (+ y (/ (* bar-scroll-height (count first-items-hidden)) (if (seq items-visible) (count items-visible) 1)))]
-          (c/draw-> canvas
+          (c/draw-> context
                     (c/rect x y width height (:background color) false)
                     (c/rect bar-x y item-width-right-margin height (:background color) true)
                     (c/rect bar-x bar-y item-width-right-margin bar-scroll-height (:border color) true)) ;;(make-darker-or-brighter (:text color))
           (if-not header
-            (draw-list canvas items props (apply max (map #(-> % :value count) items)))
+            (draw-list context items props (apply max (map #(-> % :value count) items)))
             (let [columns (count header)]
-              (draw-list canvas [{:value (mapv (fn [head]
+              (draw-list context [{:value (mapv (fn [head]
                                                  (let [name (:value head)
                                                        suffix (case (:action head)
                                                                 :sort \u2191
@@ -114,7 +114,7 @@
                                                                 :sort-desc \u2193
                                                                 "")]
                                                    (str name " " suffix))) header) :visible? true}] props columns)
-              (draw-list canvas items (update props :y (partial + item-height)) columns)))
+              (draw-list context items (update props :y (partial + item-height)) columns)))
           this))
   (after-drawing [this] this))
 

@@ -176,7 +176,7 @@
   ([widgets window-key ^strigui.widget.Widget widget] (add widgets window-key widget (:color wdg/widget-default-props)))
   ([widgets window-key ^strigui.widget.Widget widget color-profile]
   (let [window (get widgets window-key)
-        canvas (-> window :context :canvas)
+        context (-> window :context)
         window-color-profile (-> window :props :color)
         window-color-profile (-> window-color-profile
                                  ((fn [p]
@@ -190,7 +190,7 @@
         widget (update widget :props merge wdg/widget-default-props (:props widget))
         widget (assoc-in widget [:props :window] window-key)
         widget (->> widget
-                    (wdg/adjust-dimensions canvas)
+                    (wdg/adjust-dimensions context)
                     (wdg/defaults))]
     (assoc widgets (:name widget) widget))))
 
