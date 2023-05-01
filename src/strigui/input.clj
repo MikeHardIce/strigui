@@ -10,14 +10,15 @@
 
 (defrecord Input [name value props]
   wdg/Widget
-  (coord [this context] (apply b/box-coord [context (:value this) (:props this)]))
+  (coord [this context] (b/coord-for-box-with-text context (:value this) (:props this)))
   (defaults [this] (assoc-in this [:props :highlight] [:border :alpha]))
   (before-drawing [this] this)
   (draw [this context]
-        (b/box-draw context (if (-> this :props :password?)
-                             (apply str (repeat (count (:value this)) "*"))
-                             (:value this)) (:props this))
-        this)
+    (let [text (if (-> this :props :password?)
+                 (apply str (repeat (count (:value this)) "*"))
+                 (:value this))]
+      (b/draw-box-with-text context text (:props this))
+      this))
   (after-drawing [this] 
                  this))
 

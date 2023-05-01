@@ -34,8 +34,8 @@
                   width (/ (- (:width props) item-width-right-margin) max-columns)
                   cells (map (fn [it ind] [it ind]) (vec (concat (:value item) (repeat (- max-columns columns) ""))) (range 0 max-columns))]
               (doseq [cell cells]
-                (b/box-draw context (str (first cell)) {:x (+ (:x props) (* (second cell) width)) :y (+ (* index item-height) (:y props)) :width width :height item-height :color color})))
-            (b/box-draw context (str (-> items first :value)) (merge
+                (b/draw-box-with-text context (str (first cell)) {:x (+ (:x props) (* (second cell) width)) :y (+ (* index item-height) (:y props)) :width width :height item-height :color color})))
+            (b/draw-box-with-text context (str (-> items first :value)) (merge
                                                               {:y (+ (* index item-height) (:y props)) :width (- (:width props) item-width-right-margin) :height item-height :color color}
                                                               (select-keys props [:width :x]))))
           (when (:selected? item)
