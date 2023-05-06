@@ -20,8 +20,8 @@
                            (assoc :thickness 1))]
       (b/draw-text window (:text props) (-> props
                                             (update :x + 30)
-                                            (update :width - 30)))
-      (b/draw-square window props-square)
-      (b/draw-tick window (assoc props :color (-> props :color :border)) (:value this))
+                                            (update :width - 30)
+                                            (update :y - 5)))
+      (b/draw-square window props-square (:value this))
       this))
   (after-drawing [this] this))

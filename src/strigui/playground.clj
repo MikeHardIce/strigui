@@ -37,7 +37,7 @@
 (defn default-stuff
   []
   #_(gui/from-file! "gui-test-simple.edn")
-  (gui/from-file! "gui-test.edn")
+  (gui/from-file! "bla.edn")
   #_(gui/swap-widgets! #(-> %
                           (gui/add-window "main" 100 100 1200 800 "Welcome to Strigui" {})
                           (gui/add-button "main" "btnOk" "Ok" {:x 150 :y 700}))))
@@ -46,6 +46,9 @@
   
   #_(moving-by-button)
   (default-stuff)
+  (gui/swap-widgets! #(-> %
+                          (gui/add-checkbox "main-window" "cb-none" nil {:x 10 :y 0 :text "Without a tick" :align-text :left})
+                          (gui/add-checkbox "main-window" "cb-tick" true {:x 10 :y 50 :text "With a tick" :align-text :left})))
   ;;(gui/window! 200 300 1500 600 "My Window" (java.awt.Color. 44 44 44)) ;{java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON}
 
   

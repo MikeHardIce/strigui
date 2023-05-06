@@ -5,6 +5,7 @@
    [clojure.string]
    [clojure.pprint :refer [pprint]]
    [strigui.button]
+   [strigui.checkbox]
    [strigui.label]
    [strigui.list]
    [strigui.input :as inp]
@@ -12,6 +13,7 @@
    [capra.core :as c]
    [strigui.widget :as wdg]) 
   (:import [strigui.button Button]
+           [strigui.checkbox Checkbox]
            [strigui.label Label]
            [strigui.list List]
            [strigui.input Input]
@@ -205,6 +207,10 @@
   [widgets window-key]
   (c/close-window (-> widgets (get window-key) :context :window))
   widgets)
+
+(defn add-checkbox 
+  [widgets window-key name status props]
+  (add widgets window-key (Checkbox. name status props)))
 
 (defn add-button
   "Adds a button widget to the given map of widgets.

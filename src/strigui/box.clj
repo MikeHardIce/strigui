@@ -19,12 +19,16 @@
 
 (defn draw-text
   "Draws the text of the box"
-  [context text {:keys [^long x ^long y color ^long height font-style font-size can-multiline?] :as props}]
+  [context text {:keys [^long x ^long y color ^long height font-style font-size can-multiline? align-text] :as props
+                 :or { align-text :center }}]
   (let [style (if (empty? font-style) :bold (first font-style))
         size (if (number? font-size) font-size default-font-size)
         [_ _ border-width border-heigth text-width text-heigth] (coord-for-box-with-text context text props)
         text-color (get color :text (java.awt.Color. 10 10 10))
-        x-offset (/ (- border-width text-width) 2)
+        x-offset (case align-text
+                   :center (/ (- border-width text-width) 2)
+                   :left 0
+                   :right (- border-width text-width)) 
         y-offset (/ (- border-heigth text-heigth) 2)]
     (if can-multiline?
       (loop [text (s/split-lines text)
@@ -54,26 +58,11 @@
     [x y border-width border-heigth]))
 
 (defn draw-square
-  [context {:keys [x y width color thickness]}]
+  [context {:keys [x y width color thickness]} ticked?]
   (let [background-color (get color :background (java.awt.Color. 250 250 250))
         border-color (get color :border (java.awt.Color. 27 100 98))]
     (c/draw-> context
               (c/rect x y width width background-color true)
+              (when ticked?
+                (c/rect (+ x 5) (+ y 5) (- width 9) (- width 9) border-color true))
               (c/rect x y width width border-color false thickness))))
-
-(defn draw-tick 
-  [context {:keys [x y width color thickness]} shape]
-  (c/draw-> context
-            (case shape
-              :cross (let [y+w (+ y width)
-                           x+w (+ x width)]
-                       (c/line x y x+w y+w color thickness)
-                       (c/line x y+w x+w y color thickness))
-              :circle (c/ellipse x y width width color false thickness)
-              :ok (let [y2 (+ y (/ width 2))
-                        x2 (+ x (/ width 2))
-                        y+w (+ y width)
-                        x+w (+ x width)] 
-                    (c/line x y2 x2 y+w color thickness)
-                    (c/line x2 y+w x+w y color thickness))
-              nil)))
