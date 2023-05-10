@@ -212,6 +212,10 @@
   [widgets window-key name status props]
   (add widgets window-key (Checkbox. name status props)))
 
+(defn add-radio
+  [widgets window-key name status props]
+  (add widgets window-key (Checkbox. name status (assoc props :type :radio))))
+
 (defn add-button
   "Adds a button widget to the given map of widgets.
    widgets - map of widgets

@@ -35,6 +35,7 @@
 ### Widgets
   * **windows** are now widgets
   * checkboxes (TODO)
+  * radio buttons
   * align-text property with :left :center :right
   * better defaults (TODO, goal to just add widgets with x y coordinates and rest is default)
   * each widget needs to be assigned to a window key in order for it to be drawn
