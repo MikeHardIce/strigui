@@ -1,6 +1,7 @@
 (ns strigui.checkbox
   (:require [strigui.widget :as wdg]
-            [strigui.box :as b]))
+            [strigui.box :as b]
+            [clojure.set :refer [intersection]]))
 
 (defrecord Checkbox [name value props]
   wdg/Widget
@@ -30,4 +31,14 @@
 
 (defmethod wdg/widget-event [strigui.checkbox.Checkbox :mouse-clicked]
   [_ wdgs widget x y]
-  (update-in wdgs [(:name widget) :value] not))
+  (let [wdgs (if (= (-> widget :props :type) :radio)
+               (let [groups (set (-> widget :props :group))
+                     radio (filter #(= (-> % :props :type) :radio) (vals wdgs))
+                     radio (map :name (filter #(seq (intersection (set (-> % :props :group)) groups)) radio))]
+                 (loop [radio-keys radio
+                        widgets wdgs]
+                   (if (seq radio-keys)
+                     (recur (rest radio-keys) (assoc-in widgets [(first radio-keys) :value] false))
+                     widgets)))
+               wdgs)]
+    (update-in wdgs [(:name widget) :value] not)))
