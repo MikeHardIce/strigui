@@ -11,7 +11,8 @@
    [strigui.input :as inp]
    [strigui.window :as wnd]
    [capra.core :as c]
-   [strigui.widget :as wdg]) 
+   [strigui.widget :as wdg]
+   [clojure.set :as s]) 
   (:import [strigui.button Button]
            [strigui.checkbox Checkbox]
            [strigui.label Label]
@@ -308,15 +309,15 @@
                   `(java.awt.Color. ~(Integer/parseInt r) ~(Integer/parseInt g) ~(Integer/parseInt b)))
                 colors)))))
 
-(defn to-map
-  "converts the current state to a map that could be stored in a file"
-  []
-  (let [windows (->> @wdg/state :widgets vals (filter (fn [wdg] (-> wdg (get :context {}) :canvas))))
+(defn convert-for-export
+  "converts"
+  [strigui-map]
+  (let [windows (->> strigui-map :widgets vals (filter (fn [wdg] (-> wdg (get :context {}) :canvas))))
         window (for [window windows]
-                 (let [{:keys [x y width height name color]} (c/properties (:context window))]
-                   [(:name window) x y width height name (first (extract-rgb-constructors (str color)))]))
-        strigui-map {:window (vec window)}
-        widgets-grouped (group-by #(class %) (vals (-> @wdg/state :widgets)))
+                 (let [{:keys [x y width height title color]} (c/properties (:context window))]
+                   [(:name window) x y width height title (first (extract-rgb-constructors (str color)))]))
+        strigui-tmp-map {:window (vec window)}
+        widgets-grouped (group-by #(class %) (vals (filter #(empty? (s/intersection #{(-> % val :name)} (set (mapv :name windows)))) (-> strigui-map :widgets))))
         widget-types (keys widgets-grouped)
         widget-types (map #(let [parts (clojure.string/split (clojure.string/replace-first (str %) #"class " "") #"\.")
                                  cl (last parts)
@@ -330,13 +331,14 @@
                        current-widgets (map #(assoc-in % [:props :color] (extract-rgb-constructors (str (-> % :props :color)))) current-widgets)]
                    (recur (rest w-types) (merge w-map {(second cur-key)
                                                        (mapv #(vec (vals (select-keys % (filter (fn [k] (not= k :events)) (keys %))))) current-widgets)})))
-                 w-map))
-        strigui-map (merge strigui-map widget-map)]
-    strigui-map))
+                 w-map))]
+    (merge strigui-tmp-map widget-map)))
 
 (defn to-file
   "Writes the current state of strigui into a edn file"
   [file-name]
   (when (.exists (io/file file-name))
     (io/delete-file file-name))
-  (pprint (to-map) (clojure.java.io/writer file-name)))
+  (pprint (convert-for-export @wdg/state) (clojure.java.io/writer file-name)))
+
+(convert-for-export @wdg/state)
