@@ -300,23 +300,27 @@
          (edn/read-string {:readers {'window resolve-window-operation}})
          from-map!)))
 
-(defn extract-rgb-constructors
-  [rgb-string]
-  (when (seq rgb-string)
-    (let [colors (re-seq #"r=\d{1,3},g=\d{1,3},b=\d{1,3}" rgb-string)
-          colors (map #(re-seq #"\d{1,3}" %) colors)
-          [[r g b]] colors]
-      `(java.awt.Color. ~(Integer/parseInt r) ~(Integer/parseInt g) ~(Integer/parseInt b)))))
+(defn java-color->rgb-constructors
+  "Converts a java color object like #object[java.awt.Color 0x19bd601 \"java.awt.Color[r=250,g=250,b=250]\"]
+   into a constructure that can be called from within clojure like (java.awt.Color. 250 250 250)"
+  [java-color]
+  (let [rgb-string (str java-color)]
+    (when (seq rgb-string)
+      (let [colors (re-seq #"r=\d{1,3},g=\d{1,3},b=\d{1,3}" rgb-string)
+            colors (map #(re-seq #"\d{1,3}" %) colors)
+            [[r g b]] colors]
+        `(java.awt.Color. ~(Integer/parseInt r) ~(Integer/parseInt g) ~(Integer/parseInt b))))))
 
 (defn extract-color-map
+  "Converts a strigui color map consisting of java color objects into a color map consisting of rgb constructors"
   [colors]
   (loop [colors colors
          color-keys (keys colors)]
     (if-not (seq color-keys)
       colors
       (let [next-key (first color-keys)
-            color-string (str (get colors next-key))]
-        (recur (assoc colors next-key (extract-rgb-constructors color-string))
+            java-color (get colors next-key)]
+        (recur (assoc colors next-key (java-color->rgb-constructors java-color))
                (rest color-keys))))))
 
 (defn convert-for-export
@@ -325,7 +329,7 @@
   (let [windows (->> strigui-map :widgets vals (filter (fn [wdg] (-> wdg (get :context {}) :canvas))))
         window (for [window windows]
                  (let [{:keys [x y width height title color]} (c/properties (:context window))]
-                   [(:name window) x y width height title (extract-rgb-constructors (str color))]))
+                   [(:name window) x y width height title (java-color->rgb-constructors color)]))
         strigui-tmp-map {:window (vec window)}
         widgets-grouped (group-by #(class %) (vals (filter #(empty? (s/intersection #{(-> % val :name)} (set (mapv :name windows)))) (-> strigui-map :widgets))))
         widget-types (keys widgets-grouped)
