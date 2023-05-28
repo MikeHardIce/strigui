@@ -304,13 +304,23 @@
   [rgb-string]
   (when (seq rgb-string)
     (let [colors (re-seq #"r=\d{1,3},g=\d{1,3},b=\d{1,3}" rgb-string)
-          colors (map #(re-seq #"\d{1,3}" %) colors)]
-      (vec (map (fn [[r g b]]
-                  `(java.awt.Color. ~(Integer/parseInt r) ~(Integer/parseInt g) ~(Integer/parseInt b)))
-                colors)))))
+          colors (map #(re-seq #"\d{1,3}" %) colors)
+          [[r g b]] colors]
+      `(java.awt.Color. ~(Integer/parseInt r) ~(Integer/parseInt g) ~(Integer/parseInt b)))))
+
+(defn extract-color-map
+  [colors]
+  (loop [colors colors
+         color-keys (keys colors)]
+    (if-not (seq color-keys)
+      colors
+      (let [next-key (first color-keys)
+            color-string (str (get colors next-key))]
+        (recur (assoc colors next-key (extract-rgb-constructors color-string))
+               (rest color-keys))))))
 
 (defn convert-for-export
-  "converts"
+  "groups all widgets by their widget type and does some conversion to no print the plain java objects"
   [strigui-map]
   (let [windows (->> strigui-map :widgets vals (filter (fn [wdg] (-> wdg (get :context {}) :canvas))))
         window (for [window windows]
@@ -324,14 +334,14 @@
                                  n-space (filter (fn [part] (not= part cl)) parts)]
                              [% (keyword (str (clojure.string/join "." n-space) "/" cl))]) widget-types)
         widget-map (loop [w-types widget-types
-                    w-map {}]
-               (if (seq w-types)
-                 (let [cur-key (first w-types)
-                       current-widgets (get widgets-grouped (first cur-key))
-                       current-widgets (map #(assoc-in % [:props :color] (extract-rgb-constructors (str (-> % :props :color)))) current-widgets)]
-                   (recur (rest w-types) (merge w-map {(second cur-key)
-                                                       (mapv #(vec (vals (select-keys % (filter (fn [k] (not= k :events)) (keys %))))) current-widgets)})))
-                 w-map))]
+                          w-map {}]
+                     (if (seq w-types)
+                       (let [cur-key (first w-types)
+                             current-widgets (get widgets-grouped (first cur-key))
+                             current-widgets (map #(update-in % [:props :color] extract-color-map) current-widgets)]
+                         (recur (rest w-types) (merge w-map {(second cur-key)
+                                                             (mapv #(vec (vals (select-keys % (filter (fn [k] (not= k :events)) (keys %))))) current-widgets)})))
+                       w-map))]
     (merge strigui-tmp-map widget-map)))
 
 (defn to-file
@@ -339,6 +349,12 @@
   [file-name]
   (when (.exists (io/file file-name))
     (io/delete-file file-name))
-  (pprint (convert-for-export @wdg/state) (clojure.java.io/writer file-name)))
+  (->> @wdg/state
+       convert-for-export
+       str
+       (#(clojure.string/replace % #"] " "]\n"))
+       (#(clojure.string/replace % #"]]" "]]\n"))
+       (spit file-name))
+  #_(pprint (convert-for-export @wdg/state) (clojure.java.io/writer file-name)))
 
 (convert-for-export @wdg/state)
