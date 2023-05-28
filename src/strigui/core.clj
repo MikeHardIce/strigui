@@ -325,7 +325,7 @@
   (let [windows (->> strigui-map :widgets vals (filter (fn [wdg] (-> wdg (get :context {}) :canvas))))
         window (for [window windows]
                  (let [{:keys [x y width height title color]} (c/properties (:context window))]
-                   [(:name window) x y width height title (first (extract-rgb-constructors (str color)))]))
+                   [(:name window) x y width height title (extract-rgb-constructors (str color))]))
         strigui-tmp-map {:window (vec window)}
         widgets-grouped (group-by #(class %) (vals (filter #(empty? (s/intersection #{(-> % val :name)} (set (mapv :name windows)))) (-> strigui-map :widgets))))
         widget-types (keys widgets-grouped)
