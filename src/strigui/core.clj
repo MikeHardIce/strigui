@@ -328,8 +328,10 @@
   [strigui-map]
   (let [windows (->> strigui-map :widgets vals (filter (fn [wdg] (-> wdg (get :context {}) :canvas))))
         window (for [window windows]
-                 (let [{:keys [x y width height title color]} (c/properties (:context window))]
-                   [(:name window) x y width height title (java-color->rgb-constructors color)]))
+                 (let [window (-> window 
+                                  (update-in [:props :color] extract-color-map)
+                                  (update :props dissoc :rendering-hints :source-object-changed?))]
+                   [(:name window) (:props window)]))
         strigui-tmp-map {:window (vec window)}
         widgets-grouped (group-by #(class %) (vals (filter #(empty? (s/intersection #{(-> % val :name)} (set (mapv :name windows)))) (-> strigui-map :widgets))))
         widget-types (keys widgets-grouped)
