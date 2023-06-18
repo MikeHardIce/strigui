@@ -271,7 +271,8 @@
   [strigui-map]
   (when-let [windows (:window strigui-map)]
     (doseq [window-props windows]
-      (swap-widgets! #(apply add-window % (eval window-props)))))
+      (let [[name {:keys [x y width height title] :as props}] window-props]
+        (swap-widgets! #(add-window % name x y width height title (eval props))))))
   (let [exprs (for [widget-key (filter #(not= % :window) (keys strigui-map))]
                 (for [widget-props (map identity (widget-key strigui-map))]
                   (str "(apply " (namespace widget-key) "/->" (name widget-key) " " (vec widget-props) ")")))
@@ -324,13 +325,16 @@
                (rest color-keys))))))
 
 (defn convert-for-export
-  "groups all widgets by their widget type and does some conversion to no print the plain java objects"
+  "groups all widgets by their widget type and does some conversion to not print the plain java objects"
   [strigui-map]
   (let [windows (->> strigui-map :widgets vals (filter (fn [wdg] (-> wdg (get :context {}) :canvas))))
         window (for [window windows]
                  (let [window (-> window 
                                   (update-in [:props :color] extract-color-map)
-                                  (update :props dissoc :rendering-hints :source-object-changed?))]
+                                  (update :props dissoc :rendering-hints :source-object-changed?)
+                                  (update-in [:props :on-close] #(case % 
+                                                                   1 (edn/read-string {:default tagged-literal} "#window hide")
+                                                                   3 (edn/read-string {:default tagged-literal} "#window exit"))))]
                    [(:name window) (:props window)]))
         strigui-tmp-map {:window (vec window)}
         widgets-grouped (group-by #(class %) (vals (filter #(empty? (s/intersection #{(-> % val :name)} (set (mapv :name windows)))) (-> strigui-map :widgets))))

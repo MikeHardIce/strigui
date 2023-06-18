@@ -23,7 +23,8 @@
   * State map now uses an agent instead of an atom
   * support for multiple windows
   * TODO: better documentation (in progress, [wiki](https://github.com/MikeHardIce/strigui/wiki))
-  * TODO: fix export
+  * export/import with reader tag #window for hide and exit
+  * TODO: close and unload windows when they get replaced
 
 ### Highlight properties
   * highlight alpha opacity can be adjusted via key :highlight-alpha-opacity accepting integers from 0 to 255
@@ -34,7 +35,7 @@
 
 ### Widgets
   * **windows** are now widgets
-  * checkboxes (TODO)
+  * checkboxes
   * radio buttons
   * align-text property with :left :center :right
   * better defaults (TODO, goal to just add widgets with x y coordinates and rest is default)
