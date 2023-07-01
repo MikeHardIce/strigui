@@ -171,8 +171,12 @@
    rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
    of any widget drawn within the window"
   [widgets name x y width height title props]
-  (assoc widgets name (wnd/window name x y width height title (update props :color merge (:color props)
-                                                                      {:background (java.awt.Color. 250 250 250) :background-widgets (java.awt.Color. 250 250 250 250)})))) 
+  (let [props (update props :color merge (:color props)
+                      {:background (java.awt.Color. 250 250 250) :background-widgets (java.awt.Color. 250 250 250 250)})
+        window-exists? (get widgets name)]
+    (assoc widgets name (if window-exists?
+                          (wnd/window-from-context (:context window-exists?) name x y width height title props)
+                          (wnd/window name x y width height title props))))) 
 
 (defn add 
   "Adds the given widget to the map of widgets and runs defaults and dimension adjusting function"

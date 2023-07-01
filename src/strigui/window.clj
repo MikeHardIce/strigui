@@ -34,16 +34,18 @@
   (after-drawing [this] this))
 
 (defn window
-  "Initializes a new window or reuses an existing one
-   context - an already existing context (experimental)
+  "Creates and renders the frame of a new window
+   name - widget name
    x - x position on the screen
    y - y position on the screen
    width - width of the window
    height - height of the window
    title - name displayed in the title bar of the window
-   color - java.awt.Color of the windows background color
-   rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
-   of any widget drawn within the window" 
+   property map with keys like:
+        :color - java.awt.Color of the windows background color
+        :rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
+        of any widget drawn within the window
+        :icon-path - file system path for the window icon" 
   [name x y width height title {:keys [color rendering-hints on-close icon-path resizable? visible?] :or {rendering-hints {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON
                                                                                                                              java.awt.RenderingHints/KEY_RENDERING java.awt.RenderingHints/VALUE_RENDER_SPEED}
                                                                                                             on-close c/exit
@@ -55,6 +57,31 @@
          context (c/attach-buffered-strategy context 2)]
      (Window. name context {:title title :x x :y y :width width :height height :color color :rendering-hints rendering-hints 
                             :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})))
+
+(defn window-from-context
+  "Recreates a new window but uses the existing context without creating the frame again.
+   context - an already existing context
+   name - widget name
+   x - x position on the screen
+   y - y position on the screen
+   width - width of the window
+   height - height of the window
+   title - name displayed in the title bar of the window
+   property map with keys like:
+        :color - java.awt.Color of the windows background color
+        :rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
+        of any widget drawn within the window
+        :icon-path - file system path for the window icon"
+  [context name x y width height title {:keys [color rendering-hints on-close icon-path resizable? visible?] :or {rendering-hints {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON
+                                                                                                                           java.awt.RenderingHints/KEY_RENDERING java.awt.RenderingHints/VALUE_RENDER_SPEED}
+                                                                                                          on-close c/exit
+                                                                                                          icon-path nil
+                                                                                                          resizable? false
+                                                                                                          visible? true}}]
+  (let [context (assoc-in context [:canvas :rendering] rendering-hints)
+        context (c/attach-buffered-strategy context 2)]
+    (Window. name context {:title title :x x :y y :width width :height height :color color :rendering-hints rendering-hints
+                           :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})))
 
 (defmethod c/handle-event :window-hidden [_ {:keys [window-name]}] 
   (wdg/swap-widgets! #(-> %

@@ -24,7 +24,7 @@
   * support for multiple windows
   * TODO: better documentation (in progress, [wiki](https://github.com/MikeHardIce/strigui/wiki))
   * export/import with reader tag #window for hide and exit
-  * TODO: close and unload windows when they get replaced
+  * windows don't get recreated anymore when calling add-window with the same widget name
 
 ### Highlight properties
   * highlight alpha opacity can be adjusted via key :highlight-alpha-opacity accepting integers from 0 to 255
