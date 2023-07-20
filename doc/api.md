@@ -12,8 +12,8 @@ The following doc assumes strigui.core is aliased as gui
 ## Transformation
 
 The UI with all its state, including created windows, is represented by a map of widgets. Changes are done by transforming 
-this map into a new state. Strigui will determine if the state transitioning requires redrawing of the widgets that have changed, or their
-neightbours, and in which order widgets need to be redrawn.
+this map into a new state. Strigui will determine if the state transitioning requires redrawing of the widgets that have changed
+or if the neightbouring widgets need to be redrawn. It will draw the widgets based on the alignment on the z-axis.
 
 State transformations are done via swap-widgets! which requires a function that takes a map of widgets as parameter, and returns the new map of widgets.
 
@@ -130,6 +130,9 @@ Parameter | Explanation
 ```Clojure
 (gui/add-input widgets window-key name text props)
 ```
+### Check boxes
+
+### Rado boxes
 
 ### Lists
 
@@ -195,8 +198,8 @@ All windows and widgets can be imported and exported via edn.
 
 Example file: gui-test.edn
 ```Clojure
-{:window [["main-window" 50 50 700 500 "Main Window" {:resizable? true :on-close #window exit}]
-          ["sub-window" 700 100 700 500 "Sub Window" {:on-close #window hide :resizable? true}]]
+{:window [["main-window" {:x 50 :y 50 :width 800 :height 650 :title "Main Window" :resizable? true :on-close #window exit}]
+          ["sub-window" {:x 700 :y 300 :width 900 :height 500 :title "Sub Window" :on-close #window hide :resizable? true}]]
  :strigui.label/Label [["welcome" "Welcome to Strigui
                                    and other stuff ..." {:x 190 :y 100 :z 20
                                                          :color {:text (java.awt.Color. 47 120 118)}

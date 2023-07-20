@@ -2,8 +2,7 @@
   (:require
    [clojure.edn :as edn]
    [clojure.java.io :as io]
-   [clojure.string]
-   [clojure.pprint :refer [pprint]]
+   [clojure.string] 
    [strigui.button]
    [strigui.checkbox]
    [strigui.label]

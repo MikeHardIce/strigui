@@ -1,5 +1,5 @@
-{:window [["main-window" 50 50 800 650 "Main Window" {:resizable? true :on-close #window exit}]
-          ["sub-window" 700 300 900 500 "Sub Window" {:on-close #window hide :resizable? true}]]
+{:window [["main-window" {:x 50 :y 50 :width 800 :height 650 :title "Main Window" :resizable? true :on-close #window exit}]
+          ["sub-window" {:x 700 :y 300 :width 900 :height 500 :title "Sub Window" :on-close #window hide :resizable? true}]]
  :strigui.label/Label [["welcome" "Welcome to Strigui
                                    and other stuff ..." {:x 190 :y 80 :z 20
                                                       :color {:text (java.awt.Color. 47 120 118)}

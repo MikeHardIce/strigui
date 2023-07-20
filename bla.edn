@@ -1,2 +1,0 @@
-{:window [["main-window" 50 50 800 650 "Main Window" {:resizable? true :on-close #window exit}]
-          ["sub-window" 700 300 900 500 "Sub Window" {:on-close #window hide :resizable? true}]]}
