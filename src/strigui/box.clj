@@ -64,7 +64,7 @@
     (c/draw-> context
               (c/rect x y width width background-color true)
               (when ticked?
-                (c/rect (+ x 5) (+ y 5) (- width 9) (- width 9) border-color true))
+                (c/rect x y (- width 1) (- width 1) border-color true))
               (c/rect x y width width border-color false thickness))))
 
 (defn draw-circle
@@ -75,5 +75,5 @@
     (c/draw-> context
               (c/ellipse x2 y2 width width background-color true)
               (when ticked?
-                (c/ellipse x2 y2 (- width 9) (- width 9) border-color true))
+                (c/ellipse x2 y2 (- width 1) (- width 1) border-color true))
               (c/ellipse x2 y2 width width border-color false thickness))))

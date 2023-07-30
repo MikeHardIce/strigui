@@ -15,14 +15,15 @@
   (before-drawing [this] this)
   (draw [this window] 
     (let [props (:props this)
+          h (- (/ (:height props) 2) 5)
           props-square (-> props 
-                           (select-keys [:x :y :color])
-                           (assoc :width 20)
-                           (assoc :thickness 1))]
+                           (select-keys [:x :y :color :height])
+                           (assoc :width 10)
+                           (assoc :thickness 1)
+                           (update :y #(+ % h)))]
       (b/draw-text window (:text props) (-> props
-                                            (update :x + 30)
-                                            (update :width - 30)
-                                            (update :y - 10)))
+                                            (update :x + 20)
+                                            (update :width - 20)))
       (if (= (:type props) :radio)
         (b/draw-circle window props-square (:value this))
         (b/draw-square window props-square (:value this)))
