@@ -339,7 +339,7 @@
                  (let [window (-> window 
                                   (update-in [:props :color] extract-color-map)
                                   (update :props dissoc :rendering-hints :source-object-changed?)
-                                  (update-in [:props :on-close] #(case % 
+                                  (update-in [:props :on-close] #(case (int (parse-long %))
                                                                    1 (edn/read-string {:default tagged-literal} "#window hide")
                                                                    3 (edn/read-string {:default tagged-literal} "#window exit"))))]
                    [(:name window) (:props window)]))

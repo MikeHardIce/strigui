@@ -1,7 +1,6 @@
 (ns strigui.box
   (:require [capra.core :as c]
-            [clojure.string :as s])
-  (:import [java.awt Color]))
+            [clojure.string :as s]))
 
 (set! *warn-on-reflection* true)
 
