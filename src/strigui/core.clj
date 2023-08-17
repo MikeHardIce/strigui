@@ -37,9 +37,9 @@
 
 (defn get-widget-names-by-group
   "Retuns a vector of widget names of widgets that belong to the given group name"
-  [widgets name]
+  [widgets group-name]
   (let [get-seq (fn [x] (if (string? x) (vector x) x))
-        filter-crit (fn [x] (some #(= name %) (-> x val :props :group get-seq)))]
+        filter-crit (fn [x] (some #(= group-name %) (-> x val :props :group get-seq)))]
     (mapv :name (vals (filter filter-crit widgets)))))
 
 (defn get-widget-names-by-window
@@ -74,7 +74,9 @@
    :widget-focus-in -> widgets widget x y
    :widget-focus-out -> widgets widget x y"
   [widgets name event f]
-  (assoc-in widgets [name :events event] f))
+  (if (get widgets name)
+    (assoc-in widgets [name :events event] f)
+    (println "Cannot attach event " event " | Widget with name \"" name "\" doesn't exist")))
 
 (defn arrange
   "Arranges the widgets given via widget names 
@@ -208,8 +210,10 @@
 
 (defn close-window!
   "Closes the given window."
-  [widgets window-key]
-  (c/close-window (-> widgets (get window-key) :context :window))
+  [widgets window-key] 
+  (if-let [widget (get widgets window-key)]
+    (c/close-window (:context widget))
+    (println "Cannot close window | Window with name \"" window-key "\" doesn't exist")) 
   widgets)
 
 (defn add-checkbox 

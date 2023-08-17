@@ -31,7 +31,7 @@
   (after-drawing [this] this))
 
 (defmethod wdg/widget-event [strigui.checkbox.Checkbox :mouse-clicked]
-  [_ wdgs widget x y]
+  [_ wdgs widget _ _]
   (let [wdgs (if (= (-> widget :props :type) :radio)
                (let [groups (set (-> widget :props :group))
                      radio (filter #(= (-> % :props :type) :radio) (vals wdgs))

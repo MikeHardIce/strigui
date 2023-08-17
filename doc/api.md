@@ -131,9 +131,16 @@ Parameter | Explanation
 (gui/add-input widgets window-key name text props)
 ```
 ### Check boxes
+```Clojure
+(gui/add-checkbox widgets window-key name text props)
+```
+
 
 ### Rado boxes
 
+```Clojure
+(gui/add-radio widgets window-key name text props)
+```
 ### Lists
 
 ```Clojure

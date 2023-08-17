@@ -8,12 +8,13 @@
     types of widgets
   * multi-select widgets via shift+left-mouse-click to drag them as a group
   * find a way to use the OS color theme by default if no color maps are given
+  * align function to align an widget relative to another widget with :left :center :right. 
+  * better defaults, just add a widget with x and y coordinates and everything else is default
 
 ## 0.0.1-alpha32 (in progress)
 
 ### General
   * arrange function to automatically adjust position of selected widgets. Widgets can be aligned :left :center :right
-  * TODO: align function to align an widget relative to another widget with :left :center :right. 
   * add-multiple function to add a bulk of widgets of a given type by providing just their names and values
   * fixed tabbing when no widget was selected previously
   * enable updating properties of multiple widgets at the same time
@@ -39,7 +40,6 @@
   * checkboxes
   * radio buttons
   * align-text property with :left :center :right
-  * better defaults (TODO, goal to just add widgets with x y coordinates and rest is default)
   * each widget needs to be assigned to a window key in order for it to be drawn
   * changed widgets **:args** key to **:props** key (properties of a widget)
   * copy and paste via ctrl+c and ctrl+v for **input fields**

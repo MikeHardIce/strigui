@@ -49,14 +49,20 @@
 
 (defn window-key->widgets
   "Returns a vector of widget names of widgets that are part of the window with the given window key"
-  [widgets window-key]
+  [widgets window-key] 
   (mapv :name (vals (filter (comp #(= % window-key) :window :props val) widgets))))
 
 (defn widget->window-key
-  "Returns the window the given widget is displayed on"
+  "Returns the window key the given widget is displayed on"
   [widgets widget-name]
   (when-let [widget (get widgets widget-name)]
     (-> widget :props :window)))
+
+(defn widget->window
+  "Returns the window the given widget is displayed on"
+  [widgets widget-name]
+  (when-let [window-key (widget->window-key widgets widget-name)]
+    (get widgets window-key)))
 
 (defn on-border?
   [[x y w h] x0 y0]
@@ -173,7 +179,7 @@
   (reduce merge {} (map #(merge {} {(:name %) %}) (for [w (vals widgets)] (assoc-in w [:props key] value)))))
 
 (defn next-widget-to-tab
-  [context widgets previously-tabbed ^strigui.widget.Widget selected-widget]
+  [context widgets previously-tabbed ^strigui.widget.Widget selected-widget] 
   (let [widgets-can-tab (get-with-property (vals widgets) :can-tab?)
         previously-tabbed (conj previously-tabbed (:name selected-widget))
         not-tabbed (s/difference (set widgets-can-tab) (set previously-tabbed))
@@ -353,7 +359,7 @@
       (if (and clicked (not (-> (get widgets clicked) :props :resizing?)))
         (let [widgets (assoc-in widgets [clicked :props :selected?] true)
               widgets (widget-event :mouse-clicked widgets (get widgets clicked) x y)
-              widgets (trigger-custom-event :mouse-clicked widgets (get widgets clicked))]
+              widgets (trigger-custom-event :mouse-clicked widgets (get widgets clicked) x y)]
           widgets)
         widgets))
     widgets))
@@ -426,7 +432,7 @@
 
 (defn handle-tabbing
   [widgets widget code]
-  (if-let [window (widget->window-key widgets (:name widget))]
+  (if-let [window (widget->window widgets (:name widget))]
     (if (= code 9) ;;tab
       (let [context (-> window :context)
             previously-tabbed (:tabbed @previously)
@@ -453,7 +459,7 @@
             widgets (widget-event :key-pressed widgets (get widgets (:name widget)) char code previous-code)]
         (trigger-custom-event :key-pressed widgets (get widgets (:name widget)) code char previous-code))
       (if-let [tabable (first (get-with-property (vals widgets) :can-tab? true))]
-          (handle-tabbing widgets (get widgets tabable) code)
+        (handle-tabbing widgets (get widgets tabable) code) 
         widgets))))
 
 (defmethod c/handle-event :key-pressed [_ {:keys [char code window-name]}]

@@ -37,7 +37,8 @@
 (defn default-stuff
   []
   #_(gui/from-file! "gui-test-simple.edn")
-  (gui/from-file! "bla-test.edn")
+  #_(gui/from-file! "bla-test.edn")
+  (gui/from-file! "gui-test.edn")
   #_(gui/swap-widgets! #(-> %
                           (gui/add-window "main" 100 100 1200 800 "Welcome to Strigui" {})
                           (gui/add-button "main" "btnOk" "Ok" {:x 150 :y 700}))))
@@ -46,7 +47,9 @@
   
   #_(moving-by-button)
   (default-stuff)
-  (gui/swap-widgets! #(-> %
+  (gui/swap-widgets! #(gui/attach-event % "click" :mouse-clicked (fn [wdgs _ _ _]
+                                                                 (gui/close-window! wdgs "main"))))
+  #_(gui/swap-widgets! #(-> %
                           (gui/add-checkbox "main-window" "cb-none" nil {:x 10 :y 0 :text "Without a tick" :align-text :left})
                           (gui/add-checkbox "main-window" "cb-tick" true {:x 10 :y 50 :text "With a tick" :align-text :left})
                           (gui/add-radio "main-window" "cb-radio" nil {:x 10 :y 100 :text "Radio empty (X)" :align-text :left :group ["001"]})
