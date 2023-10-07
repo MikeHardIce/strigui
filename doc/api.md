@@ -156,27 +156,27 @@ Parameter | Explanation
 ```
 
 f - fn to handle the event with the following props: 
-   :mouse-clicked -> widgets {:keys [widget x y]} 
-   :mouse-moved -> widgets {:keys [widget x y]}
-   :mouse-dragged -> widgets {:keys [widget window-name x y x-prev y-prev]}
+   :mouse-clicked -> widgets {:keys [widget x y window-name]} 
+   :mouse-moved -> widgets {:keys [widget x y window-name]}
+   :mouse-dragged -> widgets {:keys [widget x y x-prev y-prev window-name]}
    :key-pressed -> widgets {:keys [widget char code previous-code window-name]}
-   :widget-focus-in -> widgets {:keys [widget x y]}
-   :widget-focus-out -> widgets {:keys [widget x y]}
+   :widget-focus-in -> widgets {:keys [widget x y window-name]}
+   :widget-focus-out -> widgets {:keys [widget x y window-name]}
 
 ### Global Events
 
 ```Clojure
-(defmethod wdg/widget-global-event :mouse-clicked [_ widgets window-name x y]
+(defmethod wdg/widget-global-event :mouse-clicked [widgets {:keys [window-name x y]}]
   ....
   widgets)
 ```
 
 with the following signatures based on the event:
-    :mouse-dragged -> widgets window x y x-prev y-prev
-    :mouse-moved -> widgets window x y
-    :mouse-clicked -> widgets window x y
-    :mouse-released -> widgets window x y
-    :key-pressed -> widgets char code previous-code
+    :mouse-dragged -> widgets {:keys [window-name x y x-prev y-prev]} 
+    :mouse-moved -> widgets {:keys [window-name x y]}
+    :mouse-clicked -> widgets {:keys [window-name x y]}
+    :mouse-released -> widgets {:keys [window-name x y]}
+    :key-pressed -> widgets {:keys [window-name char code previous-code]}
 
 ## Helpful functions
 
