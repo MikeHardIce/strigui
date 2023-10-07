@@ -47,8 +47,8 @@
   
   #_(moving-by-button)
   (default-stuff)
-  (gui/swap-widgets! #(gui/attach-event % "click" :mouse-clicked (fn [wdgs _ _ _]
-                                                                 (gui/close-window! wdgs "main"))))
+  (gui/swap-widgets! #(gui/attach-event % "click" :mouse-clicked (fn [wdgs _]
+                                                                 (gui/close-window! wdgs "main-window"))))
   #_(gui/swap-widgets! #(-> %
                           (gui/add-checkbox "main-window" "cb-none" nil {:x 10 :y 0 :text "Without a tick" :align-text :left})
                           (gui/add-checkbox "main-window" "cb-tick" true {:x 10 :y 50 :text "With a tick" :align-text :left})
@@ -67,7 +67,7 @@
   
   #_(gui/swap-widgets! (fn [wdgs]
                        (-> wdgs
-                           (gui/attach-event "click" :mouse-clicked (fn [wdgs_]
+                           (gui/attach-event "click" :mouse-clicked (fn [wdgs _]
                                                                       (gui/close-window! wdgs "main")))
                            (assoc-in ["click" :props :x] 100)
                            (assoc-in ["click" :props :y] 400)
@@ -81,6 +81,6 @@
                                                                        (gui/change-color-profile wdgs "main"(first (swap! color-profiles reverse)))))
                            (update-in ["test-list" :items] conj {:value "10"} {:value "11"} {:value "12"} {:value "13"} {:value "14"} {:value "15"})))))
 
-(defmethod wdg/widget-global-event :mouse-clicked [_ widgets window-name x y]
+(defmethod wdg/widget-global-event :mouse-clicked [widgets {:keys [window-name x y]}]
   (println "Mouse clicked x:" x " y:" y " on window: " window-name)
   widgets)

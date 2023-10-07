@@ -15,7 +15,7 @@
                  this))
 
 (defmethod wdg/widget-event [strigui.button.Button :key-pressed]
-  [_ widgets widget _ code _]
+  [widgets {:keys [widget code]}]
   (if-let [window (wdg/widget->window widgets (:name widget))]
     (if (= code 10) ;;enter
       (let [context (-> window :context)

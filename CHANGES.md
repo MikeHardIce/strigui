@@ -14,6 +14,7 @@
 ## 0.0.1-alpha32 (in progress)
 
 ### General
+  * unify event signatures (TODO, in practice it seems to cause too many bugs since its not clear how many arguments were used)
   * arrange function to automatically adjust position of selected widgets. Widgets can be aligned :left :center :right
   * add-multiple function to add a bulk of widgets of a given type by providing just their names and values
   * fixed tabbing when no widget was selected previously
@@ -27,6 +28,7 @@
   * TODO: better documentation (in progress, [wiki](https://github.com/MikeHardIce/strigui/wiki))
   * export/import with reader tag #window for hide and exit
   * windows don't get recreated anymore when calling add-window with the same widget name
+  * Unified all event parameters to 2 parameters -> first parameter is the map of widgets, 2nd a map of all arguments like the widget itself, perhaps coordinates etc. ... therefore no more guessing when using strigui
 
 ### Highlight properties
   * highlight alpha opacity can be adjusted via key :highlight-alpha-opacity accepting integers from 0 to 255

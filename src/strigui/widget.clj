@@ -37,15 +37,16 @@
 (def state (agent {:widgets {}}))
 
 (defmulti widget-event
-  (fn [action widgets widget & props]
-    [(class widget) action]))
+  (fn [widgets event-attr]
+    [(class (-> event-attr :widget)) (-> event-attr :action)]))
 
-(defmethod widget-event :default [action widgets widget & props] widgets)
+(defmethod widget-event :default [widgets _] widgets)
 
 (defmulti widget-global-event
-  (fn [action widgets window-name & props] action))
+  (fn [widgets event-attr] 
+    (-> event-attr :action)))
 
-(defmethod widget-global-event :default [_ widgets window-name & props] widgets)
+(defmethod widget-global-event :default [widgets _] widgets)
 
 (defn window-key->widgets
   "Returns a vector of widget names of widgets that are part of the window with the given window key"
@@ -319,9 +320,9 @@
   (send state update :widgets refresh-windows! f))
 
 (defn trigger-custom-event
-  [action widgets ^strigui.widget.Widget widget & props]
+  [widgets {:keys [action widget] :as event-attr}]
   (if-let [event-fn (-> widget :events action)]
-    (apply event-fn widgets (:name widget) props)
+    (event-fn widgets event-attr)
     widgets))
 
 (defn- handle-widget-dragging
@@ -358,8 +359,8 @@
           widgets (assoc-arg-for-all widgets :selected? nil)]
       (if (and clicked (not (-> (get widgets clicked) :props :resizing?)))
         (let [widgets (assoc-in widgets [clicked :props :selected?] true)
-              widgets (widget-event :mouse-clicked widgets (get widgets clicked) x y)
-              widgets (trigger-custom-event :mouse-clicked widgets (get widgets clicked) x y)]
+              widgets (widget-event widgets {:action :mouse-clicked :widget (get widgets clicked) :x x :y y :window-name window-name})
+              widgets (trigger-custom-event widgets {:action :mouse-clicked :widget (get widgets clicked) :x x :y y :window-name window-name})]
           widgets)
         widgets))
     widgets))
@@ -372,8 +373,9 @@
                       (update widgets (:name widget) handle-widget-resizing x y x-prev y-prev)
                       (if (-> widget :props :can-move?)
                         (update widgets (:name widget) handle-widget-dragging x y x-prev y-prev)
-                        widgets))]
-        (widget-event :mouse-dragged widgets (get widgets (:name widget)) x y x-prev y-prev))
+                        widgets))
+            widgets (widget-event widgets {:action :mouse-dragged :widget (get widgets (:name widget)) :x x :y y :x-prev x-prev :y-prev y-prev :window-name window-name})]
+        (trigger-custom-event widgets {:action :mouse-dragged :widget (get widgets (:name widget)) :x x :y y :x-prev x-prev :y-prev y-prev :window-name window-name}))
       widgets)
     widgets))
 
@@ -390,21 +392,21 @@
                                 (recur (rest remaining-focused) (let [name (first remaining-focused)
                                                                       widgets (assoc-in widgets [name :props :focused?] nil)
                                                                       widgets (assoc-in widgets [name :props :resizing?] nil)
-                                                                      widgets (widget-event :widget-focus-out widgets (get widgets name) x y)
-                                                                      widgets (trigger-custom-event :widget-focus-out widgets (get widgets name) x y)]
+                                                                      widgets (widget-event widgets {:action :widget-focus-out :widget (get widgets name) :x x :y y :window-name window-name})
+                                                                      widgets (trigger-custom-event widgets {:action :widget-focus-out :widget (get widgets name) :x x :y y :window-name window-name})]
                                                                   widgets))
                                 widgets))
                             widgets)]
       (if (seq widget)
       ;; if the mouse is on a widget, focus it and trigger events in case it wasn't focused before, check if it should resize
-        (let [widgets (widget-event :mouse-moved widgets widget x y)
-              widgets (trigger-custom-event :mouse-moved widgets (get widgets (:name widget)) x y)
+        (let [widgets (widget-event widgets {:action :mouse-moved :widget widget :x x :y y :window-name window-name})
+              widgets (trigger-custom-event widgets {:action :mouse-moved :widget (get widgets (:name widget)) :x x :y y :window-name window-name})
               widget (get widgets (:name widget))
               widgets (if (-> widget :props :focused?)
                         widgets
                         (let [name (:name widget)
-                              widgets (widget-event :widget-focus-in widgets (get widgets name) x y)]
-                          (trigger-custom-event :widget-focus-in widgets (get widgets name) x y)))
+                              widgets (widget-event widgets {:action :widget-focus-in :widget (get widgets name) :x x :y y :window-name window-name})]
+                          (trigger-custom-event widgets {:action :widget-focus-in :widget (get widgets name) :x x :y y :window-name window-name})))
               widgets (assoc-in widgets [(:name widget) :props :focused?] true)]
           (assoc-in widgets [(:name widget) :props :resizing?] (and (-> widget :props :can-resize?)
                                                                     (on-border? (coord (get widgets (:name widget)) (:context (get widgets (widget->window-key widgets (:name widget))))) x y))))
@@ -414,21 +416,20 @@
 (defmethod c/handle-event :mouse-dragged [_ {:keys [x y window-name]}]
   (let [[x-prev y-prev] (-> @previously :mouse-position (get window-name [0 0]))]
     (swap-widgets! #(let [widgets (handle-mouse-dragged % window-name x y x-prev y-prev)]
-                      (widget-global-event :mouse-dragged widgets window-name x y x-prev y-prev)))
+                      (widget-global-event widgets {:action :mouse-dragged :window-name window-name :x x :y y :x-prev x-prev :y-prev y-prev})))
     (swap! previously assoc-in [:mouse-position window-name] [x y])))
 
 (defmethod c/handle-event :mouse-moved [_ {:keys [x y window-name]}]
   (swap-widgets! #(let [widgets (handle-mouse-moved % window-name x y)]
-                    (widget-global-event :mouse-moved widgets window-name x y)))
+                    (widget-global-event widgets {:action :mouse-moved :window-name window-name :x x :y y})))
   (swap! previously assoc-in [:mouse-position window-name] [x y]))
 
 (defmethod c/handle-event :mouse-pressed [_ {:keys [x y window-name]}]
   (swap-widgets! #(let [widgets (handle-clicked % window-name x y)]
-                    (widget-global-event :mouse-clicked widgets window-name x y))))
+                    (widget-global-event widgets {:action :mouse-clicked :window-name window-name :x x :y y}))))
 
 (defmethod c/handle-event :mouse-released [_ {:keys [x y window-name]}]
-  (swap-widgets! #(let [widgets (widget-global-event :mouse-released % window-name x y)]
-                    (widget-global-event :mouse-released widgets window-name x y))))
+  (swap-widgets! #(widget-global-event % {:action :mouse-released :window-name window-name :x x :y y})))
 
 (defn handle-tabbing
   [widgets widget code]
@@ -452,15 +453,15 @@
 (defn handle-key-pressed
   [widgets window-name char code]
   (let [previous-code (-> @previously :key-code)
-        widgets (widget-global-event :key-pressed widgets window-name char code previous-code)]
+        widgets (widget-global-event widgets {:action :key-pressed :window-name window-name :char char :code code :previous-code previous-code})]
     (swap! previously assoc :key-code code)
     (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(-> % :props :selected?) (vals (select-keys widgets (window-key->widgets widgets window-name)))))))]
       (let [widgets (handle-tabbing widgets widget code)
-            widgets (widget-event :key-pressed widgets (get widgets (:name widget)) char code previous-code)]
-        (trigger-custom-event :key-pressed widgets (get widgets (:name widget)) code char previous-code))
+            widgets (widget-event widgets {:action :key-pressed :widget (get widgets (:name widget)) :char char :code code :previous-code previous-code :window-name window-name})]
+        (trigger-custom-event widgets {:action :key-pressed :widget (get widgets (:name widget)) :char char :code code :previous-code previous-code :window-name window-name})
       (if-let [tabable (first (get-with-property (vals widgets) :can-tab? true))]
         (handle-tabbing widgets (get widgets tabable) code) 
-        widgets))))
+        widgets)))))
 
 (defmethod c/handle-event :key-pressed [_ {:keys [char code window-name]}]
   (swap-widgets! #(handle-key-pressed % window-name char code)))

@@ -156,11 +156,12 @@ Parameter | Explanation
 ```
 
 f - fn to handle the event with the following props: 
-   :mouse-clicked -> widgets widget
-   :mouse-moved -> widgets widget x y
-   :key-pressed -> widgets widget key-code
-   :widget-focus-in -> widgets widget x y
-   :widget-focus-out -> widgets widget x y
+   :mouse-clicked -> widgets {:keys [widget x y]} 
+   :mouse-moved -> widgets {:keys [widget x y]}
+   :mouse-dragged -> widgets {:keys [widget window-name x y x-prev y-prev]}
+   :key-pressed -> widgets {:keys [widget char code previous-code window-name]}
+   :widget-focus-in -> widgets {:keys [widget x y]}
+   :widget-focus-out -> widgets {:keys [widget x y]}
 
 ### Global Events
 

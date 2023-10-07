@@ -86,7 +86,7 @@
       box-with-new-input)))
 
 (defmethod wdg/widget-event [strigui.input.Input :key-pressed]
-  [_ widgets widget char code prev-code]
+  [widgets {:keys [widget char code prev-code]}]
   (if-let [window (wdg/widget->window widgets (:name widget))]
     (update widgets (:name widget) handle-key-pressed (-> window :context) char code prev-code)
     widgets))

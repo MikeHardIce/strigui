@@ -163,11 +163,14 @@
 
 (defn add-window
   "Creates a new window widget with the parameters:
+   widgets - current map of widgets
+   name - widget name
    x - x position on the screen
    y - y position on the screen
    width - width of the window
    height - height of the window
    title - name displayed in the title bar of the window
+   props - map of properties like color
    color - java.awt.Color of the windows background color
    rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
    of any widget drawn within the window"
