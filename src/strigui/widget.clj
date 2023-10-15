@@ -458,10 +458,10 @@
     (if-let [widget (first (reverse (sort-by #(-> % :props :z) (filter #(-> % :props :selected?) (vals (select-keys widgets (window-key->widgets widgets window-name)))))))]
       (let [widgets (handle-tabbing widgets widget code)
             widgets (widget-event widgets {:action :key-pressed :widget (get widgets (:name widget)) :char char :code code :previous-code previous-code :window-name window-name})]
-        (trigger-custom-event widgets {:action :key-pressed :widget (get widgets (:name widget)) :char char :code code :previous-code previous-code :window-name window-name})
+        (trigger-custom-event widgets {:action :key-pressed :widget (get widgets (:name widget)) :char char :code code :previous-code previous-code :window-name window-name}))
       (if-let [tabable (first (get-with-property (vals widgets) :can-tab? true))]
         (handle-tabbing widgets (get widgets tabable) code) 
-        widgets)))))
+        widgets))))
 
 (defmethod c/handle-event :key-pressed [_ {:keys [char code window-name]}]
   (swap-widgets! #(handle-key-pressed % window-name char code)))

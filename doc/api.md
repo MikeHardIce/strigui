@@ -136,7 +136,7 @@ Parameter | Explanation
 ```
 
 
-### Rado boxes
+### Radio boxes
 
 ```Clojure
 (gui/add-radio widgets window-key name text props)

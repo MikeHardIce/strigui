@@ -55,6 +55,7 @@
    (let [context (c/create-window name x y width height title {:color (:background color) :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})
          context (assoc-in context [:canvas :rendering] rendering-hints)
          context (c/attach-buffered-strategy context 2)]
+     (doto (-> context :frame) (.requestFocus))
      (Window. name context {:title title :x x :y y :width width :height height :color color :rendering-hints rendering-hints 
                             :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})))
 
