@@ -5,6 +5,7 @@
    [clojure.string] 
    [strigui.button]
    [strigui.checkbox]
+   [strigui.image]
    [strigui.label]
    [strigui.list]
    [strigui.input :as inp]
@@ -17,6 +18,7 @@
            [strigui.label Label]
            [strigui.list List]
            [strigui.input Input]
+           [strigui.image Image]
            [java.awt Color RenderingHints]))
 
 (set! *warn-on-reflection* true)
@@ -275,6 +277,11 @@
            items can be maps and should at least contain a :value"
   [widgets window-key name items props]
   (add widgets window-key (List. name items props)))
+
+(defn add-image
+  ""
+  [widgets window-key name path props]
+  (add widgets window-key (Image. name path props)))
 
 (defn from-map!
   "Initializes the window and the widgets from a map"

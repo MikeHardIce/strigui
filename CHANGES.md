@@ -41,6 +41,7 @@
   * **windows** are now widgets
   * checkboxes
   * radio buttons
+  * image widget
   * align-text property with :left :center :right
   * each widget needs to be assigned to a window key in order for it to be drawn
   * changed widgets **:args** key to **:props** key (properties of a widget)

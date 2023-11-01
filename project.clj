@@ -6,6 +6,6 @@
             :year 2023
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.11.1"]
-  [com.github.mikehardice/capra "0.0.9"]]
+  [com.github.mikehardice/capra "0.0.10"]]
   ;;:resource-paths ["resources/capra-0.0.9-test.jar"]
   :repl-options {:init-ns strigui.playground})

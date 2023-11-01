@@ -146,6 +146,15 @@ Parameter | Explanation
 ```Clojure
 (gui/add-list widgets window-key name items props)
 ```
+### Image
+
+```Clojure
+(gui/add-image widgets window-key name path props)
+
+;Example
+
+(gui/swap-widgets! #(gui/add-image % "main-window" "img-1" "resources/strigui-alpha32.png" {:x 10 :y 10 :width 100 :height 100 :can-move? true :can-resize? true}))
+```
 
 ## Events
 

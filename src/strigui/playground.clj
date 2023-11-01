@@ -47,6 +47,7 @@
   
   #_(moving-by-button)
   (default-stuff)
+  (gui/swap-widgets! #(gui/add-image % "main-window" "img-1" "resources/strigui-alpha32.png" {:x 10 :y 10 :width 100 :height 100 :can-move? true :can-resize? true}))
   (gui/swap-widgets! #(gui/attach-event % "click" :mouse-clicked (fn [wdgs _]
                                                                  (gui/close-window! wdgs "main-window"))))
   #_(gui/swap-widgets! #(-> %
