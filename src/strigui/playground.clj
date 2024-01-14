@@ -44,11 +44,18 @@
                           (gui/add-button "main" "btnOk" "Ok" {:x 150 :y 700}))))
 
 (defn main []
-  
+  (gui/swap-widgets! #(-> %
+                          (gui/add-window "main" 100 100 1200 800 "Window with a cactus" {})
+                          (gui/add-image "main" "cactus-image" "resources/dino plant.jpg" 
+                                         {:x 200 :y 100 :width 300 :height 100 :can-resize? true :can-move? true})
+                          (gui/add-button "main" "reset-button" "Reset" {:x 10 :y 600 :width 250 :height 35})
+                          (gui/arrange 2 {:from [0 1200] :align :right} "reset-button" )))
+
+
   #_(moving-by-button)
-  (default-stuff)
-  (gui/swap-widgets! #(gui/add-image % "main-window" "img-1" "resources/strigui-alpha32.png" {:x 10 :y 10 :width 100 :height 100 :can-move? true :can-resize? true}))
-  (gui/swap-widgets! #(gui/attach-event % "click" :mouse-clicked (fn [wdgs _]
+  #_(default-stuff)
+  #_(gui/swap-widgets! #(gui/add-image % "main-window" "img-1" "resources/cactus.GIF" {:x 10 :y 10 :width 100 :height 100 :can-move? true :can-resize? true}))
+  #_(gui/swap-widgets! #(gui/attach-event % "click" :mouse-clicked (fn [wdgs _]
                                                                  (gui/close-window! wdgs "main-window"))))
   #_(gui/swap-widgets! #(-> %
                           (gui/add-checkbox "main-window" "cb-none" nil {:x 10 :y 0 :text "Without a tick" :align-text :left})

@@ -10,11 +10,12 @@
   * find a way to use the OS color theme by default if no color maps are given
   * align function to align an widget relative to another widget with :left :center :right. 
   * better defaults, just add a widget with x and y coordinates and everything else is default
+  * improve overall performance (large lists, moving images, ...)
 
 ## 0.0.1-alpha32 (in progress)
 
 ### General
-  * unify event signatures (TODO, in practice it seems to cause too many bugs since its not clear how many arguments were used)
+  * unify event signatures
   * arrange function to automatically adjust position of selected widgets. Widgets can be aligned :left :center :right
   * add-multiple function to add a bulk of widgets of a given type by providing just their names and values
   * fixed tabbing when no widget was selected previously
@@ -25,10 +26,12 @@
   * internally reworked swap-widgets so that it can be used internally with update-in 
   * State map now uses an agent instead of an atom
   * support for multiple windows
-  * TODO: better documentation (in progress, [wiki](https://github.com/MikeHardIce/strigui/wiki))
+  * better documentation (in progress, [wiki](https://github.com/MikeHardIce/strigui/wiki))
   * export/import with reader tag #window for hide and exit
   * windows don't get recreated anymore when calling add-window with the same widget name
   * Unified all event parameters to 2 parameters -> first parameter is the map of widgets, 2nd a map of all arguments like the widget itself, perhaps coordinates etc. ... therefore no more guessing when using strigui
+  - TODO: Have a process in the background that redraws every window once/twice per second and don't redraw anymore on "swap-widgets". Use that solely to
+    update the widget map via an agent
 
 ### Highlight properties
   * highlight alpha opacity can be adjusted via key :highlight-alpha-opacity accepting integers from 0 to 255

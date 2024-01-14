@@ -134,7 +134,7 @@
                                    (assoc-in [name :props :height] h))))))
                   (+ height max-height (last space)))))))))
 
-(defn align-horizontal
+#_(defn align-horizontal
   "Aligns a widget or widgets relative to another widget horizontally, only changing its x-coordinate.
    For example:
    (align wdgs \"main-window\" :center \"a\" \"b\")
@@ -142,7 +142,7 @@
   [widgets reference-widget-name alignment & widget-names]
   widgets)
 
-(defn align-vertical
+#_(defn align-vertical
   "Aligns a widget relative to another widget vertically, only changing its y-coordinate
    For example:
    (align-vertical wdgs \"main-window\" :center \"a\" \"b\")

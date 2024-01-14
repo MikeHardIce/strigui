@@ -108,7 +108,7 @@
   ([context color strength x y w h no-fill]
    (when (> strength 0)
      (c/draw-> context
-        (c/rect (+ x strength) (+ y strength) (- w strength) (- h strength) color (not no-fill) strength)) ;;TODO: clean this up double negation
+               (c/rect (+ x strength) (+ y strength) (- w strength) (- h strength) color (not no-fill) strength)) ;;TODO: clean this up double negation
      (draw-border-rec context color (- strength 1) x y w h no-fill))))
 
 (defn- draw-border
@@ -119,13 +119,13 @@
    (let [[x y w h] (coord box context)]
      (draw-border-rec context color strength x y w h (not fill)))))
 
-(defn draw-highlight [key default widget context]
+(defn draw-highlight [key default ^strigui.widget.Widget widget context]
   (when (some #{:border} (-> widget :props :highlight))
     (draw-border widget context (get (-> widget :props :color) key default) (get (-> widget :props) :highlight-border-size (:highlight-border-size widget-default-props))))
   (when (some #{:alpha} (-> widget :props :highlight))
-    (draw (assoc-in widget [:props :color :background] (let [color ^Color (get (-> widget :props :color) key default)]
-                                                         (Color. ^int (.getRed color) ^int (.getGreen color) ^int (.getBlue color) ^int (get (-> widget :props) :highlight-alpha-opacity (:highlight-alpha-opacity widget-default-props)))))
-          context)))
+      (draw (assoc-in widget [:props :color :background] (let [color ^Color (get (-> widget :props :color) key default)]
+                                                           (Color. ^int (.getRed color) ^int (.getGreen color) ^int (.getBlue color) ^int (get (-> widget :props) :highlight-alpha-opacity (:highlight-alpha-opacity widget-default-props)))))
+            context)))
 
 (def hide! (fn [widget context]
                      (let [[x y w h] (coord widget context)]
@@ -414,6 +414,7 @@
     widgets))
 
 (defmethod c/handle-event :mouse-dragged [_ {:keys [x y window-name]}]
+  (println "dragging")
   (let [[x-prev y-prev] (-> @previously :mouse-position (get window-name [0 0]))]
     (swap-widgets! #(let [widgets (handle-mouse-dragged % window-name x y x-prev y-prev)]
                       (widget-global-event widgets {:action :mouse-dragged :window-name window-name :x x :y y :x-prev x-prev :y-prev y-prev})))
@@ -425,10 +426,12 @@
   (swap! previously assoc-in [:mouse-position window-name] [x y]))
 
 (defmethod c/handle-event :mouse-pressed [_ {:keys [x y window-name]}]
+  (println "pressed")
   (swap-widgets! #(let [widgets (handle-clicked % window-name x y)]
                     (widget-global-event widgets {:action :mouse-clicked :window-name window-name :x x :y y}))))
 
 (defmethod c/handle-event :mouse-released [_ {:keys [x y window-name]}]
+  (println "released")
   (swap-widgets! #(widget-global-event % {:action :mouse-released :window-name window-name :x x :y y})))
 
 (defn handle-tabbing
