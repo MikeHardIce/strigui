@@ -30,8 +30,7 @@
         (let [{:keys [width height color]} props]
           (c/draw-> window
                     (c/rect 0 0 width height (:background color) true)))
-        this)
-  (after-drawing [this] this))
+        this))
 
 (defn window
   "Creates and renders the frame of a new window

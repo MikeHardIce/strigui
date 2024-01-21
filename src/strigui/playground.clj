@@ -47,7 +47,7 @@
   (gui/swap-widgets! #(-> %
                           (gui/add-window "main" 100 100 1200 800 "Window with a cactus" {})
                           (gui/add-image "main" "cactus-image" "resources/dino plant.jpg" 
-                                         {:x 200 :y 100 :width 300 :height 100 :can-resize? true :can-move? true})
+                                         {:x 200 :y 100 :width 300 :height 200 :can-resize? true :can-move? true})
                           (gui/add-button "main" "reset-button" "Reset" {:x 10 :y 600 :width 250 :height 35})
                           (gui/arrange 2 {:from [0 1200] :align :right} "reset-button" )))
 

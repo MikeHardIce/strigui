@@ -10,9 +10,7 @@
   (defaults [this] (assoc-in this [:props :highlight] [:border :alpha]))
   (before-drawing [this] this)
   (draw [this context]
-        (b/draw-box-with-text context (:value this) (:props this)))
-  (after-drawing [this] 
-                 this))
+        (b/draw-box-with-text context (:value this) (:props this))))
 
 (defmethod wdg/widget-event [strigui.button.Button :key-pressed]
   [widgets {:keys [widget code]}]

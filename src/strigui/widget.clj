@@ -2,7 +2,8 @@
   (:require [capra.core :as c]
             [clojure.set :as s]
             [clojure.string]
-            [clojure.stacktrace])
+            [clojure.stacktrace]
+            [clojure.core.async :refer [go-loop <! timeout]])
   (:import [java.awt Color]))
 
 (set! *warn-on-reflection* true)
@@ -12,9 +13,8 @@
   "collection of functions around redrawing widgets, managing the border etc. ..."
   (coord [this window] "gets the coordinates of the widget")
   (defaults [this] "attach default values once the widget gets created")
-  (before-drawing [this] "modify the widget each time before it gets drawn")
-  (draw [this window] "draw the widget, returns the widget on success")
-  (after-drawing [this] "modify the widget each time after it got drawn"))
+  (before-drawing [this] "temporary modify the widget each time before it is drawn")
+  (draw [this window] "draw the widget, returns the widget on success"))
 
 (defonce widget-default-props {:width 150 :height 42
                               :z 0 
@@ -34,7 +34,7 @@
                        :mouse-position nil
                        :key-code nil}))
 
-(def state (agent {:widgets {}}))
+(def state (agent {:widgets {} :rendering? false}))
 
 (defmulti widget-event
   (fn [widgets event-attr]
@@ -261,63 +261,48 @@
   (into {} (filter (comp :rendering-hints :props val) widgets)))
 
 (defn- refresh-window!
-  [window-key before after]
-  (let [window-before (get before window-key)
-        window-after (get after window-key)
-        window-after (if (and (seq window-after) (not= window-before window-after))
-                       (before-drawing window-after)
-                       window-after)
-        after (if (seq window-after) (assoc after window-key window-after) after)]
-    (if-let [window (get after window-key)]
-      (try
-        (let [context (-> window :context)
-              before (filter-by-window window-key before)
-              widgets-after (atom (filter-by-window window-key after))
-              updated-keys (if (and (seq window-after) (not= window-before window-after))
-                             (keys @widgets-after)
-                             (updated-widgets->keys before @widgets-after))
-              added-keys (added-widgets->keys before @widgets-after)
-              removed-keys (removed-widgets->keys before @widgets-after)
-              neighbour-keys (select-neighbouring-keys context @widgets-after (s/union updated-keys added-keys removed-keys))]
-          (c/use-buffer-> context
-                          (when (and (seq window-after) (not= window-before window-after))
-                            (draw window context))
-                          (doseq [to-hide (vals (select-keys before (s/union updated-keys removed-keys)))]
-                            (when (-> to-hide :props :can-hide?)
-                              (hide! to-hide context)))
-                          (when-let [widgets-to-draw (vals (select-keys @widgets-after neighbour-keys))]
-                            (let [widgets-to-draw (map before-drawing widgets-to-draw)]
-                              (draw-widgets! context widgets-to-draw)
-                              (let [widgets-to-draw (map after-drawing widgets-to-draw)
-                                    wdgs-after (merge-with into @widgets-after (mapcat #(merge {(:name %) %}) widgets-to-draw))]
-                                (reset! widgets-after wdgs-after)))))
-          (merge after @widgets-after))
-        (catch Exception e
-          (println "Failed to update widgets, perhaps the given function" \newline
-                   "doesn't take or doesn't return a widgets map." \newline
-                   "Exception: " (.getMessage e) \newline
-                   (clojure.stacktrace/print-stack-trace e))
-          after))
-      after)))
+  [window-key widgets]
+  (let [window (get widgets window-key)
+        window (before-drawing window)]
+    (try
+      (let [context (-> window :context)
+            widgets (filter-by-window window-key widgets)]
+        (c/use-buffer-> context
+                        (draw window context)
+                        (let [widgets-to-draw (map before-drawing (vals widgets))]
+                          (draw-widgets! context widgets-to-draw))))
+      (catch Exception e
+        (println "Failed to update widgets, perhaps the given function" \newline
+                 "doesn't take or doesn't return a widgets map." \newline
+                 "Exception: " (.getMessage e) \newline
+                 (clojure.stacktrace/print-stack-trace e))))))
 
 (defn- refresh-windows!
-  [before f]
+  [widgets]
   (try
-   (let [after (f before)]
-     (loop [windows (get-windows after)
-            widgets after]
-       (if (seq windows)
-         (recur (rest windows) (refresh-window! (-> windows first key) before widgets))
-         widgets))) 
+    (loop [windows (get-windows widgets)]
+      (when (seq windows)
+        (refresh-window! (-> windows first key) widgets)
+        (recur (rest windows))))
     (catch Exception e
-      (clojure.stacktrace/print-stack-trace e)
-      before)))
+      (clojure.stacktrace/print-stack-trace e))))
+
+(defn init-rendering
+  []
+  (go-loop []
+    (refresh-windows! (-> @state :widgets))
+    (<! (timeout 10))
+    (recur)))
 
 (defn swap-widgets!
   "Swaps out the widgets using the given function.
    f - function that takes a widgets map and returns a new widgets map"
   [f]
-  (send state update :widgets refresh-windows! f))
+  (when-not (-> @state :rendering?)
+    (init-rendering)
+    (send state assoc :rendering? true))
+  (send state update :widgets f))
+
 
 (defn trigger-custom-event
   [widgets {:keys [action widget] :as event-attr}]
@@ -414,7 +399,6 @@
     widgets))
 
 (defmethod c/handle-event :mouse-dragged [_ {:keys [x y window-name]}]
-  (println "dragging")
   (let [[x-prev y-prev] (-> @previously :mouse-position (get window-name [0 0]))]
     (swap-widgets! #(let [widgets (handle-mouse-dragged % window-name x y x-prev y-prev)]
                       (widget-global-event widgets {:action :mouse-dragged :window-name window-name :x x :y y :x-prev x-prev :y-prev y-prev})))
@@ -426,12 +410,10 @@
   (swap! previously assoc-in [:mouse-position window-name] [x y]))
 
 (defmethod c/handle-event :mouse-pressed [_ {:keys [x y window-name]}]
-  (println "pressed")
   (swap-widgets! #(let [widgets (handle-clicked % window-name x y)]
                     (widget-global-event widgets {:action :mouse-clicked :window-name window-name :x x :y y}))))
 
 (defmethod c/handle-event :mouse-released [_ {:keys [x y window-name]}]
-  (println "released")
   (swap-widgets! #(widget-global-event % {:action :mouse-released :window-name window-name :x x :y y})))
 
 (defn handle-tabbing

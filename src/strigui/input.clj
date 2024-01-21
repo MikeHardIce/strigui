@@ -18,9 +18,7 @@
                  (apply str (repeat (count (:value this)) "*"))
                  (:value this))]
       (b/draw-box-with-text context text (:props this))
-      this))
-  (after-drawing [this] 
-                 this))
+      this)))
 
 (defn adjust-text [text context char code {:keys [can-multiline? can-scroll? font-size width height] :or {height 42 width 150 font-size 15}}] 
   (if (and (= code 8) (> (count text) 0)) 

@@ -115,8 +115,7 @@
                                                                 "")]
                                                    (str name " " suffix))) header) :visible? true}] props columns)
               (draw-list context items (update props :y (partial + item-height)) columns)))
-          this))
-  (after-drawing [this] this))
+          this)))
 
 (defn activate!
   [widget y property]

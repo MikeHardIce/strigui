@@ -43,5 +43,4 @@
   (coord [this context] (coord-label this context))
   (defaults [this] this)
   (before-drawing [this] this)
-  (draw [this context] (draw-label this context))
-  (after-drawing [this] this))
+  (draw [this context] (draw-label this context)))

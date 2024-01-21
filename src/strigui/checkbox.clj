@@ -27,8 +27,7 @@
       (if (= (:type props) :radio)
         (b/draw-circle window props-square (:value this))
         (b/draw-square window props-square (:value this)))
-      this))
-  (after-drawing [this] this))
+      this)))
 
 (defmethod wdg/widget-event [strigui.checkbox.Checkbox :mouse-clicked]
   [wdgs {:keys [widget]}]
