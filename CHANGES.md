@@ -30,8 +30,8 @@
   * export/import with reader tag #window for hide and exit
   * windows don't get recreated anymore when calling add-window with the same widget name
   * Unified all event parameters to 2 parameters -> first parameter is the map of widgets, 2nd a map of all arguments like the widget itself, perhaps coordinates etc. ... therefore no more guessing when using strigui
-  - TODO: Have a process in the background that redraws every window once/twice per second and don't redraw anymore on "swap-widgets". Use that solely to
-    update the widget map via an agent
+  - New process in the background that redraws every window (target 20 times per second). "swap-widgets" will be solely used to
+    update the widget map via an agent. TODO: close windows of removed window keys
 
 ### Highlight properties
   * highlight alpha opacity can be adjusted via key :highlight-alpha-opacity accepting integers from 0 to 255

@@ -3,7 +3,7 @@
             [clojure.set :as s]
             [clojure.string]
             [clojure.stacktrace]
-            [clojure.core.async :refer [go-loop <! timeout]])
+            [clojure.core.async :refer [go <! thread]])
   (:import [java.awt Color]))
 
 (set! *warn-on-reflection* true)
@@ -126,11 +126,6 @@
       (draw (assoc-in widget [:props :color :background] (let [color ^Color (get (-> widget :props :color) key default)]
                                                            (Color. ^int (.getRed color) ^int (.getGreen color) ^int (.getBlue color) ^int (get (-> widget :props) :highlight-alpha-opacity (:highlight-alpha-opacity widget-default-props)))))
             context)))
-
-(def hide! (fn [widget context]
-                     (let [[x y w h] (coord widget context)]
-                       (c/draw-> (dissoc context :rendering) ;;remove rendering hints when erasing a widget on the canvas
-                           (c/clear-rect (- x 5) (- y 5) (+ w 8) (+ h 8))))))
 
 (def draw-resizing! (partial draw-highlight :resize (-> widget-default-props :color :resize)))
 
@@ -287,19 +282,22 @@
     (catch Exception e
       (clojure.stacktrace/print-stack-trace e))))
 
-(defn init-rendering
+(defn create-rendering-process
   []
-  (go-loop []
-    (refresh-windows! (-> @state :widgets))
-    (<! (timeout 10))
-    (recur)))
+  (thread 
+    (loop []
+      (refresh-windows! (-> @state :widgets))
+      (Thread/sleep 50)
+      (recur))
+    false))
 
 (defn swap-widgets!
   "Swaps out the widgets using the given function.
    f - function that takes a widgets map and returns a new widgets map"
   [f]
   (when-not (-> @state :rendering?)
-    (init-rendering)
+    (let [rendering-channel (create-rendering-process)]
+      (go (send state assoc :rendering? (<! rendering-channel))))
     (send state assoc :rendering? true))
   (send state update :widgets f))
 
