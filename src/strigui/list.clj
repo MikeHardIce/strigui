@@ -84,12 +84,13 @@
   (coord [this _] (let [{:keys [x y width height]} (:props this)]
                          [x y width height]))
   (defaults [this] (make-visible this))
-  (before-drawing [this] (if (< (count (filter :visible? (:items this)))
+  (before-drawing [this] #_(if (< (count (filter :visible? (:items this)))
                                 (- (Math/floor (/ (-> this :props :height) item-height)) (if (-> this :props :header)
                                                                                            1
                                                                                            0)))
                            (make-visible this)
-                           this))
+                           this)
+    this)
   (draw [this context]
         (let [{:keys [x y width height color header] :as props} (:props this)
               bar-x (+ x (- width item-width-right-margin))

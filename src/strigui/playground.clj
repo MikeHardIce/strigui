@@ -45,11 +45,12 @@
 
 (defn main []
   (gui/swap-widgets! #(-> %
-                          (gui/add-window "main" 100 100 1200 800 "Window with a cactus" {})
-                          (gui/add-image "main" "cactus-image" "resources/dino plant.jpg" 
+                          (gui/add-window "main" 100 100 1200 800 "Window with a dino" {})
+                          (gui/add-image "main" "dino-image" "resources/dino plant.jpg" 
                                          {:x 200 :y 100 :width 300 :height 200 :can-resize? true :can-move? true})
                           (gui/add-button "main" "reset-button" "Reset" {:x 10 :y 600 :width 250 :height 35})
-                          (gui/arrange 2 {:from [0 1200] :align :right} "reset-button" )))
+                          (gui/attach-event "reset-button" :mouse-clicked (fn [wdgs _]
+                                                                            (update-in wdgs ["dino-image" :props] merge {:x 200 :y 100 :width 300 :height 200})))))
 
 
   #_(moving-by-button)

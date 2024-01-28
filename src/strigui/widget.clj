@@ -255,16 +255,16 @@
   [widgets]
   (into {} (filter (comp :rendering-hints :props val) widgets)))
 
-(defn- refresh-window!
+(defn- refresh-widgets-in-window!
   [window-key widgets]
-  (let [window (get widgets window-key)
-        window (before-drawing window)]
+  (let [window (get widgets window-key)]
     (try
       (let [context (-> window :context)
             widgets (filter-by-window window-key widgets)]
         (c/use-buffer-> context
                         (draw window context)
-                        (let [widgets-to-draw (map before-drawing (vals widgets))]
+                        (draw-widgets! context (vals widgets))
+                        #_(let [widgets-to-draw (map before-drawing (vals widgets))]
                           (draw-widgets! context widgets-to-draw))))
       (catch Exception e
         (println "Failed to update widgets, perhaps the given function" \newline
@@ -272,12 +272,12 @@
                  "Exception: " (.getMessage e) \newline
                  (clojure.stacktrace/print-stack-trace e))))))
 
-(defn- refresh-windows!
+(defn- refresh-widgets!
   [widgets]
   (try
     (loop [windows (get-windows widgets)]
       (when (seq windows)
-        (refresh-window! (-> windows first key) widgets)
+        (refresh-widgets-in-window! (-> windows first key) widgets)
         (recur (rest windows))))
     (catch Exception e
       (clojure.stacktrace/print-stack-trace e))))
@@ -286,10 +286,34 @@
   []
   (thread 
     (loop []
-      (refresh-windows! (-> @state :widgets))
+      (refresh-widgets! (-> @state :widgets))
       (Thread/sleep 50)
       (recur))
     false))
+
+(defn refresh-window!
+  [window-key before after]
+  (let [window-before (get before window-key)
+        window-after (get after window-key)
+        window-after (if (and (seq window-after) (not= window-before window-after))
+                       (before-drawing window-after)
+                       window-after)
+        widgets (filter-by-window window-key after)
+        after (merge-with into after (mapcat #(merge {(:name %) %}) (map before-drawing (vals widgets))))]
+    (if (seq window-after) (assoc after window-key window-after) after)))
+
+(defn refresh-windows!
+  [before f]
+  (try
+    (let [after (f before)]
+      (loop [windows (get-windows after)
+             widgets after]
+        (if (seq windows)
+          (recur (rest windows) (refresh-window! (-> windows first key) before widgets))
+          widgets)))
+    (catch Exception e
+      (clojure.stacktrace/print-stack-trace e)
+      before)))
 
 (defn swap-widgets!
   "Swaps out the widgets using the given function.
@@ -299,7 +323,7 @@
     (let [rendering-channel (create-rendering-process)]
       (go (send state assoc :rendering? (<! rendering-channel))))
     (send state assoc :rendering? true))
-  (send state update :widgets f))
+  (send state update :widgets refresh-windows! f))
 
 
 (defn trigger-custom-event

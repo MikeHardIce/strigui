@@ -8,7 +8,7 @@
  wdg/Widget
   (coord [this _] this)
   (defaults [this] this)
-  (before-drawing [this] 
+  (before-drawing [this]
                   (if (-> this :props :source-object-changed?)
                     (assoc-in this [:props :source-object-changed?] false)
                     (let [{:keys [frame canvas]} (:context this)
