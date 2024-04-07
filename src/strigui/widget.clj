@@ -263,32 +263,32 @@
             widgets (filter-by-window window-key widgets)]
         (c/use-buffer-> context
                         (draw window context)
-                        (draw-widgets! context (vals widgets))
-                        #_(let [widgets-to-draw (map before-drawing (vals widgets))]
+                        (let [widgets-to-draw (map before-drawing (vals widgets))]
                           (draw-widgets! context widgets-to-draw))))
       (catch Exception e
         (println "Failed to update widgets, perhaps the given function" \newline
-                 "doesn't take or doesn't return a widgets map." \newline
+                 "doesn't take or doesn't return a widget map." \newline
                  "Exception: " (.getMessage e) \newline
                  (clojure.stacktrace/print-stack-trace e))))))
 
-(defn- refresh-widgets!
-  [widgets]
-  (try
-    (loop [windows (get-windows widgets)]
-      (when (seq windows)
-        (refresh-widgets-in-window! (-> windows first key) widgets)
-        (recur (rest windows))))
-    (catch Exception e
-      (clojure.stacktrace/print-stack-trace e))))
+(defn create-rendering-for-window 
+  [window-key]
+  (thread
+    (while (contains? (-> @state :widgets keys set) window-key)
+      (refresh-widgets-in-window! window-key (-> @state :widgets))
+      (Thread/sleep 50))
+    :closed))
 
 (defn create-rendering-process
   []
-  (thread 
-    (loop []
-      (refresh-widgets! (-> @state :widgets))
-      (Thread/sleep 50)
-      (recur))
+  (thread
+    (loop [window-keys #{}]
+      (Thread/sleep 500)
+      (let [winds (get-windows (-> @state :widgets))
+            new-window-keys (s/difference (-> winds keys set) window-keys)
+            removed-window-keys (s/difference window-keys (-> winds keys set))]
+        (doseq [window-key new-window-keys] (create-rendering-for-window window-key))
+        (recur (s/difference (s/union window-keys new-window-keys) removed-window-keys))))
     false))
 
 (defn refresh-window!

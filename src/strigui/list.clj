@@ -84,7 +84,7 @@
   (coord [this _] (let [{:keys [x y width height]} (:props this)]
                          [x y width height]))
   (defaults [this] (make-visible this))
-  (before-drawing [this] #_(if (< (count (filter :visible? (:items this)))
+  (before-drawing [this] (if (< (count (filter :visible? (:items this)))
                                 (- (Math/floor (/ (-> this :props :height) item-height)) (if (-> this :props :header)
                                                                                            1
                                                                                            0)))
@@ -108,13 +108,13 @@
             (draw-list context items props (apply max (map #(-> % :value count) items)))
             (let [columns (count header)]
               (draw-list context [{:value (mapv (fn [head]
-                                                 (let [name (:value head)
-                                                       suffix (case (:action head)
-                                                                :sort \u2191
-                                                                :sort-asc \u2191 
-                                                                :sort-desc \u2193
-                                                                "")]
-                                                   (str name " " suffix))) header) :visible? true}] props columns)
+                                                  (let [name (:value head)
+                                                        suffix (case (:action head)
+                                                                 :sort \u2191
+                                                                 :sort-asc \u2191
+                                                                 :sort-desc \u2193
+                                                                 "")]
+                                                    (str name " " suffix))) header) :visible? true}] props columns)
               (draw-list context items (update props :y (partial + item-height)) columns)))
           this)))
 

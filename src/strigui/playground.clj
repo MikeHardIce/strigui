@@ -44,7 +44,7 @@
                           (gui/add-button "main" "btnOk" "Ok" {:x 150 :y 700}))))
 
 (defn main []
-  (gui/swap-widgets! #(-> %
+  #_(gui/swap-widgets! #(-> %
                           (gui/add-window "main" 100 100 1200 800 "Window with a dino" {})
                           (gui/add-image "main" "dino-image" "resources/dino plant.jpg" 
                                          {:x 200 :y 100 :width 300 :height 200 :can-resize? true :can-move? true})
@@ -54,7 +54,7 @@
 
 
   #_(moving-by-button)
-  #_(default-stuff)
+  (default-stuff)
   #_(gui/swap-widgets! #(gui/add-image % "main-window" "img-1" "resources/cactus.GIF" {:x 10 :y 10 :width 100 :height 100 :can-move? true :can-resize? true}))
   #_(gui/swap-widgets! #(gui/attach-event % "click" :mouse-clicked (fn [wdgs _]
                                                                  (gui/close-window! wdgs "main-window"))))

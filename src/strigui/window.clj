@@ -53,7 +53,8 @@
                                                                                                             visible? true}}] 
    (let [context (c/create-window name x y width height title {:color (:background color) :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})
          context (assoc-in context [:canvas :rendering] rendering-hints)
-         context (c/attach-buffered-strategy context 2)]
+         context (c/attach-buffered-strategy context 2)
+         ]
      (doto (-> context :frame) (.requestFocus))
      (Window. name context {:title title :x x :y y :width width :height height :color color :rendering-hints rendering-hints 
                             :on-close on-close :icon-path icon-path :resizable? resizable? :visible? visible?})))
@@ -71,8 +72,8 @@
         :color - java.awt.Color of the windows background color
         :rendering-hints - map of java.awt.RenderingHints key value combinations to configure the rendering quality
         of any widget drawn within the window
-        :icon-path - file system path for the window icon"
-  [context name x y width height title {:keys [color rendering-hints on-close icon-path resizable? visible?] :or {rendering-hints {java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON
+        :icon-path - file system path for the window icon"   
+  [context name x y width height title {:keys [color rendering-hints on-close icon-path resizable? visible?] :or {rendering-hints { java.awt.RenderingHints/KEY_ANTIALIASING java.awt.RenderingHints/VALUE_ANTIALIAS_ON
                                                                                                                            java.awt.RenderingHints/KEY_RENDERING java.awt.RenderingHints/VALUE_RENDER_SPEED}
                                                                                                           on-close c/exit
                                                                                                           icon-path nil
@@ -106,4 +107,4 @@
                           (assoc-in [window-name :props :source-object-changed?] true))))
 
 (defmethod  c/handle-event :window-closed [_ {:keys [window-name]}]
-  )
+  (wdg/swap-widgets! #(dissoc % window-name)))
