@@ -16,6 +16,8 @@
   (draw [this window] "draw the widget, returns the widget on success")
   (after-drawing [this] "modify the widget each time after it got drawn"))
 
+(System/setProperty "sun.java2d.opengl" "True")
+
 (defonce widget-default-props {:width 150 :height 42
                               :z 0 
                                :border-size 1
