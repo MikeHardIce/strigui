@@ -416,7 +416,6 @@
     widgets))
 
 (defmethod c/handle-event :mouse-dragged [_ {:keys [x y window-name]}]
-  (println "dragging")
   (let [[x-prev y-prev] (-> @previously :mouse-position (get window-name [0 0]))]
     (swap-widgets! #(let [widgets (handle-mouse-dragged % window-name x y x-prev y-prev)]
                       (widget-global-event widgets {:action :mouse-dragged :window-name window-name :x x :y y :x-prev x-prev :y-prev y-prev})))
@@ -428,12 +427,10 @@
   (swap! previously assoc-in [:mouse-position window-name] [x y]))
 
 (defmethod c/handle-event :mouse-pressed [_ {:keys [x y window-name]}]
-  (println "pressed")
   (swap-widgets! #(let [widgets (handle-clicked % window-name x y)]
                     (widget-global-event widgets {:action :mouse-clicked :window-name window-name :x x :y y}))))
 
 (defmethod c/handle-event :mouse-released [_ {:keys [x y window-name]}]
-  (println "released")
   (swap-widgets! #(widget-global-event % {:action :mouse-released :window-name window-name :x x :y y})))
 
 (defn handle-tabbing

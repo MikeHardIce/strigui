@@ -16,9 +16,9 @@
                              widget)
                            this))
   (draw [this context]
-        (time (let [[x y width height] (wdg/coord this context)]
-                (c/draw-> context
-                          (c/image (-> this :props :loaded-image) x y width height (-> this :props :color :background)))))
+        (let [[x y width height] (wdg/coord this context)]
+          (c/draw-> context
+                    (c/image (-> this :props :loaded-image) x y width height (-> this :props :color :background))))
     this)
   (after-drawing [this]
     this))

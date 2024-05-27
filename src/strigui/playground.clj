@@ -34,17 +34,24 @@
                                                                           (update-in ["main-window" :props :x] (partial + 50))
                                                                           (gui/change-color-profile "sub-window" (first (swap! color-profiles reverse)))))))))
 
+(defn example 
+  []
+  (gui/swap-widgets! #(-> %
+                          (gui/add-window "window1" 50 50 1000 1000 "My First Window" {}))))
+
 (defn default-stuff
   []
+  (example)
   #_(gui/from-file! "gui-test-simple.edn")
   #_(gui/from-file! "bla-test.edn")
-  (gui/from-file! "gui-test.edn")
+  #_(gui/from-file! "gui-test.edn")
   #_(gui/swap-widgets! #(-> %
                           (gui/add-window "main" 100 100 1200 800 "Welcome to Strigui" {})
                           (gui/add-button "main" "btnOk" "Ok" {:x 150 :y 700}))))
 
 (defn main []
-  (gui/swap-widgets! #(-> %
+  (default-stuff)
+  #_(gui/swap-widgets! #(-> %
                           (gui/add-window "main" 100 100 1200 800 "Window with a cactus" {})
                           (gui/add-image "main" "cactus-image" "resources/dino plant.jpg" 
                                          {:x 200 :y 100 :width 300 :height 100 :can-resize? true :can-move? true})
