@@ -11,10 +11,10 @@ Available widgets:
 - input
 - label
 - image
-- checkbox
+- checkbox/radiobutton
 - list
 
-Each of those widget types have its own "add" function in strigui.core. In addition there are global events that trigger for a specific window, and events that trigger for specific widgets. See the [Api Documentation] (https://github.com/MikeHardIce/strigui/blob/master/doc/api.md) for further information.
+Each of those widget types have their own "add" function in strigui.core. In addition there are global events that trigger for a specific window, and events that trigger for specific widgets. See the [Api Documentation] (https://github.com/MikeHardIce/strigui/blob/master/doc/api.md) for further information.
 
 
 ## Quick Start
@@ -104,12 +104,14 @@ For the above, the my-app.edn file will contain something like
 }
 ```
 
+Have a look at the "examples" folder.
+
 ### Warning
 
 This is an alpha version and there is still a long way to go until it can be used for anything serious.
-So only use it for fun stuff like [Dame](https://github.com/MikeHardIce/Dame)
+So only use Strigui for fun stuff like [Dame](https://github.com/MikeHardIce/Dame)
 
-when drawing widgets, strigui uses [Capra](https://github.com/MikeHardIce/Capra). This means anything that can be drawn could potentially be a widget.
+When drawing widgets, strigui uses [Capra](https://github.com/MikeHardIce/Capra). This means anything that can be drawn could potentially be a widget.
 
 Creating a custom widget type can easily be done by implementing the widget protocol:
 ```Clojure
@@ -130,7 +132,7 @@ For example the game board in the game [Dame](https://github.com/MikeHardIce/Dam
     (gui/swap-widgets! #(-> %
                           ....
                           (gui/add "main-window" (board/create-board "Dame" board))))
-                          ```
+```
 
 [See Changes](CHANGES.md)
 
