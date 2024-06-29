@@ -111,7 +111,7 @@ So only use it for fun stuff like [Dame](https://github.com/MikeHardIce/Dame)
 
 when drawing widgets, strigui uses [Capra](https://github.com/MikeHardIce/Capra). This means anything that can be drawn could potentially be a widget.
 
-Creating a custom widget type can be easily done by implementing the widget protocol:
+Creating a custom widget type can easily be done by implementing the widget protocol:
 ```Clojure
 (defprotocol Widget
   "collection of functions around redrawing widgets, managing the border etc. ..."
