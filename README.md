@@ -14,7 +14,7 @@ Available widgets:
 - checkbox/radiobutton
 - list
 
-Each of those widget types have their own "add" function in strigui.core. In addition there are global events that trigger for a specific window, and events that trigger for specific widgets. See the [Api Documentation] (https://github.com/MikeHardIce/strigui/blob/master/doc/api.md) for further information.
+Each of those widget types have their own "add" function in strigui.core. In addition there are global events that trigger for a specific window, and events that trigger for specific widgets. See the [Api Documentation](https://github.com/MikeHardIce/strigui/blob/master/doc/api.md) for further information.
 
 
 ## Quick Start
