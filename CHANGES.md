@@ -12,6 +12,11 @@
   * better defaults, just add a widget with x and y coordinates and everything else is default
   * improve overall performance (large lists, moving images, ...)
 
+## 0.0.1-alpha33
+
+### fixes
+  * strigui.core/inspect fix
+
 ## 0.0.1-alpha32
 
 ### General
