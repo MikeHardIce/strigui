@@ -29,7 +29,7 @@
 (defn inspect-widgets
   "Returns the entire widget map."
   []
-  (:widgets (@wdg/state)))
+  (:widgets @wdg/state))
 
 (defn swap-widgets!
   [f]
