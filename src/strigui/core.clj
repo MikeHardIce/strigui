@@ -80,6 +80,7 @@
     (assoc-in widgets [name :events event] f)
     (println "Cannot attach event " event " | Widget with name \"" name "\" doesn't exist")))
 
+;; TODO needs to be reworked to make it more useful
 (defn arrange
   "Arranges the widgets given via widget names 
    by the given grid
@@ -134,12 +135,14 @@
                                    (assoc-in [name :props :height] h))))))
                   (+ height max-height (last space)))))))))
 
-#_(defn align-horizontal
+(defn align-horizontal
   "Aligns a widget or widgets relative to another widget horizontally, only changing its x-coordinate.
    For example:
    (align wdgs \"main-window\" :center \"a\" \"b\")
    would align the widget \"a\" and \"b\" to the horizontal center of the main window"
   [widgets reference-widget-name alignment & widget-names]
+  (let [ref-widget (get widgets reference-widget-name {})
+        [x width] (select-keys (:props ref-widget) [:x :width])])
   widgets)
 
 #_(defn align-vertical

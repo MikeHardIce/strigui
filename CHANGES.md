@@ -14,8 +14,17 @@
 
 ## 0.0.1-alpha33
 
+### general
+  * unit tests (TODO)
+
 ### fixes
   * strigui.core/inspect fix
+  * fix size of labels (TODO)
+
+### arrange functions
+  * implement arrange-horizontally (TODO)
+  * implement arrange-vertically (TODO)
+
 
 ## 0.0.1-alpha32
 
