@@ -80,8 +80,19 @@
     (assoc-in widgets [name :events event] f)
     (println "Cannot attach event " event " | Widget with name \"" name "\" doesn't exist")))
 
+
+(defn arrange-horizontally
+  "Arrange a set of widgets horizontally
+   "
+  [])
+
+(defn arrange-vertically
+  "Arrange a set of widgets vertically
+   "
+  [])
+
 ;; TODO needs to be reworked to make it more useful
-(defn arrange
+#_(defn arrange
   "Arranges the widgets given via widget names 
    by the given grid
    skip-after - indicates how many items should be displayed per row
@@ -211,6 +222,8 @@
     (assoc widgets (:name widget) widget))))
 
 (defmacro add-multiple
+  "Add multiple widgets of the same type with name title pairs
+   Example: (add-multiple wdgs \"main-window\" strigui.button.Button \"btn1\" \"name1\" \"btn2\" \"name2\")"
   [wdgs window-key type & names]
   `(-> ~wdgs
          ~@(for [pair (partition 2 names)]
@@ -221,7 +234,7 @@
   [widgets window-key] 
   (if-let [widget (get widgets window-key)]
     (c/close-window (:context widget))
-    (println "Cannot close window | Window with name \"" window-key "\" doesn't exist")) 
+    (throw (Exception. (str "Cannot close window | Window with name \"" window-key "\" doesn't exist")))) 
   widgets)
 
 (defn add-checkbox 
