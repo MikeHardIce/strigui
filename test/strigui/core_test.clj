@@ -41,5 +41,35 @@
           expected #{"btn-1" "btn-2" "btn-3"}]
       (is (= expected (s/intersection (set wkeys) expected))))))
 
-(deftest test-arrange-horizontally
-  (testing "Test the arrangement a set of widgets horizontally"))
+(deftest test-assoc-property-change-width
+  (testing "Test to change the width property of multiple widgets at once"
+    (swap-widgets! #(-> %
+                        (add-window "test-window" 50 50 500 500 "simple-button-with-event-test" {})
+                        (add-multiple "test-window" strigui.button.Button "btn-1" "1" "btn-2" "2" "btn-3" "3")
+                        (assoc-property :width 100 "btn-1" "btn-2" "btn-3")))
+    (Thread/sleep 500)
+    (let [widgets (inspect-widgets)
+          buttons (vals (select-keys widgets ["btn-1" "btn-2" "btn-3"]))]
+      (doseq [btn-width (map #(-> % :props :width) buttons)]
+        (is (= 100 btn-width))))))
+
+(deftest test-arrange
+  (testing "Test the arrangement of a set of widgets"
+    (swap-widgets! #(-> %
+                        (add-window "test-window" 50 50 500 500 "simple-button-with-event-test" {})
+                        (add-multiple "test-window" strigui.button.Button "btn-1" "1" "btn-2" "2" "btn-3" "3"
+                                      "btn-4" "4" "btn-5" "5" "btn-6" "6"
+                                      "btn-7" "7" "btn-8" "8" "btn-9" "9")
+                        (assoc-property :width 150 "btn-1" "btn-2" "btn-3" "btn-4" "btn-5" "btn-6" "btn-7" "btn-8" "btn-9")
+                        (assoc-property :height 50 "btn-1" "btn-2" "btn-3" "btn-4" "btn-5" "btn-6" "btn-7" "btn-8" "btn-9")
+                        (arrange "test-window" {:x 0 :y 0 :width 500 :height 500 :spacing-horizontally 20 :spacing-vertically 30} "btn-1" "btn-2" "btn-3" 
+                                 "btn-4" "btn-5" "btn-6" "btn-7" "btn-8" "btn-9")))
+    (Thread/sleep 500)
+    (let [widgets (inspect-widgets)
+          buttons (sort-by :name (vals (select-keys widgets ["btn-1" "btn-2" "btn-3" "btn-4" "btn-5" "btn-6" "btn-7" "btn-8" "btn-9"])))
+          actual (mapv (fn [wdg]
+                           (vec (cons (-> wdg :name) (cons (-> wdg :props :window) (vals (select-keys (-> wdg :props) [:x :y :width :height])))))) buttons)
+          expected [["btn-1" "test-window" 0 0 150 50] ["btn-2" "test-window" 170 0 150 50] ["btn-3" "test-window" 340 0 150 50]
+                    ["btn-4" "test-window" 0 80 150 50] ["btn-5" "test-window" 170 80 150 50] ["btn-6" "test-window" 340 80 150 50]
+                    ["btn-7" "test-window" 0 160 150 50] ["btn-8" "test-window" 170 160 150 50] ["btn-9" "test-window" 340 160 150 50]]]
+      (is (= expected actual)))))

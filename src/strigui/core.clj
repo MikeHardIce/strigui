@@ -78,91 +78,32 @@
   [widgets name event f]
   (if (get widgets name)
     (assoc-in widgets [name :events event] f)
-    (println "Cannot attach event " event " | Widget with name \"" name "\" doesn't exist")))
+    (throw (Exception. (str "Cannot attach event " event " | Widget with name \"" name "\" doesn't exist")))))
 
 
-(defn arrange-horizontally
-  "Arrange a set of widgets horizontally
-   "
-  [])
-
-(defn arrange-vertically
-  "Arrange a set of widgets vertically
-   "
-  [])
-
-;; TODO needs to be reworked to make it more useful
-#_(defn arrange
-  "Arranges the widgets given via widget names 
-   by the given grid
-   skip-after - indicates how many items should be displayed per row
-   {:from [x y]
-   :space [between-space-horizontal between-space-vertical]
-   :align :left :center :right
-   Example: 2 by 3 grid that starts at x: 100 y: 50
-   (-> wdgs
-   ...
-   (arrange 2 {:from [100 50]} \"label1\" \"button1\" \"label2\" \"button2\" \"label3\" \"button3\"))"
-  ([widgets names] (apply arrange widgets (count names) {} names))
-  (^{:pre [#(> % 0)]} 
-   [widgets skip-after {:keys [from space align] :or {from [0 0]
-                                                     space [35 15]
-                                                      align :left}} & names] 
-   (let [name-groups (partition-all skip-after (->> (select-keys widgets names)
-                                                    vals
-                                                    (map (fn [widget]
-                                                           (vec (cons (:name widget) (vals (select-keys (:props widget) [:x :y :width :height]))))))))
-         max-width (apply max (flatten (for [group name-groups]
-                                         (+ (apply + (map (comp second reverse) group)) (* (count group) (first space))))))]
-     (loop [name-groups name-groups
-            widgets widgets
-            height (second from)]
-       (if-not (seq name-groups)
-         widgets
-         (let [row-width (apply + (map (comp second reverse) (first name-groups)))
-               start-on-x (case align 
-                            :left (first from)
-                            :right (- (+ (first from) max-width) row-width)
-                            :center (- (+ (first from) (/ max-width 2)) (/ row-width 2)))
-               coords (reduce (fn [prev [name _ _ w h]]
-                                (let [[_ x0 y0 w0 _] (last prev)]
-                                  (concat prev [[name (+ x0 w0 (first space))
-                                                 y0 w h]])))
-                              (let [[name _ _ w h] (-> name-groups first first)]
-                                [[name start-on-x height w h]])
-                              (-> name-groups first rest))
-               max-height (apply max (map last coords))]
-           (recur (rest name-groups)
-                  (loop [gr coords
-                         wdgs widgets]
-                    (if-not (seq gr)
-                      wdgs
-                      (let [[name x y w h] (first gr)]
-                        (recur (rest gr)
-                               (-> wdgs
-                                   (assoc-in [name :props :x] x)
-                                   (assoc-in [name :props :y] y)
-                                   (assoc-in [name :props :width] w)
-                                   (assoc-in [name :props :height] h))))))
-                  (+ height max-height (last space)))))))))
-
-(defn align-horizontal
-  "Aligns a widget or widgets relative to another widget horizontally, only changing its x-coordinate.
-   For example:
-   (align wdgs \"main-window\" :center \"a\" \"b\")
-   would align the widget \"a\" and \"b\" to the horizontal center of the main window"
-  [widgets reference-widget-name alignment & widget-names]
-  (let [ref-widget (get widgets reference-widget-name {})
-        [x width] (select-keys (:props ref-widget) [:x :width])])
-  widgets)
-
-#_(defn align-vertical
-  "Aligns a widget relative to another widget vertically, only changing its y-coordinate
-   For example:
-   (align-vertical wdgs \"main-window\" :center \"a\" \"b\")
-   would align the widget \"a\" and \"b\" to the vertical center of the main window"
-  [widgets reference-widget-name alignment & widget-names]
-  widgets)
+(defn arrange
+  "Change the arrangement of widgets and assigning them to a given window"
+  [widgets window-name {:keys [x y width height spacing-horizontally spacing-vertically] :or {x 0 y 0 width 500 height 500
+                                                                                              spacing-horizontally 50
+                                                                                              spacing-vertically 50}} & wdg-names]
+  (loop [wdgs widgets
+         to-be-arranged wdg-names
+         [x-current y-current] [x y]]
+    (if-not (seq to-be-arranged)
+      wdgs
+      (let [wdg-name (first to-be-arranged)
+            wdgs (assoc-in wdgs [wdg-name :props :x] x-current)
+            wdgs (assoc-in wdgs [wdg-name :props :y] y-current)
+            wdgs (assoc-in wdgs [wdg-name :props :window] window-name)
+            wdg (get wdgs wdg-name)
+            wdg-width (-> wdg :props :width)
+            wdg-height (-> wdg :props :height)
+            x-new (+ x-current wdg-width spacing-horizontally)]
+        (recur wdgs
+               (rest to-be-arranged)
+               (if (> x-new width)
+                 [x (+ y-current wdg-height spacing-vertically)]
+                 [x-new y-current]))))))
 
 (defn change-color-profile
   "Changes the color profile of the window and all widgets
@@ -400,4 +341,4 @@
        (spit file-name))
   #_(pprint (convert-for-export @wdg/state) (clojure.java.io/writer file-name)))
 
-(convert-for-export @wdg/state)
+#_(convert-for-export @wdg/state)

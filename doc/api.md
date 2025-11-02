@@ -191,19 +191,19 @@ with the following signatures based on the event:
 
 ### Arranging widgets
 
-#### Align
-
-TODO
-```Clojure
-(gui/align-horizontal widgets reference-widget-name alignment & widget-names)
-(gui/align-vertical widgets reference-widget-name alignment & widget-names)
-```
-
 #### Arrange
 
+
+
 ```Clojure
-(gui/arrange widgets widget-names)
-(gui/arrange widgets skip-after options widget-names...)
+(gui/arrange widgets window-name {} widget-names..)
+(gui/arrange widgets window-name {:x :y :width :height :spacing-horizontally :spacing-vertically} widget-names..)
+```
+
+Example
+```Clojure
+(arrange "test-window" {:x 0 :y 0 :width 500 :height 500 :spacing-horizontally 20 :spacing-vertically 30} "btn-1" "btn-2" "btn-3" 
+                                 "btn-4" "btn-5" "btn-6" "btn-7" "btn-8" "btn-9")
 ```
 
 ## Custom Widgets

@@ -27,7 +27,7 @@ lein new app my-app
 Add the strigui dependency to your project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha32"]
+:dependencies [[strigui "0.0.1-alpha33"]
               [com.github.mikehardice/capra "0.0.10"]]
 ```
 
