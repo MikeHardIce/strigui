@@ -2,7 +2,8 @@
 [back](https://github.com/MikeHardIce/strigui)
 
 ## future (for non alpha release)
-  * focus on a complete set of widgets, like DatePicker, DropDown, Radio Buttons, etc. ...
+  * focus on a complete set of widgets, like DatePicker, DropDown, Radio Buttons, etc. ... 
+  (but perhaps as a library and only have the basics in strigui)
   * window property :guides? which draws visual guides to help align widgets when dragging them across the window
   * get rid of box.clj and rather provide a namespace with helper functions to easily construct
     types of widgets
@@ -11,6 +12,17 @@
   * align function to align an widget relative to another widget with :left :center :right. 
   * better defaults, just add a widget with x and y coordinates and everything else is default
   * improve overall performance (large lists, moving images, ...)
+
+## 0.0.1-alpha33
+
+### general
+  * unit tests (ongoing)
+  * reworked arrange function (signature change)
+
+### fixes
+  * strigui.core/inspect fix  
+  * thow exception for attach-event and close-window instead of printing out the error
+
 
 ## 0.0.1-alpha32
 

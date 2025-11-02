@@ -2,7 +2,7 @@
 
 [![Clojars Project](https://img.shields.io/clojars/v/strigui.svg)](https://clojars.org/strigui)
 
-A small GUI library that treats the entire UI as a map of widgets. Changes occur by transforming this map into a new state.
+A small experimental GUI library that treats the entire UI as a map of widgets. Changes occur by transforming this map into a new state.
 Strigui will figure out which widgets need to be redrawn and in what order.
 
 Available widgets:
@@ -27,7 +27,7 @@ lein new app my-app
 Add the strigui dependency to your project.clj:
 
 ```
-:dependencies [[strigui "0.0.1-alpha32"]
+:dependencies [[strigui "0.0.1-alpha33"]
               [com.github.mikehardice/capra "0.0.10"]]
 ```
 
@@ -108,7 +108,8 @@ Have a look at the "examples" folder.
 
 ### Warning
 
-This is an alpha version and there is still a long way to go until it can be used for anything serious.
+This is an alpha version and may never be completed. It mostly serves as an experiment to see how it would be if the gui is just a map and rendered automaticallhy
+when the map is being transformed from one state into the other.
 So only use Strigui for fun stuff like [Dame](https://github.com/MikeHardIce/Dame)
 
 When drawing widgets, strigui uses [Capra](https://github.com/MikeHardIce/Capra). This means anything that can be drawn could potentially be a widget.

@@ -1,9 +1,9 @@
-(defproject strigui "0.0.1-alpha32"
+(defproject strigui "0.0.1-alpha33"
   :description "An experimental GUI library."
   :url "https://github.com/MikeHardIce/strigui"
   :license {:name "MIT"
             :url "https://choosealicense.com/licenses/mit"
-            :year 2023
+            :year 2025
             :key "mit"
             :comment "MIT License"}
   :dependencies [[org.clojure/clojure "1.11.1"]
