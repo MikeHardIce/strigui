@@ -19,6 +19,8 @@
   * exceptions during the state transition reset the state to where the transition started (TODO)
   * unit tests (ongoing)
   * find ways to make widgets more composable (TODO), perhaps with generated identifiers for children
+  * move the agent out to the user, create a function that returns an agent that has to be handed to the
+    strigui.core/swap-widgets! function and remove the bang (TODO, breaking change)
 
 ## 0.0.1-alpha33
 
